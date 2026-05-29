@@ -9,38 +9,258 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubscriptionRouteImport } from './routes/subscription'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MessengerRouteImport } from './routes/messenger'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as CommunitiesRouteImport } from './routes/communities'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as AdsRouteImport } from './routes/ads'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CategoriesIdRouteImport } from './routes/categories.$id'
+import { Route as AdsNewRouteImport } from './routes/ads.new'
+import { Route as CategoriesIdSubIdRouteImport } from './routes/categories.$id.$subId'
 
+const SubscriptionRoute = SubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessengerRoute = MessengerRouteImport.update({
+  id: '/messenger',
+  path: '/messenger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdsRoute = AdsRouteImport.update({
+  id: '/ads',
+  path: '/ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesIdRoute = CategoriesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CategoriesRoute,
+} as any)
+const AdsNewRoute = AdsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdsRoute,
+} as any)
+const CategoriesIdSubIdRoute = CategoriesIdSubIdRouteImport.update({
+  id: '/$subId',
+  path: '/$subId',
+  getParentRoute: () => CategoriesIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ads': typeof AdsRouteWithChildren
+  '/categories': typeof CategoriesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
+  '/friends': typeof FriendsRoute
+  '/login': typeof LoginRoute
+  '/messenger': typeof MessengerRoute
+  '/profile': typeof ProfileRoute
+  '/subscription': typeof SubscriptionRoute
+  '/ads/new': typeof AdsNewRoute
+  '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ads': typeof AdsRouteWithChildren
+  '/categories': typeof CategoriesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
+  '/friends': typeof FriendsRoute
+  '/login': typeof LoginRoute
+  '/messenger': typeof MessengerRoute
+  '/profile': typeof ProfileRoute
+  '/subscription': typeof SubscriptionRoute
+  '/ads/new': typeof AdsNewRoute
+  '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ads': typeof AdsRouteWithChildren
+  '/categories': typeof CategoriesRouteWithChildren
+  '/communities': typeof CommunitiesRoute
+  '/friends': typeof FriendsRoute
+  '/login': typeof LoginRoute
+  '/messenger': typeof MessengerRoute
+  '/profile': typeof ProfileRoute
+  '/subscription': typeof SubscriptionRoute
+  '/ads/new': typeof AdsNewRoute
+  '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/ads'
+    | '/categories'
+    | '/communities'
+    | '/friends'
+    | '/login'
+    | '/messenger'
+    | '/profile'
+    | '/subscription'
+    | '/ads/new'
+    | '/categories/$id'
+    | '/categories/$id/$subId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/ads'
+    | '/categories'
+    | '/communities'
+    | '/friends'
+    | '/login'
+    | '/messenger'
+    | '/profile'
+    | '/subscription'
+    | '/ads/new'
+    | '/categories/$id'
+    | '/categories/$id/$subId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/ads'
+    | '/categories'
+    | '/communities'
+    | '/friends'
+    | '/login'
+    | '/messenger'
+    | '/profile'
+    | '/subscription'
+    | '/ads/new'
+    | '/categories/$id'
+    | '/categories/$id/$subId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AdsRoute: typeof AdsRouteWithChildren
+  CategoriesRoute: typeof CategoriesRouteWithChildren
+  CommunitiesRoute: typeof CommunitiesRoute
+  FriendsRoute: typeof FriendsRoute
+  LoginRoute: typeof LoginRoute
+  MessengerRoute: typeof MessengerRoute
+  ProfileRoute: typeof ProfileRoute
+  SubscriptionRoute: typeof SubscriptionRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/subscription': {
+      id: '/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof SubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messenger': {
+      id: '/messenger'
+      path: '/messenger'
+      fullPath: '/messenger'
+      preLoaderRoute: typeof MessengerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ads': {
+      id: '/ads'
+      path: '/ads'
+      fullPath: '/ads'
+      preLoaderRoute: typeof AdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +268,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/$id': {
+      id: '/categories/$id'
+      path: '/$id'
+      fullPath: '/categories/$id'
+      preLoaderRoute: typeof CategoriesIdRouteImport
+      parentRoute: typeof CategoriesRoute
+    }
+    '/ads/new': {
+      id: '/ads/new'
+      path: '/new'
+      fullPath: '/ads/new'
+      preLoaderRoute: typeof AdsNewRouteImport
+      parentRoute: typeof AdsRoute
+    }
+    '/categories/$id/$subId': {
+      id: '/categories/$id/$subId'
+      path: '/$subId'
+      fullPath: '/categories/$id/$subId'
+      preLoaderRoute: typeof CategoriesIdSubIdRouteImport
+      parentRoute: typeof CategoriesIdRoute
+    }
   }
 }
 
+interface AdsRouteChildren {
+  AdsNewRoute: typeof AdsNewRoute
+}
+
+const AdsRouteChildren: AdsRouteChildren = {
+  AdsNewRoute: AdsNewRoute,
+}
+
+const AdsRouteWithChildren = AdsRoute._addFileChildren(AdsRouteChildren)
+
+interface CategoriesIdRouteChildren {
+  CategoriesIdSubIdRoute: typeof CategoriesIdSubIdRoute
+}
+
+const CategoriesIdRouteChildren: CategoriesIdRouteChildren = {
+  CategoriesIdSubIdRoute: CategoriesIdSubIdRoute,
+}
+
+const CategoriesIdRouteWithChildren = CategoriesIdRoute._addFileChildren(
+  CategoriesIdRouteChildren,
+)
+
+interface CategoriesRouteChildren {
+  CategoriesIdRoute: typeof CategoriesIdRouteWithChildren
+}
+
+const CategoriesRouteChildren: CategoriesRouteChildren = {
+  CategoriesIdRoute: CategoriesIdRouteWithChildren,
+}
+
+const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
+  CategoriesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AdsRoute: AdsRouteWithChildren,
+  CategoriesRoute: CategoriesRouteWithChildren,
+  CommunitiesRoute: CommunitiesRoute,
+  FriendsRoute: FriendsRoute,
+  LoginRoute: LoginRoute,
+  MessengerRoute: MessengerRoute,
+  ProfileRoute: ProfileRoute,
+  SubscriptionRoute: SubscriptionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
