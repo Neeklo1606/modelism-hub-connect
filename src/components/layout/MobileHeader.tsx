@@ -6,12 +6,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export function MobileHeader() {
   return (
     <header
-      className="lg:hidden sticky top-0 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] px-[14px]"
+      className="lg:hidden sticky top-0 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] px-[16px]"
       style={{
-        height: 52,
+        height: 48,
         background: "color-mix(in oklab, var(--background) 92%, transparent)",
         backdropFilter: "saturate(180%) blur(12px)",
-        WebkitBackdropFilter: "saturate(180%) blur(12px)",
         borderBottom: "1px solid var(--border)",
       }}
     >
