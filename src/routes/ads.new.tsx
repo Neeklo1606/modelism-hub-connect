@@ -257,7 +257,7 @@ function StepPhotos({ form, set }: { form: Form; set: <K extends keyof Form>(k: 
 }
 
 /* ────────── STEP 2: Data ────────── */
-function StepData({ form, set, cat }: { form: Form; set: <K extends keyof Form>(k: K, v: Form[K]) => void; cat: ReturnType<typeof Object> }) {
+function StepData({ form, set, cat }: { form: Form; set: <K extends keyof Form>(k: K, v: Form[K]) => void; cat: (typeof categories)[number] }) {
   return (
     <section className="space-y-[24px]">
       <Block title="Тип объявления">
@@ -332,7 +332,7 @@ function StepData({ form, set, cat }: { form: Form; set: <K extends keyof Form>(
 }
 
 /* ────────── STEP 3: Preview ────────── */
-function StepPreview({ form, cat }: { form: Form; cat: ReturnType<typeof Object> }) {
+function StepPreview({ form, cat }: { form: Form; cat: (typeof categories)[number] }) {
   const sub = (cat as typeof categories[number]).subcategories.find((s) => s.id === form.subcategoryId);
   const status = form.status;
   const statusStyle = status === "Продаю"
