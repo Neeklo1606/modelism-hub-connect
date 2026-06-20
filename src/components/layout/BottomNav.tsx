@@ -3,55 +3,79 @@ import { Newspaper, MessageSquare, Plus, Megaphone, User } from "lucide-react";
 import { useState } from "react";
 import { CreateChooserModal } from "@/components/CreateChooserModal";
 
-const items = [
+type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper };
+
+const LEFT: Item[] = [
   { to: "/", label: "Лента", icon: Newspaper },
   { to: "/messenger", label: "Чаты", icon: MessageSquare },
-] as const;
-const items2 = [
+];
+const RIGHT: Item[] = [
   { to: "/ads", label: "Объявления", icon: Megaphone },
   { to: "/profile", label: "Профиль", icon: User },
-] as const;
+];
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+
   return (
     <>
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur">
-        <ul className="grid grid-cols-5 px-1 py-1.5">
-          {items.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to;
-            return (
-              <li key={to}>
-                <Link to={to} className={`flex flex-col items-center gap-0.5 py-1 text-[10px] ${active ? "text-primary" : "text-muted-foreground"}`}>
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-          <li>
-            <button onClick={() => setOpen(true)} className="flex w-full flex-col items-center gap-0.5 py-1 text-[10px] text-primary-foreground">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-primary -mt-3 shadow-md">
-                <Plus className="h-5 w-5" />
-              </span>
-              <span className="text-primary">Создать</span>
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
+        style={{
+          background: "color-mix(in oklab, var(--background) 94%, transparent)",
+          backdropFilter: "saturate(180%) blur(14px)",
+          WebkitBackdropFilter: "saturate(180%) blur(14px)",
+          borderTop: "1px solid var(--border)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        <ul className="grid grid-cols-5 items-center" style={{ height: 60 }}>
+          {LEFT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to} />)}
+          <li className="flex items-center justify-center">
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Создать"
+              className="grid place-items-center transition-transform duration-150 active:scale-95"
+              style={{
+                width: 44, height: 44,
+                background: "var(--accent)",
+                color: "#fff",
+                borderRadius: 14,
+                boxShadow: "0 6px 16px -4px color-mix(in oklab, var(--accent) 55%, transparent)",
+              }}
+            >
+              <Plus size={22} strokeWidth={2.4} />
             </button>
           </li>
-          {items2.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to;
-            return (
-              <li key={to}>
-                <Link to={to} className={`flex flex-col items-center gap-0.5 py-1 text-[10px] ${active ? "text-primary" : "text-muted-foreground"}`}>
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
+          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to || (it.to === "/profile" && pathname.startsWith("/profile"))} />)}
         </ul>
       </nav>
       <CreateChooserModal open={open} onOpenChange={setOpen} />
     </>
+  );
+}
+
+function NavTab({ item, active }: { item: Item; active: boolean }) {
+  const Icon = item.icon;
+  return (
+    <li>
+      <Link
+        to={item.to}
+        className="flex h-full flex-col items-center justify-center gap-[3px] transition-colors duration-150"
+        style={{
+          color: active ? "var(--accent)" : "var(--foreground-50)",
+          height: 60,
+        }}
+      >
+        <Icon size={22} strokeWidth={active ? 2.4 : 2} />
+        <span
+          className="font-medium"
+          style={{ fontSize: 10.5, letterSpacing: "0.01em", lineHeight: 1 }}
+        >
+          {item.label}
+        </span>
+      </Link>
+    </li>
   );
 }

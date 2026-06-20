@@ -52,45 +52,45 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
         {/* Cover */}
         <div className="relative">
           {user.coverImage ? (
-            <img src={user.coverImage} alt="" className="h-[200px] w-full object-cover md:h-[200px]" style={{ height: "min(200px, 28vw)" }} />
+            <img src={user.coverImage} alt="" className="w-full object-cover" style={{ height: "clamp(140px, 26vw, 220px)" }} />
           ) : (
-            <div className="h-[200px] w-full" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-muted))" }} />
+            <div className="w-full" style={{ height: "clamp(140px, 26vw, 220px)", background: "linear-gradient(135deg, var(--accent), var(--accent-muted))" }} />
           )}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[80px]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60px]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
         </div>
 
         {/* Identity */}
-        <div className="flex flex-col gap-[16px] px-[24px] pb-[20px] md:flex-row md:items-end md:gap-[24px] md:px-[32px]">
+        <div className="flex flex-col gap-[14px] px-[16px] pb-[16px] md:flex-row md:items-end md:gap-[24px] md:px-[32px]">
           <img
             src={user.avatar}
             alt=""
-            className="h-[72px] w-[72px] shrink-0 rounded-full object-cover md:h-[96px] md:w-[96px]"
-            style={{ marginTop: -48, border: "4px solid var(--background)", boxShadow: "var(--shadow-card)" }}
+            className="h-[80px] w-[80px] shrink-0 rounded-full object-cover md:h-[96px] md:w-[96px]"
+            style={{ marginTop: -40, border: "4px solid var(--background)", boxShadow: "var(--shadow-card)" }}
           />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-[10px]">
-              <h1 className="font-display text-[20px] font-bold md:text-[24px]" style={{ color: "var(--foreground)" }}>{user.name}</h1>
+            <div className="flex flex-wrap items-center gap-[8px]">
+              <h1 className="truncate font-display text-[20px] font-bold md:text-[24px]" style={{ color: "var(--foreground)", letterSpacing: "-0.01em" }}>{user.name}</h1>
               {user.subscription && (
                 <span
                   className="inline-flex items-center gap-[4px] font-semibold"
-                  style={{ background: "var(--accent-soft)", color: "var(--accent)", fontSize: 12, padding: "2px 10px", borderRadius: 999 }}
+                  style={{ background: "var(--accent-soft)", color: "var(--accent)", fontSize: 11, padding: "2px 8px", borderRadius: 999 }}
                 >
-                  <BadgeCheck size={12} /> Pro · {user.subscription}
+                  <BadgeCheck size={11} /> Pro
                 </span>
               )}
             </div>
-            <div className="mt-[4px] flex items-center gap-[6px] text-[14px]" style={{ color: "var(--foreground-50)" }}>
+            <div className="mt-[2px] flex items-center gap-[6px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
               <MapPin size={12} /> {user.city}
             </div>
             {user.status && <div className="mt-[2px] text-[13px] italic" style={{ color: "var(--foreground-50)" }}>{user.status}</div>}
           </div>
 
-          <div className="flex flex-wrap gap-[8px]">
+          <div className="flex w-full gap-[8px] md:w-auto">
             {isOwn ? (
               <button
                 onClick={() => setEditOpen(true)}
-                className="inline-flex items-center gap-[8px] font-medium transition-colors duration-150"
-                style={{ height: 40, padding: "0 20px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
+                className="inline-flex flex-1 items-center justify-center gap-[8px] font-medium transition-colors duration-150 md:flex-none"
+                style={{ height: 40, padding: "0 18px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
               >
                 <Pencil size={14} /> Редактировать
               </button>
@@ -98,7 +98,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
               <>
                 {isFriend ? (
                   <span
-                    className="inline-flex items-center gap-[6px] font-medium"
+                    className="inline-flex flex-1 items-center justify-center gap-[6px] font-medium md:flex-none"
                     style={{ height: 40, padding: "0 16px", borderRadius: 10, background: "var(--background-surface)", color: "var(--foreground-70)", fontSize: 14 }}
                   >
                     <BadgeCheck size={14} style={{ color: "var(--success)" }} /> В друзьях
@@ -106,30 +106,32 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                 ) : (
                   <button
                     onClick={() => { setIsFriend(true); toast.success("Заявка отправлена"); }}
-                    className="inline-flex items-center gap-[6px] font-semibold transition-colors duration-150"
-                    style={{ height: 40, padding: "0 20px", borderRadius: 10, background: "var(--accent)", color: "white", fontSize: 14 }}
+                    className="inline-flex flex-1 items-center justify-center gap-[6px] font-semibold transition-colors duration-150 md:flex-none"
+                    style={{ height: 40, padding: "0 18px", borderRadius: 10, background: "var(--accent)", color: "white", fontSize: 14 }}
                   >
-                    <UserPlus size={14} /> Добавить в друзья
+                    <UserPlus size={14} /> В друзья
                   </button>
                 )}
-                <button
-                  onClick={() => { setSubscribed((s) => !s); toast.success(subscribed ? "Вы отписались" : "Вы подписались"); }}
-                  className="inline-flex items-center gap-[6px] font-medium transition-colors duration-150"
-                  style={{ height: 40, padding: "0 16px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
-                >
-                  <Bell size={14} /> {subscribed ? "Подписаны" : "Подписаться"}
-                </button>
                 <Link
                   to="/messenger"
-                  className="inline-flex items-center gap-[6px] font-medium transition-colors duration-150"
+                  className="inline-flex flex-1 items-center justify-center gap-[6px] font-medium transition-colors duration-150 md:flex-none"
                   style={{ height: 40, padding: "0 16px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
                 >
                   <MessageSquare size={14} /> Написать
                 </Link>
+                <button
+                  onClick={() => { setSubscribed((s) => !s); toast.success(subscribed ? "Вы отписались" : "Вы подписались"); }}
+                  className="grid h-[40px] w-[40px] shrink-0 place-items-center transition-colors duration-150"
+                  style={{ borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: subscribed ? "var(--accent)" : "var(--foreground-70)" }}
+                  aria-label="Подписаться"
+                >
+                  <Bell size={14} />
+                </button>
               </>
             )}
           </div>
         </div>
+
 
         {/* Counters */}
         <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
