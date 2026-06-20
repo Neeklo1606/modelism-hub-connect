@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -88,6 +89,11 @@ const FriendsRoute = FriendsRouteImport.update({
   path: '/friends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdsRoute = AdsRouteImport.update({
   id: '/ads',
   path: '/ads',
@@ -104,9 +110,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesIndexRoute = CommunitiesIndexRouteImport.update({
-  id: '/communities/',
-  path: '/communities/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => CommunitiesRoute,
 } as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/categories/',
@@ -124,9 +130,9 @@ const UserIdRoute = UserIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
-  id: '/communities/$id',
-  path: '/communities/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CommunitiesRoute,
 } as any)
 const CategoriesIdRoute = CategoriesIdRouteImport.update({
   id: '/categories/$id',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
+  '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -203,6 +210,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
+  '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -230,6 +238,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/ads'
+    | '/communities'
     | '/friends'
     | '/help'
     | '/landing'
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/ads'
+    | '/communities'
     | '/friends'
     | '/help'
     | '/landing'
@@ -305,6 +315,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdsRoute: typeof AdsRouteWithChildren
+  CommunitiesRoute: typeof CommunitiesRouteWithChildren
   FriendsRoute: typeof FriendsRoute
   HelpRoute: typeof HelpRoute
   LandingRoute: typeof LandingRoute
@@ -317,10 +328,8 @@ export interface RootRouteChildren {
   SubscriptionRoute: typeof SubscriptionRoute
   WelcomeRoute: typeof WelcomeRoute
   CategoriesIdRoute: typeof CategoriesIdRouteWithChildren
-  CommunitiesIdRoute: typeof CommunitiesIdRoute
   UserIdRoute: typeof UserIdRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
-  CommunitiesIndexRoute: typeof CommunitiesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -402,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FriendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ads': {
       id: '/ads'
       path: '/ads'
@@ -425,10 +441,10 @@ declare module '@tanstack/react-router' {
     }
     '/communities/': {
       id: '/communities/'
-      path: '/communities'
+      path: '/'
       fullPath: '/communities/'
       preLoaderRoute: typeof CommunitiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof CommunitiesRoute
     }
     '/categories/': {
       id: '/categories/'
@@ -453,10 +469,10 @@ declare module '@tanstack/react-router' {
     }
     '/communities/$id': {
       id: '/communities/$id'
-      path: '/communities/$id'
+      path: '/$id'
       fullPath: '/communities/$id'
       preLoaderRoute: typeof CommunitiesIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof CommunitiesRoute
     }
     '/categories/$id': {
       id: '/categories/$id'
@@ -503,6 +519,20 @@ const AdsRouteChildren: AdsRouteChildren = {
 
 const AdsRouteWithChildren = AdsRoute._addFileChildren(AdsRouteChildren)
 
+interface CommunitiesRouteChildren {
+  CommunitiesIdRoute: typeof CommunitiesIdRoute
+  CommunitiesIndexRoute: typeof CommunitiesIndexRoute
+}
+
+const CommunitiesRouteChildren: CommunitiesRouteChildren = {
+  CommunitiesIdRoute: CommunitiesIdRoute,
+  CommunitiesIndexRoute: CommunitiesIndexRoute,
+}
+
+const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
+  CommunitiesRouteChildren,
+)
+
 interface CategoriesIdRouteChildren {
   CategoriesIdSubIdRoute: typeof CategoriesIdSubIdRoute
 }
@@ -519,6 +549,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdsRoute: AdsRouteWithChildren,
+  CommunitiesRoute: CommunitiesRouteWithChildren,
   FriendsRoute: FriendsRoute,
   HelpRoute: HelpRoute,
   LandingRoute: LandingRoute,
@@ -531,10 +562,8 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionRoute: SubscriptionRoute,
   WelcomeRoute: WelcomeRoute,
   CategoriesIdRoute: CategoriesIdRouteWithChildren,
-  CommunitiesIdRoute: CommunitiesIdRoute,
   UserIdRoute: UserIdRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
-  CommunitiesIndexRoute: CommunitiesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
