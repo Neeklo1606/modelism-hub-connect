@@ -137,6 +137,9 @@ export interface Message {
   authorId: ID;
   time: string;
   text: string;
+  status?: "sent" | "delivered" | "read";
+  replyTo?: ID;
+  image?: string;
 }
 
 export interface Dialog {
