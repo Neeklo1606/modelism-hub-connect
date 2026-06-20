@@ -1,112 +1,85 @@
-# Прототип «МоДелизМ Club» — план в 10 промтах
+# v4.0 — Раздел объявлений (МоДелизМ Club)
 
-Кликабельный frontend-прототип соцплатформы для моделистов. Mock data, local state, без backend. Адаптив desktop (3 колонки) + mobile (header + bottom nav).
+Апгрейд транзакционного трека: карточки, детальная страница, мастер создания, продвинутый список. Всё bespoke, только `var(--...)` токены, Framer Motion, без shadcn-дефолтов.
 
-## Дизайн-система
+## Что меняется / добавляется
 
-- Фон белый `#FFFFFF`, карточки `#F5F5F7`, текст `#0A0A0A`
-- Акцент бордовый из логотипа `#C8102E`, hover `#A00D24`
-- Вторичные: серый `#6B7280`, бордер `#E5E7EB`
-- Типографика: Inter (body) + Manrope (headings), крупные заголовки
-- Радиусы 12px, мягкие тени, без кислотных цветов
-- Логотип «М» с самолётом и красной лентой — в шапке
+### Файлы
+**Изменить:**
+- `src/components/AdCard.tsx` — полный rewrite (v2)
+- `src/routes/ads.tsx` — sticky-фильтры, поиск с debounce, сортировка, пагинация, skeleton
+- `src/routes/ads.new.tsx` — 3-шаговый мастер
+- `src/lib/mock.ts` — расширить `Ad` (gallery, description, seller, deliveryDetails, condition, createdAt, views, likes) + 30+ объявлений
 
-## 10 промтов (этапов реализации)
+**Создать:**
+- `src/routes/ads.$id.tsx` — детальная страница
+- `src/components/ads/AdGallery.tsx` — Embla карусель + thumbnails
+- `src/components/ads/SellerCard.tsx` — карточка продавца
+- `src/components/ads/SimilarAds.tsx` — горизонтальный скролл похожих
+- `src/components/ads/AdCardSkeleton.tsx` — shimmer-скелет
+- `src/components/ads/AdFilters.tsx` — sticky-сайдбар фильтров (desktop) + bottom sheet (mobile)
+- `src/components/ads/AdSortBar.tsx` — поиск + сортировка
+- `src/components/ads/wizard/StepIndicator.tsx` — индикатор 3-х шагов
+- `src/components/ads/wizard/StepPhotos.tsx`, `StepData.tsx`, `StepPreview.tsx`
+- `src/components/ads/wizard/SuccessModal.tsx` — AnimatePresence модалка
+- `src/components/ui-bespoke/RadioCard.tsx`, `Checkbox.tsx` — кастомные контролы
 
-**1. Фундамент и дизайн-система**
-- Токены в `src/styles.css` (oklch: bg, fg, primary бордовый, muted, card, border)
-- Подключить шрифты, обновить `__root.tsx` (мета, header)
-- Logo-компонент, обложка моделизма (сгенерить hero image)
-- Mock data файл `src/lib/mock.ts`: users(8), posts(10), ads(10), categories(10), subcategories автомоделей, chats(5), dialogs(5), banners(3), tariffs(4), communities(5)
+## Дизайн-контракт
 
-**2. Layout: Sidebar + RightCategories + Header + BottomNav**
-- `AppLayout` с 3 колонками на desktop, 1 колонка + bottom nav на mobile (<1024px)
-- Sidebar: Лента, Сообщества, Мессенджер, Объявления, Друзья, Профиль, Маркет (→ modelizm23.ru), Помощь
-- BottomNav: Лента, Чаты, Создать (модалка выбора), Объявления, Профиль
+- Все цвета — `var(--accent)`, `var(--background-*)`, `var(--foreground-*)`, `var(--border*)`, `var(--success/warning/error)` и их `*-soft`
+- Радиусы — `var(--r-card)`, `var(--r-card-sm)`, `var(--r-button)`, `var(--r-input)`, `var(--r-tag)`, `var(--r-pill)`, `var(--r-modal)`
+- Тени — `var(--shadow-card)`, `--shadow-card-hover`, `--shadow-float`, `--shadow-glow-accent`, `--shadow-button`
+- Spacing/font-size — точные px через `[16px]`-нотацию
+- Анимации — только Framer Motion, без `layoutId`, ≤800ms, springs только на клик
+- Работает в light+dark, RU-копия, без horizontal scroll, touch ≥44px
 
-**3. Главная / Лента (`/`)**
-- Hero обложка + название + слоган «Моделизм — это жизнь, остальное детали»
-- AdBanner-слайдер с 3 баннерами
-- CreatePostForm (textarea, фото-кнопка, селект категории, «Опубликовать» → toast «На модерации»)
-- PostCard список (аватар, имя, дата, категория, текст, фото, лайк/коммент/шер)
-- Правая колонка: CategoryList (раскрываются подкатегории)
+## AdCard v2
 
-**4. Категории и Подкатегория+Чат**
-- `/categories` — сетка CategoryCard (иконка lucide, описание, кол-во участников, «Открыть»)
-- `/categories/$categoryId` — список подкатегорий
-- `/categories/$categoryId/$subId` — вкладки Чат/Объявления, закреплённые правила, ChatWindow с MessageBubble, поле ввода + фото
+Bespoke карточка: фото 4:3 с hover-zoom, бейдж статуса (Продаю/Куплю/Обмен) в углу, иконка bookmark, заголовок (2 строки clamp), цена крупно `--font-display`, мета (категория · подкатегория), строка city + delivery icons, footer с views/likes/createdAt. Hover: подъём `--shadow-card-hover`, image scale 1.04. Состояния: default / liked / moderated (полупрозрачность + бейдж) / rejected (border --error).
 
-**5. Мессенджер (`/messenger`) + Друзья (`/friends`)**
-- Мессенджер: список диалогов слева, активный диалог справа, mock-сообщения, локальная отправка
-- Друзья: поиск, карточки (аватар, имя, интересы, город, «Добавить»/«Написать»)
+## Детальная страница `/ads/$id`
 
-**6. Сообщества (`/communities`)**
-- Карточки сообществ (название, описание, участники, категория, «Вступить»/«Открыть»)
-- Локальный toggle «Вступить/Покинуть»
+Layout: 2 колонки (gallery + sticky правая info-панель), под ней блоки описание, доставка, продавец (SellerCard), похожие (SimilarAds horizontal scroll). Embla с thumbnails и стрелками. Кнопки «Написать», «Показать контакт» (раскрытие), «В избранное», «Поделиться».
 
-**7. Объявления + Создание (`/ads`, `/ads/new`)**
-- Список: поиск, фильтры (категория, цена range), сетка AdCard
-- AdCard: фото, цена, название, категория/подкатегория, город, доставка-иконки, StatusBadge продаю/куплю/обменяю, «Написать»/«Показать контакт»
-- Создание: форма с полями + до 10 фото (превью local), кнопка «Оплатить и разместить» → Modal «20 ₽, ЮKassa/Т-Банк» → «Отправлено на модерацию»
+## Wizard `/ads/new` (3 шага)
 
-**8. Подписка (`/subscription`) + Профиль (`/profile`)**
-- Подписка: 4 PricingCard (1 день/1₽, месяц/100₽, полгода/500₽, год/800₽) → modal-заглушка оплаты
-- Профиль: шапка с аватаром, инфо, статус подписки, счётчики (публикации/объявления/друзья), табы «Мои публикации»/«Мои объявления», кнопка редактирования (modal)
+1. **Photos** — drag&drop зона, до 10, превью с reorder и удалением, первая = главная
+2. **Data** — RadioCard (Продаю/Куплю/Обмен), название, описание, цена, категория/подкатегория, состояние, город, контакт, чекбоксы доставки
+3. **Preview** — рендер как AdCard + детальный блок, кнопка «Оплатить 20 ₽ и опубликовать» → SuccessModal → redirect `/ads`
 
-**9. Регистрация/Вход (`/login`) + EmptyStates**
-- Визуальный экран с логотипом, табы Вход/Регистрация, поля (без реальной авторизации), кнопка → редирект на `/`
-- EmptyState компонент: пустой чат, нет объявлений, нет публикаций, нет сообщений
-- StatusBadge для «На модерации», ошибок форм, успеха (sonner toast)
+Custom StepIndicator (3 кружка + соединяющая полоса с заполнением), кастомный progress, валидация на каждом шаге, sticky bottom bar «Назад/Далее».
 
-**10. Админка (`/admin`) + полировка**
-- Sidebar админки: Пользователи, Категории, Подкатегории, Объявления, Публикации, Реклама, Тарифы, Жалобы, Настройки
-- AdminTable переиспользуемый
-- Все разделы с mock-таблицами + кнопки одобрить/отклонить/блок (local state)
-- Тарифы: форма редактирования цен + «Сохранить» (toast)
-- Финальная проверка адаптива на 320/375/390/430 px, отсутствие горизонтального скролла
+## `/ads` — список
 
-## Маршруты (TanStack Router)
+- Sticky-сайдбар фильтров (desktop, 280px): категория, подкатегория, статус, цена range, город, состояние, доставка, чек «только с фото»
+- Mobile: кнопка «Фильтры» → Bottom Sheet (Framer Motion drag)
+- Topbar: search с debounce 300ms, сортировка (новые/дешевле/дороже/популярные), переключатель grid/list
+- Skeleton 8 шт. при загрузке (имитируем 400ms)
+- Пагинация «Показать ещё» по 12, без infinite
+- Empty state с reset-фильтров
 
+## Mock-данные (`src/lib/mock.ts`)
+
+Расширяем `Ad`:
+```ts
+gallery: string[]; description: string; condition: "Новое" | "Б/у — отлично" | "Б/у — хорошо" | "Под восстановление";
+seller: { id; name; avatar; rating; deals; since };
+deliveryDetails: string; views: number; likes: number; createdAt: string;
 ```
-/                          Лента
-/login                     Вход/Регистрация
-/profile                   Профиль
-/categories                Все категории
-/categories/$id            Подкатегории
-/categories/$id/$subId     Чат подкатегории
-/messenger                 Мессенджер
-/friends                   Друзья
-/communities               Сообщества
-/ads                       Объявления
-/ads/new                   Создание объявления
-/subscription              Тарифы
-/admin                     Дашборд админки
-/admin/$section            Разделы админки
-```
+30+ реалистичных объявлений по категориям RC: ДВС/электро, шасси, кузова, аккумуляторы, регуляторы, серво, передатчики, инструменты, краски, запчасти 1:8/1:10. Использовать Unsplash для gallery (4-6 фото на объявление).
 
-## Компоненты
+## Технические заметки
 
-Layout, Sidebar, RightCategories, Header, BottomNav, Logo, PostCard, AdCard, CategoryCard, CommunityCard, FriendCard, ChatWindow, MessageBubble, DialogList, PricingCard, AdBanner, CreatePostForm, AdForm, SearchInput, FilterPanel, StatusBadge, EmptyState, AdminTable, AdminSidebar, PaymentModal, CreateChooserModal.
+- TanStack Router file-based: `ads.$id.tsx` + `createFileRoute("/ads/$id")`
+- `<Link to="/ads/$id" params={{ id }}>` — никогда `<a href>`
+- Embla: `bun add embla-carousel-react` (уже есть)
+- Debounce: ручной `useEffect` + `setTimeout`, без lodash
+- BottomSheet: `motion.div` с `drag="y"`, `dragConstraints`, `onDragEnd` для close
+- Skeleton shimmer — переиспользовать паттерн из `feed/Skeleton.tsx`
+- Все `<img>` с `aspect-ratio` или явными w/h, `loading="lazy"` только off-screen
 
-## Что будет работать (frontend-only)
+## Что НЕ трогаем
 
-- Навигация между всеми страницами
-- Создание постов/объявлений → статус «На модерации» в local state
-- Лайки, вступление в сообщества, добавление друзей — toggle в local state
-- Отправка сообщений в чатах подкатегорий и мессенджере — local state
-- Фильтры и поиск объявлений
-- Модалки оплаты (заглушки)
-- Админка: одобрить/отклонить/блок — local state
-
-## Заглушки
-
-- Оплата подписки и объявлений (ЮKassa/Т-Банк) — модалка
-- Авторизация — визуальный экран без проверки
-- Загрузка фото — локальный preview через URL.createObjectURL
-- Модерация — мгновенный toggle в админке
-
-## Что подключать на backend-этапе
-
-Auth, БД (users/posts/ads/messages/categories), realtime для чатов, загрузка медиа в storage, платежи ЮKassa/Т-Банк, модерация с очередью, push-уведомления, API для рекламного блока.
-
-Подтверди план — начну с промта 1 (фундамент + дизайн-система + mock data).
+- `src/styles.css` (токены уже есть)
+- Лента `/`, профиль, чаты, авторизация, layout (Sidebar/MobileHeader/BottomNav)
+- shadcn-файлы под `src/components/ui/*` (не используем, но не удаляем)
