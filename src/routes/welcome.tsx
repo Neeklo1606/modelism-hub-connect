@@ -314,7 +314,9 @@ function WelcomePage() {
           <span>v2.1 · prototype</span>
         </div>
       </footer>
+      </div>
     </div>
+
   );
 }
 
