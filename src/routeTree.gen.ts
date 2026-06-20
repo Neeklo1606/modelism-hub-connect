@@ -24,6 +24,8 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserIdRouteImport } from './routes/user.$id'
+import { Route as CommunitiesIdRouteImport } from './routes/communities.$id'
 import { Route as CategoriesIdRouteImport } from './routes/categories.$id'
 import { Route as AdsNewRouteImport } from './routes/ads.new'
 import { Route as AdsIdRouteImport } from './routes/ads.$id'
@@ -104,6 +106,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserIdRoute = UserIdRouteImport.update({
+  id: '/user/$id',
+  path: '/user/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CommunitiesRoute,
+} as any)
 const CategoriesIdRoute = CategoriesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -130,7 +142,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
@@ -144,6 +156,8 @@ export interface FileRoutesByFullPath {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/communities/$id': typeof CommunitiesIdRoute
+  '/user/$id': typeof UserIdRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRoutesByTo {
@@ -151,7 +165,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
@@ -165,6 +179,8 @@ export interface FileRoutesByTo {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/communities/$id': typeof CommunitiesIdRoute
+  '/user/$id': typeof UserIdRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRoutesById {
@@ -173,7 +189,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
-  '/communities': typeof CommunitiesRoute
+  '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
@@ -187,6 +203,8 @@ export interface FileRoutesById {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/communities/$id': typeof CommunitiesIdRoute
+  '/user/$id': typeof UserIdRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
 export interface FileRouteTypes {
@@ -210,6 +228,8 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/communities/$id'
+    | '/user/$id'
     | '/categories/$id/$subId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -231,6 +251,8 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/communities/$id'
+    | '/user/$id'
     | '/categories/$id/$subId'
   id:
     | '__root__'
@@ -252,6 +274,8 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/communities/$id'
+    | '/user/$id'
     | '/categories/$id/$subId'
   fileRoutesById: FileRoutesById
 }
@@ -260,7 +284,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdsRoute: typeof AdsRouteWithChildren
   CategoriesRoute: typeof CategoriesRouteWithChildren
-  CommunitiesRoute: typeof CommunitiesRoute
+  CommunitiesRoute: typeof CommunitiesRouteWithChildren
   FriendsRoute: typeof FriendsRoute
   LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
@@ -271,6 +295,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
   WelcomeRoute: typeof WelcomeRoute
+  UserIdRoute: typeof UserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -380,6 +405,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/$id': {
+      id: '/user/$id'
+      path: '/user/$id'
+      fullPath: '/user/$id'
+      preLoaderRoute: typeof UserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communities/$id': {
+      id: '/communities/$id'
+      path: '/$id'
+      fullPath: '/communities/$id'
+      preLoaderRoute: typeof CommunitiesIdRouteImport
+      parentRoute: typeof CommunitiesRoute
+    }
     '/categories/$id': {
       id: '/categories/$id'
       path: '/$id'
@@ -447,12 +486,24 @@ const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
   CategoriesRouteChildren,
 )
 
+interface CommunitiesRouteChildren {
+  CommunitiesIdRoute: typeof CommunitiesIdRoute
+}
+
+const CommunitiesRouteChildren: CommunitiesRouteChildren = {
+  CommunitiesIdRoute: CommunitiesIdRoute,
+}
+
+const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
+  CommunitiesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdsRoute: AdsRouteWithChildren,
   CategoriesRoute: CategoriesRouteWithChildren,
-  CommunitiesRoute: CommunitiesRoute,
+  CommunitiesRoute: CommunitiesRouteWithChildren,
   FriendsRoute: FriendsRoute,
   LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
@@ -463,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
   WelcomeRoute: WelcomeRoute,
+  UserIdRoute: UserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

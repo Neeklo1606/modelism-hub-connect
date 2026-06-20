@@ -8,6 +8,20 @@ export interface User {
   interests: string;
   avatar: string;
   subscription?: "Тестовый" | "Месяц" | "Полгода" | "Год" | null;
+  bio?: string;
+  status?: string;
+  coverImage?: string;
+  joinedDate?: string;
+  friendIds?: ID[];
+  online?: boolean;
+}
+
+export interface FriendRequest {
+  id: ID;
+  fromId: ID;
+  toId: ID;
+  status: "pending" | "accepted" | "rejected";
+  date: string;
 }
 
 export interface Comment {
@@ -94,6 +108,10 @@ export interface Community {
   members: number;
   category: string;
   joined?: boolean;
+  coverImage?: string;
+  avatarIcon?: string;
+  adminId?: ID;
+  postIds?: ID[];
 }
 
 export interface Banner {
@@ -119,6 +137,9 @@ export interface Message {
   authorId: ID;
   time: string;
   text: string;
+  status?: "sent" | "delivered" | "read";
+  replyTo?: ID;
+  image?: string;
 }
 
 export interface Dialog {
@@ -137,14 +158,20 @@ const photo = (id: number) =>
   `https://picsum.photos/seed/modelizm${id}/800/600`;
 
 export const users: User[] = [
-  { id: "u1", name: "Александр RC", city: "Краснодар", interests: "RC авто, ДВС 1:8", avatar: avatar("Александр RC"), subscription: "Год" },
-  { id: "u2", name: "Сергей ДВС", city: "Москва", interests: "Двигатели, тюнинг", avatar: avatar("Сергей ДВС"), subscription: "Месяц" },
-  { id: "u3", name: "Михаил Квадро", city: "Санкт-Петербург", interests: "FPV, квадрокоптеры", avatar: avatar("Михаил Квадро"), subscription: "Полгода" },
-  { id: "u4", name: "Андрей Самолёты", city: "Новосибирск", interests: "Авиамодели, планеры", avatar: avatar("Андрей Самолёты"), subscription: null },
-  { id: "u5", name: "Дмитрий Моделист", city: "Екатеринбург", interests: "Корабли, катера", avatar: avatar("Дмитрий Моделист"), subscription: "Тестовый" },
-  { id: "u6", name: "Игорь Электрик", city: "Казань", interests: "Электроника, DIY", avatar: avatar("Игорь Электрик"), subscription: "Месяц" },
-  { id: "u7", name: "Павел Самокат", city: "Сочи", interests: "Электросамокаты, моды", avatar: avatar("Павел Самокат"), subscription: null },
-  { id: "u8", name: "Олег Разработчик", city: "Ростов-на-Дону", interests: "Автопилоты, прошивки", avatar: avatar("Олег Разработчик"), subscription: "Год" },
+  { id: "u1", name: "Александр RC", city: "Краснодар", interests: "RC авто, ДВС 1:8, багги, гонки", avatar: avatar("Александр RC"), subscription: "Год", bio: "Гоняю RC авто с 2015 года. Строю багги на базе HB Racing. Организую заезды в Краснодаре.", status: "В проекте с 2024", coverImage: photo(101), joinedDate: "2024-03-15T10:00:00Z", friendIds: ["u2","u3","u5","u6","u7"], online: true },
+  { id: "u2", name: "Сергей ДВС", city: "Москва", interests: "Двигатели, тюнинг, ДВС, нитро", avatar: avatar("Сергей ДВС"), subscription: "Месяц", bio: "Двигателист со стажем. Знаю о ДВС всё: от обкатки до форсирования. Помогу с настройкой.", status: "Чемпион гонок 2025", coverImage: photo(102), joinedDate: "2024-04-02T14:30:00Z", friendIds: ["u1","u4"], online: true },
+  { id: "u3", name: "Михаил Квадро", city: "Санкт-Петербург", interests: "FPV, квадрокоптеры, видео, 5дюймов", avatar: avatar("Михаил Квадро"), subscription: "Полгода", bio: "FPV-пилот. Летаю на 5-дюймовых рамах. Снимаю видео с коптера. Ищу напарников для совместных полётов.", coverImage: photo(103), joinedDate: "2024-05-20T08:00:00Z", friendIds: ["u1","u6","u8"], online: false },
+  { id: "u4", name: "Андрей Самолёты", city: "Новосибирск", interests: "Авиамодели, планеры, реставрация", avatar: avatar("Андрей Самолёты"), subscription: null, bio: "Авиамоделист. Восстанавливаю советские модели. Ищу редкие декали и чертежи.", coverImage: photo(104), joinedDate: "2024-06-10T12:00:00Z", friendIds: ["u2"], online: true },
+  { id: "u5", name: "Дмитрий Моделист", city: "Екатеринбург", interests: "Корабли, катера, парусники", avatar: avatar("Дмитрий Моделист"), subscription: "Тестовый", bio: "Судомоделист из Екатеринбурга. Строю катера на ДВС и электротяге.", coverImage: photo(105), joinedDate: "2024-07-01T09:00:00Z", friendIds: ["u1"], online: false },
+  { id: "u6", name: "Игорь Электрик", city: "Казань", interests: "Электроника, DIY, пайка, ESC", avatar: avatar("Игорь Электрик"), subscription: "Месяц", bio: "DIY-электронщик. Паяю контроллеры, ESC, датчики. Делюсь схемами и прошивками.", status: "Мастер пайки", coverImage: photo(106), joinedDate: "2024-08-15T16:00:00Z", friendIds: ["u1","u3"], online: true },
+  { id: "u7", name: "Павел Самокат", city: "Сочи", interests: "Электросамокаты, моды, аккумуляторы", avatar: avatar("Павел Самокат"), subscription: null, bio: "Моддинг электросамокатов: аккумуляторы, прошивки, контроллеры.", coverImage: photo(107), joinedDate: "2025-01-10T11:00:00Z", friendIds: ["u1"], online: false },
+  { id: "u8", name: "Олег Разработчик", city: "Ростов-на-Дону", interests: "Автопилоты, прошивки, STM32", avatar: avatar("Олег Разработчик"), subscription: "Год", bio: "Разрабатываю автопилоты на базе STM32. Пишу прошивки под ArduPilot и PX4.", status: "Разработчик", coverImage: photo(108), joinedDate: "2024-09-01T07:00:00Z", friendIds: ["u3"], online: true },
+];
+
+export const friendRequests: FriendRequest[] = [
+  { id: "fr1", fromId: "u4", toId: "u1", status: "pending", date: "2026-06-19T14:22:00Z" },
+  { id: "fr2", fromId: "u7", toId: "u1", status: "pending", date: "2026-06-18T09:15:00Z" },
+  { id: "fr3", fromId: "u8", toId: "u1", status: "pending", date: "2026-06-17T20:30:00Z" },
 ];
 
 export const me: User = users[0];
@@ -286,34 +313,138 @@ export const tariffs: Tariff[] = [
 ];
 
 export const communities: Community[] = [
-  { id: "g1", name: "RC Авто Краснодар", description: "Локальное сообщество гонщиков", members: 412, category: "Автомодели", joined: true },
-  { id: "g2", name: "Самолёты и авиамодели", description: "Сборка, обкатка, обмен опытом", members: 1180, category: "Самолёты" },
-  { id: "g3", name: "Квадрокоптеры и FPV", description: "FPV полёты, настройка, гонки", members: 2210, category: "Квадрокоптеры" },
-  { id: "g4", name: "Разработчики автопилотов", description: "ArduPilot, PX4, прошивки", members: 320, category: "Разработчики" },
-  { id: "g5", name: "Барахолка запчастей", description: "Купля, продажа, обмен", members: 1640, category: "Запчасти" },
+  { id: "g1", name: "RC Авто Краснодар", description: "Локальное сообщество гонщиков. Еженедельные заезды, обмен опытом, совместные закупки запчастей.", members: 412, category: "Автомодели", joined: true, avatarIcon: "Car", adminId: "u1", postIds: ["p1","p4"], coverImage: photo(301) },
+  { id: "g2", name: "Самолёты и авиамодели", description: "Сборка, обкатка, обмен опытом. От планеров до реактивных моделей.", members: 1180, category: "Самолёты", avatarIcon: "Plane", adminId: "u4", postIds: ["p3"], coverImage: photo(302) },
+  { id: "g3", name: "Квадрокоптеры и FPV", description: "FPV полёты, настройка, гонки. 5-дюймовые и 7-дюймовые рамы. Съёмка с воздуха.", members: 2210, category: "Квадрокоптеры", avatarIcon: "Send", adminId: "u3", postIds: ["p2"], coverImage: photo(303) },
+  { id: "g4", name: "Разработчики автопилотов", description: "ArduPilot, PX4, Betaflight, INAV. Прошивки, кастомные платы, датчики.", members: 320, category: "Разработчики", avatarIcon: "Code2", adminId: "u8", postIds: [], coverImage: photo(304) },
+  { id: "g5", name: "Барахолка запчастей", description: "Купля, продажа, обмен. Двигатели, сервоприводы, аккумуляторы, радиоаппаратура.", members: 1640, category: "Запчасти", avatarIcon: "Wrench", adminId: "u2", postIds: [], coverImage: photo(305) },
+  { id: "g6", name: "Судомоделисты России", description: "Катера, яхты, парусники. Строительство, испытания, соревнования.", members: 540, category: "Корабли", avatarIcon: "Ship", adminId: "u5", postIds: [], coverImage: photo(306) },
+  { id: "g7", name: "Электроника и DIY", description: "Самодельные контроллеры, ESC, телеметрия. Схемы, печатные платы, прошивки.", members: 890, category: "Электроника", avatarIcon: "Cpu", adminId: "u6", postIds: ["p5"], coverImage: photo(307) },
+  { id: "g8", name: "Аккумуляторы и зарядки", description: "LiPo, Li-ion, NiMH. Выбор, эксплуатация, хранение. Обзоры зарядных устройств.", members: 670, category: "Аккумуляторы", avatarIcon: "BatteryCharging", adminId: "u2", postIds: [], coverImage: photo(308) },
 ];
+
+const _ago = (minutes: number): string =>
+  new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
 export const dialogs: Dialog[] = [
   {
-    id: "d1", userId: "u1", lastMessage: "Привет, готов выслать двигатель", time: "12:34", unread: 2,
+    id: "d1", userId: "u2", lastMessage: "Да, конечно! Скину схему вечером", time: _ago(5), unread: 2,
     messages: [
-      { id: "m1", authorId: "u1", time: "12:30", text: "Привет! Получил твой запрос по двигателю." },
-      { id: "m2", authorId: "u1", time: "12:34", text: "Привет, готов выслать двигатель" },
+      { id: "d1m1", authorId: "u1", time: _ago(120), text: "Привет! Ты разбираешься в настройке карбюратора на OS Speed?", status: "read" },
+      { id: "d1m2", authorId: "u2", time: _ago(118), text: "Привет! Да, конечно. Какой именно? У меня их три штуки на разных моторах стоят.", status: "read" },
+      { id: "d1m3", authorId: "u1", time: _ago(115), text: "OS Speed 21XZ-B Spec II. Никак не могу поймать устойчивый холостой ход.", status: "read" },
+      { id: "d1m4", authorId: "u2", time: _ago(110), text: "С этим мотором главное — игла холостого хода. Выставь зазор 0.7 мм, потом крути низ по температуре.", status: "read" },
+      { id: "d1m5", authorId: "u1", time: _ago(100), text: "А свечу какую посоветуешь?", status: "read" },
+      { id: "d1m6", authorId: "u2", time: _ago(90), text: "OS A5 средняя. На нитро 25% — идеально. У меня на такой же связке температура головы 105-115°C.", status: "read" },
+      { id: "d1m7", authorId: "u1", time: _ago(15), text: "Спасибо, попробую! А можешь скинуть свою схему настройки?", status: "read" },
+      { id: "d1m8", authorId: "u2", time: _ago(5), text: "Да, конечно! Скину схему вечером", status: "delivered", replyTo: "d1m7" },
     ],
   },
-  { id: "d2", userId: "u2", lastMessage: "Скинь фото головки", time: "11:02", messages: [{ id: "m1", authorId: "u2", time: "11:02", text: "Скинь фото головки" }] },
-  { id: "d3", userId: "u3", lastMessage: "Снял видео полёта, смотри!", time: "вчера", messages: [{ id: "m1", authorId: "u3", time: "вчера", text: "Снял видео полёта, смотри!" }] },
-  { id: "d4", userId: "u4", lastMessage: "Есть в наличии декали", time: "вчера", messages: [{ id: "m1", authorId: "u4", time: "вчера", text: "Есть в наличии декали" }] },
-  { id: "d5", userId: "u5", lastMessage: "Спасибо за помощь!", time: "пн", messages: [{ id: "m1", authorId: "u5", time: "пн", text: "Спасибо за помощь!" }] },
+  {
+    id: "d2", userId: "u3", lastMessage: "Сегодня в 18:00 на обычном месте", time: _ago(30), unread: 1,
+    messages: [
+      { id: "d2m1", authorId: "u3", time: _ago(180), text: "Готовим ночную гонку FPV! Будет трасса с LED-воротами.", status: "read" },
+      { id: "d2m2", authorId: "u1", time: _ago(170), text: "Ого, звучит круто! Когда и где?", status: "read" },
+      { id: "d2m3", authorId: "u3", time: _ago(160), text: "Суббота, 20:00. За городом, скину координаты.", status: "read" },
+      { id: "d2m4", authorId: "u3", time: _ago(150), text: "Можешь взять свой 5-дюймовик и запасные пропеллеры?", status: "read" },
+      { id: "d2m5", authorId: "u1", time: _ago(60), text: "Да, без проблем. А что по частотам? 5.8?", status: "read" },
+      { id: "d2m6", authorId: "u3", time: _ago(30), text: "Сегодня в 18:00 на обычном месте", status: "delivered" },
+    ],
+  },
+  {
+    id: "d3", userId: "u4", lastMessage: "Напишу как получу посылку!", time: _ago(120), unread: 0,
+    messages: [
+      { id: "d3m1", authorId: "u4", time: _ago(1440), text: "Привет! Ты говорил, что у тебя есть декали на Як-52?", status: "read" },
+      { id: "d3m2", authorId: "u1", time: _ago(1430), text: "Да, есть комплект в масштабе 1:6. Оригинальные советские.", status: "read" },
+      { id: "d3m3", authorId: "u4", time: _ago(1400), text: "Отлично! Мне как раз такие нужны. Сколько хочешь?", status: "read" },
+      { id: "d3m4", authorId: "u1", time: _ago(1380), text: "Да забирай так. Всё равно лежат без дела. Я вышлю почтой.", status: "read" },
+      { id: "d3m5", authorId: "u4", time: _ago(160), text: "Спасибо огромное! Адрес в личных данных. Жду!", status: "read" },
+      { id: "d3m6", authorId: "u1", time: _ago(120), text: "Отправил сегодня утром. Трек-номер: RU123456789", status: "read" },
+      { id: "d3m7", authorId: "u4", time: _ago(115), text: "Супер! Буду ждать. Ещё раз спасибо!", status: "read" },
+      { id: "d3m8", authorId: "u4", time: _ago(110), text: "Напишу как получу посылку!", status: "read" },
+    ],
+  },
+  {
+    id: "d4", userId: "u6", lastMessage: "Готово! Проверил — всё работает", time: _ago(10), unread: 4,
+    messages: [
+      { id: "d4m1", authorId: "u6", time: _ago(300), text: "Слушай, можешь глянуть мою схему контроллера ESC на STM32?", status: "read" },
+      { id: "d4m2", authorId: "u6", time: _ago(299), text: "Вот скриншот разводки платы", status: "read", image: photo(201) },
+      { id: "d4m3", authorId: "u1", time: _ago(280), text: "Смотрю... А где у тебя защитный диод на входе питания?", status: "read", replyTo: "d4m2" },
+      { id: "d4m4", authorId: "u6", time: _ago(270), text: "Точно! Забыл про него. Сейчас добавлю.", status: "read" },
+      { id: "d4m5", authorId: "u6", time: _ago(250), text: "Кстати, какой конденсатор лучше поставить на выход?", status: "read" },
+      { id: "d4m6", authorId: "u1", time: _ago(200), text: "Low ESR, 470 мкФ, 25V. Я обычно Nichicon ставлю.", status: "read" },
+      { id: "d4m7", authorId: "u6", time: _ago(60), text: "Переделал плату с учётом замечаний. Глянешь ещё раз?", status: "read" },
+      { id: "d4m8", authorId: "u6", time: _ago(55), text: "Вот обновлённая схема", status: "read", image: photo(202) },
+      { id: "d4m9", authorId: "u1", time: _ago(20), text: "Теперь отлично! Защита есть, дорожки толстые. Можно заказывать.", status: "read" },
+      { id: "d4m10", authorId: "u6", time: _ago(10), text: "Готово! Проверил — всё работает", status: "delivered" },
+    ],
+  },
+  {
+    id: "d5", userId: "u5", lastMessage: "Договорились! До встречи", time: _ago(1440), unread: 0,
+    messages: [
+      { id: "d5m1", authorId: "u5", time: _ago(3000), text: "Здорово! Увидел твой пост про багги. У меня тоже HB, только D817.", status: "read" },
+      { id: "d5m2", authorId: "u1", time: _ago(2900), text: "Классная машина! Как тебе дифференциалы?", status: "read" },
+      { id: "d5m3", authorId: "u5", time: _ago(2800), text: "Залил 100k спереди, 7k сзади. На ковре едет как по рельсам.", status: "read" },
+      { id: "d5m4", authorId: "u1", time: _ago(1500), text: "Слушай, у меня как раз передние диффы под замену. Какие посоветуешь?", status: "read" },
+      { id: "d5m5", authorId: "u5", time: _ago(1440), text: "Договорились! До встречи", status: "read" },
+    ],
+  },
+  {
+    id: "d6", userId: "u7", lastMessage: "Спасибо, всё понял!", time: _ago(2880), unread: 0,
+    messages: [
+      { id: "d6m1", authorId: "u7", time: _ago(4320), text: "Привет! Подскажи по прошивке контроллера самоката?", status: "read" },
+      { id: "d6m2", authorId: "u1", time: _ago(4300), text: "Привет! А что именно интересует?", status: "read" },
+      { id: "d6m3", authorId: "u7", time: _ago(4200), text: "Хочу увеличить максимальную скорость. Стандартная прошивка ограничивает 25 км/ч.", status: "read" },
+      { id: "d6m4", authorId: "u1", time: _ago(4000), text: "Тут надо аккуратно. Во-первых, проверь версию контроллера. Во-вторых, прошей через ST-Link.", status: "read" },
+      { id: "d6m5", authorId: "u7", time: _ago(2880), text: "Спасибо, всё понял!", status: "read" },
+    ],
+  },
+  {
+    id: "d7", userId: "u8", lastMessage: "Согласен! Завтра созвонимся", time: _ago(5760), unread: 0,
+    messages: [
+      { id: "d7m1", authorId: "u8", time: _ago(6000), text: "Привет! Я тут свой автопилот на STM32F4 делаю. Интересует совместная разработка?", status: "read" },
+      { id: "d7m2", authorId: "u1", time: _ago(5900), text: "Очень интересно! А что за проект?", status: "read" },
+      { id: "d7m3", authorId: "u8", time: _ago(5800), text: "Полётный контроллер с поддержкой ArduPilot. Свой дизайн платы, 6-слойка.", status: "read" },
+      { id: "d7m4", authorId: "u8", time: _ago(5790), text: "Вот фото прототипа", status: "read", image: photo(203) },
+      { id: "d7m5", authorId: "u1", time: _ago(5770), text: "Согласен! Завтра созвонимся", status: "read" },
+    ],
+  },
+  {
+    id: "d8", userId: "u4", lastMessage: "Отлично, жду!", time: _ago(10080), unread: 0,
+    messages: [
+      { id: "d8m1", authorId: "u1", time: _ago(10100), text: "Андрей, привет! Ты на гонки в субботу идёшь?", status: "read" },
+      { id: "d8m2", authorId: "u4", time: _ago(10090), text: "Привет! Да, планирую. Буду со своим новым планером.", status: "read" },
+      { id: "d8m3", authorId: "u1", time: _ago(10080), text: "Отлично, жду!", status: "read" },
+    ],
+  },
 ];
 
 export const chatMessages: Message[] = [
-  { id: "cm1", authorId: "u2", time: "10:12", text: "Парни, кто гонял Picco на нитро 30%? Какие настройки иглы?" },
-  { id: "cm2", authorId: "u1", time: "10:15", text: "У меня основная 2 щелчка от закрытия, холостая по факелу" },
-  { id: "cm3", authorId: "u4", time: "10:20", text: "Главное — не перегреть. Следи за головой." },
-  { id: "cm4", authorId: "u6", time: "10:25", text: "Тоже хочу попробовать, продаю свой O.S." },
-  { id: "cm5", authorId: "u3", time: "10:31", text: "Видео обкатки скинете?" },
+  { id: "cm1", authorId: "u2", time: _ago(120), text: "Парни, кто гонял Picco на нитро 30%? Какие настройки иглы?", status: "read" },
+  { id: "cm2", authorId: "u1", time: _ago(115), text: "У меня основная 2 щелчка от закрытия, холостая по факелу", status: "read" },
+  { id: "cm3", authorId: "u4", time: _ago(110), text: "Главное — не перегреть. Следи за головой.", status: "read" },
+  { id: "cm4", authorId: "u6", time: _ago(60), text: "Тоже хочу попробовать, продаю свой O.S.", status: "read" },
+  { id: "cm5", authorId: "u3", time: _ago(30), text: "Видео обкатки скинете?", status: "read" },
 ];
 
 export const userById = (id: ID) => users.find((u) => u.id === id) ?? users[0];
 export const categoryById = (id: ID) => categories.find((c) => c.id === id);
+export const communityById = (id: ID) => communities.find((c) => c.id === id);
+
+export function formatRelativeTime(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return iso;
+  const diffMs = Date.now() - t;
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "только что";
+  if (min < 60) return `${min} мин назад`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `${h} ч назад`;
+  const d = new Date(t);
+  const days = Math.floor(h / 24);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (days < 2) return `Вчера ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (days < 7) return `${days} дн назад`;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
