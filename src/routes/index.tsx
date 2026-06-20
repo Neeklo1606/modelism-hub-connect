@@ -191,6 +191,14 @@ function FeedPage() {
                 title="Выберите категорию"
                 description="Отфильтруйте ленту по интересующему вас направлению моделизма."
               />
+            ) : filter === "saved" ? (
+              <EmptyFeedState
+                icon={Bookmark}
+                title="Нет сохранённых публикаций"
+                description="Нажмите на иконку закладки у понравившейся публикации."
+                ctaLabel="Вернуться в ленту"
+                onCta={() => setFilter("all")}
+              />
             ) : (
               <EmptyFeedState
                 icon={Newspaper}
@@ -204,7 +212,14 @@ function FeedPage() {
               />
             )
           ) : (
-            slice.map((p) => <PostCard key={p.id} post={p} />)
+            slice.map((p) => (
+              <PostCard
+                key={p.id}
+                post={p}
+                isSavedExternal={savedIds.has(p.id)}
+                onToggleSave={toggleSave}
+              />
+            ))
           )}
 
           {!initialLoading && visible < filtered.length && (
