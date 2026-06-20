@@ -36,6 +36,10 @@ export interface Post {
   reposts?: number;
   status?: "published" | "moderation";
   isFollowing?: boolean;
+  isLiked?: boolean;
+  isSaved?: boolean;
+  isReposted?: boolean;
+  repostComment?: string;
   commentList?: Comment[];
   repostedBy?: ID;
 }
