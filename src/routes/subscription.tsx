@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import type { Variants } from "framer-motion";
 import { motion } from "framer-motion";
 import { Check, Gift } from "lucide-react";
 import { toast } from "sonner";
@@ -12,11 +13,11 @@ export const Route = createFileRoute("/subscription")({
   component: SubscriptionPage,
 });
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 };
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
 };
