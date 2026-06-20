@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Loader2, Newspaper, UserPlus, Compass } from "lucide-react";
+import { Plus, X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdBanner } from "@/components/AdBanner";
 import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
