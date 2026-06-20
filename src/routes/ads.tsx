@@ -1,88 +1,122 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus, Inbox, Eye, Heart, TrendingUp, MessageCircle, X } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ads as ALL_ADS } from "@/lib/mock";
-import { AdCard } from "@/components/AdCard";
-import { AdCardSkeleton } from "@/components/ads/AdCardSkeleton";
-import { AdSortBar, type SortKey, type ViewMode } from "@/components/ads/AdSortBar";
-import { AdFiltersDesktop, AdFiltersSheet, DEFAULT_FILTERS, type FiltersState } from "@/components/ads/AdFilters";
-import { Plus, Inbox } from "lucide-react";
+import { ads as ALL_ADS, type Ad } from "@/lib/mock";
+import { MyAdCard, type MyAdStatus } from "@/components/MyAdCard";
 
 export const Route = createFileRoute("/ads")({
-  head: () => ({ meta: [{ title: "Объявления — МоДелизМ Club" }] }),
-  component: AdsPage,
+  head: () => ({ meta: [{ title: "Мои объявления — МоДелизМ Club" }] }),
+  component: MyAdsPage,
 });
 
-const PAGE = 12;
+const CURRENT_USER_ID = "u1";
 
-function AdsPage() {
-  const [query, setQuery] = useState("");
-  const [debounced, setDebounced] = useState("");
-  const [sort, setSort] = useState<SortKey>("new");
-  const [view, setView] = useState<ViewMode>("grid");
-  const [filters, setFilters] = useState<FiltersState>(DEFAULT_FILTERS);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+type TabKey = "active" | "archived" | "drafts";
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(query.trim().toLowerCase()), 300);
-    return () => clearTimeout(t);
-  }, [query]);
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "active",    label: "Активные" },
+  { key: "archived",  label: "Архив" },
+  { key: "drafts",    label: "Неопубликованные" },
+];
 
-  useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(t);
-  }, []);
+interface DecoratedAd { ad: Ad; status: MyAdStatus }
 
-  useEffect(() => { setPage(1); }, [debounced, sort, filters]);
+function classifyAd(ad: Ad, overrides: Record<string, MyAdStatus>): MyAdStatus {
+  if (overrides[ad.id]) return overrides[ad.id];
+  if (ad.moderation === "moderation") return "moderation";
+  if (ad.moderation === "rejected") return "rejected";
+  return "active";
+}
 
-  const filtered = useMemo(() => {
-    const out = ALL_ADS.filter((a) => {
-      if (filters.category !== "Все" && a.category !== filters.category) return false;
-      if (filters.subcategory !== "Все" && a.subcategory !== filters.subcategory) return false;
-      if (filters.status !== "Все" && a.status !== filters.status) return false;
-      if (filters.city && !a.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
-      if (filters.priceMin && a.price < filters.priceMin) return false;
-      if (filters.priceMax && a.price > filters.priceMax) return false;
-      if (filters.conditions.length && (!a.condition || !filters.conditions.includes(a.condition))) return false;
-      if (filters.deliveries.length && !a.delivery.some((d) => filters.deliveries.includes(d))) return false;
-      if (filters.withPhotoOnly && !(a.gallery && a.gallery.length > 0)) return false;
-      if (debounced) {
-        const hay = `${a.title} ${a.subcategory} ${a.description ?? ""}`.toLowerCase();
-        if (!hay.includes(debounced)) return false;
-      }
-      return true;
+function MyAdsPage() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<TabKey>("active");
+  const [overrides, setOverrides] = useState<Record<string, MyAdStatus>>({
+    // seed a couple of demo states for u1's ads
+    a10: "archived",
+    a17: "archived",
+    a22: "moderation",
+    a11: "rejected",
+  });
+  const [deleted, setDeleted] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const myAds = useMemo<DecoratedAd[]>(() => {
+    return ALL_ADS.filter((a) => a.authorId === CURRENT_USER_ID && !deleted.has(a.id))
+      .map((a) => ({ ad: a, status: classifyAd(a, overrides) }));
+  }, [overrides, deleted]);
+
+  const counts = useMemo(() => ({
+    active:   myAds.filter((x) => x.status === "active").length,
+    archived: myAds.filter((x) => x.status === "archived").length,
+    drafts:   myAds.filter((x) => x.status === "moderation" || x.status === "rejected").length,
+  }), [myAds]);
+
+  const visible = useMemo(() => {
+    if (tab === "active")   return myAds.filter((x) => x.status === "active");
+    if (tab === "archived") return myAds.filter((x) => x.status === "archived");
+    return myAds.filter((x) => x.status === "moderation" || x.status === "rejected");
+  }, [tab, myAds]);
+
+  // Aggregate stats from active ads
+  const stats = useMemo(() => {
+    const active = myAds.filter((x) => x.status === "active");
+    const views = active.reduce((s, x) => s + (x.ad.views ?? 0), 0);
+    const likes = active.reduce((s, x) => s + (x.ad.likes ?? 0), 0);
+    const earnings = active.reduce((s, x) => s + x.ad.price, 0);
+    return { count: active.length, views, likes, earnings };
+  }, [myAds]);
+
+  const handleCreate = () => navigate({ to: "/ads/new" });
+  const handleSelect = (id: string, checked: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id); else next.delete(id);
+      return next;
     });
-    out.sort((a, b) => {
-      if (sort === "cheap") return a.price - b.price;
-      if (sort === "expensive") return b.price - a.price;
-      if (sort === "popular") return (b.views ?? 0) - (a.views ?? 0);
-      return 0; // "new" = original order (newest first)
+  };
+  const clearSelection = () => setSelected(new Set());
+  const archiveSelected = () => {
+    setOverrides((o) => {
+      const next = { ...o };
+      selected.forEach((id) => { next[id] = "archived"; });
+      return next;
     });
-    return out;
-  }, [filters, sort, debounced]);
-
-  const visible = filtered.slice(0, page * PAGE);
-  const canLoadMore = visible.length < filtered.length;
+    clearSelection();
+  };
+  const deleteSelected = () => {
+    setDeleted((d) => {
+      const next = new Set(d);
+      selected.forEach((id) => next.add(id));
+      return next;
+    });
+    clearSelection();
+  };
 
   return (
     <AppLayout rightColumn={false}>
-      <div className="flex flex-col gap-[24px]">
+      <div className="mx-auto flex w-full max-w-[960px] flex-col gap-[20px]">
+        {/* Header */}
         <header className="flex flex-wrap items-end justify-between gap-[16px]">
           <div>
-            <h1 className="font-display text-[28px] font-bold leading-none sm:text-[36px]"
-              style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
-              Объявления
+            <h1
+              className="font-display text-[28px] font-bold leading-[1.1] sm:text-[32px]"
+              style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}
+            >
+              Мои объявления
             </h1>
-            <p className="mt-[8px] text-[14px]" style={{ color: "var(--foreground-70)" }}>
-              Купля, продажа и обмен запчастей, моделей и инструмента
+            <p className="mt-[6px] text-[14px]" style={{ color: "var(--foreground-70)" }}>
+              Управляйте своими публикациями, статистикой и архивом
             </p>
           </div>
-          <Link
-            to="/ads/new"
-            className="inline-flex items-center gap-[8px] px-[20px] text-[14px] font-semibold transition-opacity hover:opacity-90"
+
+          {/* Desktop sticky CTA */}
+          <button
+            type="button"
+            onClick={handleCreate}
+            className="hidden items-center gap-[8px] px-[20px] text-[14px] font-semibold transition-all md:inline-flex"
             style={{
               background: "var(--accent)",
               color: "#fff",
@@ -90,107 +124,245 @@ function AdsPage() {
               boxShadow: "var(--shadow-button)",
               height: 44,
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
           >
             <Plus size={16} /> Разместить объявление
-          </Link>
+          </button>
         </header>
 
-        <div className="flex gap-[24px]">
-          <AdFiltersDesktop
-            value={filters}
-            onChange={setFilters}
-            onReset={() => setFilters(DEFAULT_FILTERS)}
-          />
+        {/* Stats */}
+        <section className="grid grid-cols-2 gap-[12px] md:grid-cols-4">
+          <StatCard icon={<TrendingUp size={18} />} label="Активных" value={stats.count.toString()} accent />
+          <StatCard icon={<Eye size={18} />} label="Просмотров" value={stats.views.toLocaleString("ru")} />
+          <StatCard icon={<Heart size={18} />} label="Лайков" value={stats.likes.toLocaleString("ru")} />
+          <StatCard icon={<MessageCircle size={18} />} label="Сумма" value={`${stats.earnings.toLocaleString("ru")} ₽`} />
+        </section>
 
-          <div className="min-w-0 flex-1 space-y-[16px]">
-            <AdSortBar
-              query={query} onQuery={setQuery}
-              sort={sort} onSort={setSort}
-              view={view} onView={setView}
-              onOpenFilters={() => setSheetOpen(true)}
-              count={filtered.length}
-            />
-
-            {loading ? (
-              <div className={view === "grid"
-                ? "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3"
-                : "flex flex-col gap-[12px]"}>
-                {Array.from({ length: 6 }).map((_, i) => <AdCardSkeleton key={i} />)}
-              </div>
-            ) : visible.length === 0 ? (
-              <EmptyAds onReset={() => { setFilters(DEFAULT_FILTERS); setQuery(""); }} />
-            ) : (
-              <>
-                <div className={view === "grid"
-                  ? "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3"
-                  : "flex flex-col gap-[12px]"}>
-                  {visible.map((a) => <AdCard key={a.id} ad={a} />)}
-                </div>
-
-                {canLoadMore && (
-                  <div className="flex justify-center pt-[8px]">
-                    <button
-                      type="button"
-                      onClick={() => setPage((p) => p + 1)}
-                      className="inline-flex items-center px-[24px] text-[14px] font-semibold transition-colors"
-                      style={{
-                        background: "var(--background-elevated)",
-                        color: "var(--foreground)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "var(--r-button)",
-                        height: 48,
-                        boxShadow: "var(--shadow-card)",
-                      }}
-                    >
-                      Показать ещё {Math.min(PAGE, filtered.length - visible.length)}
-                    </button>
-                  </div>
+        {/* Tabs */}
+        <nav
+          className="sticky top-0 z-10 flex items-center gap-[4px] overflow-x-auto py-[8px]"
+          style={{
+            background: "var(--background)",
+            backdropFilter: "blur(8px)",
+            borderBottom: "1px solid var(--border)",
+          }}
+          role="tablist"
+        >
+          {TABS.map((t) => {
+            const active = tab === t.key;
+            const count = counts[t.key];
+            return (
+              <button
+                key={t.key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setTab(t.key)}
+                className="relative inline-flex items-center gap-[8px] whitespace-nowrap px-[16px] py-[10px] text-[14px] font-semibold transition-colors"
+                style={{ color: active ? "var(--foreground)" : "var(--foreground-50)" }}
+              >
+                {t.label}
+                <span
+                  className="inline-flex h-[20px] min-w-[20px] items-center justify-center px-[6px] text-[11px] font-bold"
+                  style={{
+                    background: active ? "var(--accent-soft)" : "var(--background-surface)",
+                    color: active ? "var(--accent)" : "var(--foreground-50)",
+                    borderRadius: "var(--r-pill)",
+                  }}
+                >
+                  {count}
+                </span>
+                {active && (
+                  <motion.span
+                    layoutId="tab-underline"
+                    className="absolute bottom-0 left-[8px] right-[8px]"
+                    style={{ height: 3, background: "var(--accent)", borderRadius: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
                 )}
-              </>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Bulk toolbar */}
+        <AnimatePresence>
+          {selected.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="flex flex-wrap items-center justify-between gap-[12px] px-[16px] py-[12px]"
+              style={{
+                background: "var(--accent-soft)",
+                border: "1px solid var(--accent)",
+                borderRadius: "var(--r-card-sm)",
+              }}
+            >
+              <span className="text-[14px] font-semibold" style={{ color: "var(--accent)" }}>
+                Выбрано: {selected.size}
+              </span>
+              <div className="flex items-center gap-[8px]">
+                <button
+                  type="button"
+                  onClick={archiveSelected}
+                  className="inline-flex items-center px-[14px] text-[13px] font-semibold"
+                  style={{
+                    background: "var(--background)",
+                    border: "1px solid var(--border-strong)",
+                    color: "var(--foreground)",
+                    borderRadius: "var(--r-button)",
+                    height: 34,
+                  }}
+                >
+                  Архивировать
+                </button>
+                <button
+                  type="button"
+                  onClick={deleteSelected}
+                  className="inline-flex items-center px-[14px] text-[13px] font-semibold"
+                  style={{
+                    background: "var(--error)",
+                    color: "#fff",
+                    borderRadius: "var(--r-button)",
+                    height: 34,
+                  }}
+                >
+                  Удалить
+                </button>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="grid h-[34px] w-[34px] place-items-center"
+                  style={{
+                    background: "transparent",
+                    color: "var(--foreground-50)",
+                    borderRadius: "var(--r-pill)",
+                  }}
+                  aria-label="Отменить выбор"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* List */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18 }}
+            className="flex flex-col gap-[12px] pb-[120px] md:pb-[40px]"
+          >
+            {visible.length === 0 ? (
+              <EmptyTab tab={tab} onCreate={handleCreate} />
+            ) : (
+              visible.map(({ ad, status }) => (
+                <MyAdCard
+                  key={ad.id}
+                  ad={ad}
+                  status={status}
+                  selected={selected.has(ad.id)}
+                  onSelect={handleSelect}
+                  onArchive={(id) => setOverrides((o) => ({ ...o, [id]: "archived" }))}
+                  onPublish={(id) => setOverrides((o) => ({ ...o, [id]: "active" }))}
+                  onDelete={(id) => setDeleted((d) => new Set(d).add(id))}
+                />
+              ))
             )}
-          </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <AdFiltersSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        value={filters}
-        onChange={setFilters}
-        onReset={() => { setFilters(DEFAULT_FILTERS); setSheetOpen(false); }}
-      />
+      {/* Mobile FAB */}
+      <button
+        type="button"
+        onClick={handleCreate}
+        aria-label="Разместить объявление"
+        className="fixed right-[20px] bottom-[20px] z-30 grid h-[56px] w-[56px] place-items-center md:hidden"
+        style={{
+          background: "var(--accent)",
+          color: "#fff",
+          borderRadius: "var(--r-pill)",
+          boxShadow: "var(--shadow-glow-accent), var(--shadow-float)",
+        }}
+      >
+        <Plus size={24} strokeWidth={2.5} />
+      </button>
     </AppLayout>
   );
 }
 
-function EmptyAds({ onReset }: { onReset: () => void }) {
+function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
     <div
-      className="grid place-items-center gap-[12px] p-[48px] text-center"
+      className="flex flex-col gap-[6px] p-[14px]"
       style={{
-        background: "var(--background-elevated)",
+        background: accent ? "var(--accent-soft)" : "var(--background-surface)",
+        border: `1px solid ${accent ? "var(--accent)" : "var(--border)"}`,
+        borderRadius: "var(--r-card-sm)",
+      }}
+    >
+      <div className="flex items-center gap-[6px] text-[12px] font-medium" style={{ color: accent ? "var(--accent)" : "var(--foreground-50)" }}>
+        {icon}
+        <span style={{ fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</span>
+      </div>
+      <div
+        className="font-display text-[22px] font-bold leading-none"
+        style={{ color: accent ? "var(--accent)" : "var(--foreground)" }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function EmptyTab({ tab, onCreate }: { tab: TabKey; onCreate: () => void }) {
+  const config = {
+    active:   { title: "Нет активных объявлений",   desc: "Создайте первое — это бесплатно и занимает 2 минуты." },
+    archived: { title: "Архив пуст",                desc: "Архивированные объявления можно вернуть в любой момент." },
+    drafts:   { title: "Нет неопубликованных",      desc: "Здесь появятся объявления на модерации или отклонённые." },
+  }[tab];
+
+  return (
+    <div
+      className="grid place-items-center gap-[14px] p-[56px] text-center"
+      style={{
+        background: "var(--background-surface)",
         border: "1px dashed var(--border-strong)",
         borderRadius: "var(--r-card)",
       }}
     >
       <div
-        className="grid h-[56px] w-[56px] place-items-center"
-        style={{ background: "var(--background-surface)", color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
+        className="grid h-[64px] w-[64px] place-items-center"
+        style={{ background: "var(--background-elevated)", color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
       >
-        <Inbox size={24} />
+        <Inbox size={26} />
       </div>
-      <h3 className="font-display text-[18px] font-bold" style={{ color: "var(--foreground)" }}>Ничего не найдено</h3>
-      <p className="text-[13px]" style={{ color: "var(--foreground-70)" }}>
-        Попробуйте смягчить фильтры или поискать другое
-      </p>
-      <button
-        type="button"
-        onClick={onReset}
-        className="mt-[4px] inline-flex items-center px-[18px] text-[13px] font-semibold"
-        style={{ background: "var(--accent)", color: "#fff", borderRadius: "var(--r-button)", height: 40 }}
-      >
-        Сбросить фильтры
-      </button>
+      <div>
+        <h3 className="font-display text-[20px] font-bold" style={{ color: "var(--foreground)" }}>{config.title}</h3>
+        <p className="mt-[6px] text-[14px]" style={{ color: "var(--foreground-70)" }}>{config.desc}</p>
+      </div>
+      {tab === "active" && (
+        <button
+          type="button"
+          onClick={onCreate}
+          className="mt-[4px] inline-flex items-center gap-[8px] px-[20px] text-[14px] font-semibold"
+          style={{
+            background: "var(--accent)",
+            color: "#fff",
+            borderRadius: "var(--r-button)",
+            boxShadow: "var(--shadow-button)",
+            height: 42,
+          }}
+        >
+          <Plus size={16} /> Разместить объявление
+        </button>
+      )}
     </div>
   );
 }
