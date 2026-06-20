@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { CategoryCard } from "@/components/CategoryCard";
 import { categories } from "@/lib/mock";
 
-export const Route = createFileRoute("/categories")({
+export const Route = createFileRoute("/categories/")({
   head: () => ({ meta: [{ title: "Категории — МоДелизМ Club" }] }),
   component: CategoriesPage,
 });

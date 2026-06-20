@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ads as ALL_ADS, type Ad } from "@/lib/mock";
 import { MyAdCard, type MyAdStatus } from "@/components/MyAdCard";
 
-export const Route = createFileRoute("/ads")({
+export const Route = createFileRoute("/ads/")({
   head: () => ({ meta: [{ title: "Мои объявления — МоДелизМ Club" }] }),
   component: MyAdsPage,
 });

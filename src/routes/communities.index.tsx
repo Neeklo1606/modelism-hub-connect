@@ -8,7 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { communities as initial } from "@/lib/mock";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/communities")({
+export const Route = createFileRoute("/communities/")({
   head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Club" }] }),
   component: CommunitiesPage,
 });
