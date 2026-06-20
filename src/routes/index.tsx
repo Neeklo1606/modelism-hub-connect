@@ -31,6 +31,15 @@ function FeedPage() {
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  const toggleSave = (id: string) =>
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   // initial skeleton load
   const [initialLoading, setInitialLoading] = useState(true);
@@ -42,8 +51,9 @@ function FeedPage() {
   const filtered = useMemo(() => {
     if (filter === "following") return posts.filter((p) => p.isFollowing);
     if (filter === "categories" && activeCategory) return posts.filter((p) => p.category === activeCategory);
+    if (filter === "saved") return posts.filter((p) => savedIds.has(p.id));
     return posts;
-  }, [posts, filter, activeCategory]);
+  }, [posts, filter, activeCategory, savedIds]);
 
   // infinite loading
   const [visible, setVisible] = useState(PAGE_SIZE);
