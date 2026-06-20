@@ -10,6 +10,15 @@ export interface User {
   subscription?: "Тестовый" | "Месяц" | "Полгода" | "Год" | null;
 }
 
+export interface Comment {
+  id: ID;
+  authorId: ID;
+  time: string;
+  text: string;
+  likes?: number;
+  replies?: Comment[];
+}
+
 export interface Post {
   id: ID;
   authorId: ID;
@@ -23,7 +32,12 @@ export interface Post {
   views?: number;
   likes: number;
   comments: number;
+  saves?: number;
+  reposts?: number;
   status?: "published" | "moderation";
+  isFollowing?: boolean;
+  commentList?: Comment[];
+  repostedBy?: ID;
 }
 
 export interface Ad {
@@ -137,17 +151,47 @@ export const categories: Category[] = [
   { id: "c10", name: "Запчасти", description: "Детали и комплектующие", icon: "Wrench", members: 2210, subcategories: [{ id: "s1", name: "Шасси" }, { id: "s2", name: "Моторы" }] },
 ];
 
+
+const cmt = (id: string, authorId: ID, time: string, text: string, likes = 0, replies: Comment[] = []): Comment => ({ id, authorId, time, text, likes, replies });
+
 export const posts: Post[] = [
-  { id: "p1", authorId: "u1", date: "2 ч назад", category: "Автомодели", title: "Новый проект на шасси 1:8", text: "Собрал новый багги на базе HB Racing. Делюсь первыми впечатлениями от обкатки ДВС: на первых баках мотор работал стабильно, температура головы держалась в районе 110°C, что для нового двигателя — отличный показатель. После 4 баков перешёл на штатный режим и сразу заметил прирост отзывчивости.", image: photo(1), tags: ["ДВС", "1:8", "багги", "HB Racing"], views: 1240, likes: 42, comments: 12 },
-  { id: "p2", authorId: "u3", date: "4 ч назад", category: "Квадрокоптеры", title: "FPV полёт над лесом", text: "Снял красивое видео на 5-дюймовой раме с GoPro. Настройки PID наконец-то идеальные.", image: photo(2), tags: ["FPV", "5 дюймов", "GoPro"], views: 3420, likes: 88, comments: 24 },
-  { id: "p3", authorId: "u4", date: "вчера", category: "Самолёты", title: "Реставрация Як-52", text: "Восстанавливаю модель Як-52 в масштабе 1:6. Ищу комплект декалей.", image: photo(3), tags: ["Як-52", "1:6", "реставрация"], views: 890, likes: 31, comments: 8 },
-  { id: "p4", authorId: "u2", date: "вчера", category: "Запчасти", title: "Обзор нового мотора Castle 1717", text: "Поставил на дрэгстер. Отдача — космос. Подробности в посте.", image: photo(4), tags: ["Castle", "дрэгстер", "мотор"], views: 1560, likes: 56, comments: 17 },
-  { id: "p5", authorId: "u6", date: "2 дня назад", category: "Электроника", title: "Самодельный контроллер ESC", text: "Спаял свой ESC на STM32. Поделюсь схемой и прошивкой.", image: photo(5), tags: ["ESC", "STM32", "DIY"], views: 2110, likes: 73, comments: 29 },
-  { id: "p6", authorId: "u5", date: "3 дня назад", category: "Корабли", title: "Радиоуправляемый катер своими руками", text: "Корпус из стеклопластика, мотор 540. Первые ходовые испытания на пруду.", image: photo(6), tags: ["катер", "стеклопластик", "DIY"], views: 640, likes: 22, comments: 5 },
-  { id: "p7", authorId: "u8", date: "3 дня назад", category: "Разработчики", title: "ArduPilot 4.5 — что нового", text: "Разбор основных фич нового релиза автопилота.", image: photo(7), tags: ["ArduPilot", "автопилот"], views: 1340, likes: 41, comments: 11 },
-  { id: "p8", authorId: "u7", date: "4 дня назад", category: "Электросамокаты", title: "Моддинг контроллера на самокате", text: "Поставил кастомную прошивку, мощность +30%.", image: photo(8), tags: ["прошивка", "мод"], views: 520, likes: 19, comments: 4 },
-  { id: "p9", authorId: "u1", date: "5 дней назад", category: "Автомодели", title: "Гонки в Краснодаре — итоги", text: "Прошли весенние гонки. Сделал фотоотчёт и обзор шасси участников.", image: photo(9), tags: ["гонки", "Краснодар"], views: 1880, likes: 64, comments: 22 },
-  { id: "p10", authorId: "u3", date: "неделю назад", category: "Квадрокоптеры", title: "Сборка 7-дюймового лонг-рейнджа", text: "Дальность 12 км, время полёта 25 минут. Конфигурация внутри.", image: photo(10), tags: ["7 дюймов", "long range"], views: 2960, likes: 95, comments: 31 },
+  { id: "p1", authorId: "u1", date: "2 ч назад", category: "Автомодели", title: "Новый проект на шасси 1:8", text: "Собрал новый багги на базе HB Racing. Делюсь первыми впечатлениями от обкатки ДВС: на первых баках мотор работал стабильно, температура головы держалась в районе 110°C, что для нового двигателя — отличный показатель. После 4 баков перешёл на штатный режим и сразу заметил прирост отзывчивости.", image: photo(1), tags: ["ДВС", "1:8", "багги", "HBRacing"], views: 1240, likes: 42, comments: 3, saves: 18, reposts: 4, isFollowing: true, commentList: [
+    cmt("c1", "u2", "1 ч назад", "Какую свечу ставил? У меня на той же голове перегревала.", 5, [
+      cmt("c1r1", "u1", "55 мин назад", "OS A5, средняя. На нитро 25% — оптимально.", 2),
+    ]),
+    cmt("c2", "u4", "40 мин назад", "Красивый багги! Сколько весит в сборе?", 1),
+    cmt("c3", "u6", "20 мин назад", "Поделись настройками иглы потом", 0),
+  ] },
+  { id: "p2", authorId: "u3", date: "4 ч назад", category: "Квадрокоптеры", title: "FPV полёт над лесом", text: "Снял красивое видео на 5-дюймовой раме с GoPro. Настройки PID наконец-то идеальные.", image: photo(2), tags: ["FPV", "5дюймов", "GoPro"], views: 3420, likes: 88, comments: 2, saves: 34, reposts: 9, isFollowing: true, commentList: [
+    cmt("c1", "u6", "3 ч назад", "PID поделишься?", 3),
+    cmt("c2", "u8", "2 ч назад", "Какая частота? 2.4 или 5.8?", 1),
+  ] },
+  { id: "p3", authorId: "u4", date: "вчера", category: "Самолёты", title: "Реставрация Як-52", text: "Восстанавливаю модель Як-52 в масштабе 1:6. Ищу комплект декалей.", image: photo(3), tags: ["Як52", "1:6", "реставрация"], views: 890, likes: 31, comments: 1, saves: 7, reposts: 2, commentList: [
+    cmt("c1", "u5", "23 ч назад", "У меня остался комплект, напиши в личку", 4),
+  ] },
+  { id: "p4", authorId: "u2", date: "вчера", category: "Запчасти", title: "Обзор нового мотора Castle 1717", text: "Поставил на дрэгстер. Отдача — космос. Подробности в посте.", image: photo(4), tags: ["Castle", "дрэгстер", "мотор"], views: 1560, likes: 56, comments: 2, saves: 22, reposts: 6, isFollowing: true, commentList: [
+    cmt("c1", "u1", "20 ч назад", "Какой ESC использовал?", 2),
+    cmt("c2", "u7", "18 ч назад", "Цена вопроса?", 0),
+  ] },
+  { id: "p5", authorId: "u6", date: "2 дня назад", category: "Электроника", title: "Самодельный контроллер ESC", text: "Спаял свой ESC на STM32. Поделюсь схемой и прошивкой.", image: photo(5), tags: ["ESC", "STM32", "DIY"], views: 2110, likes: 73, comments: 2, saves: 41, reposts: 11, commentList: [
+    cmt("c1", "u8", "1 день назад", "Схему в студию!", 6),
+    cmt("c2", "u2", "1 день назад", "Какая макс мощность?", 1),
+  ] },
+  { id: "p6", authorId: "u5", date: "3 дня назад", category: "Корабли", title: "Радиоуправляемый катер своими руками", text: "Корпус из стеклопластика, мотор 540. Первые ходовые испытания на пруду.", image: photo(6), tags: ["катер", "стеклопластик", "DIY"], views: 640, likes: 22, comments: 1, saves: 5, reposts: 1, commentList: [cmt("c1", "u3", "2 дня назад", "Скорость какая?", 0)] },
+  { id: "p7", authorId: "u8", date: "3 дня назад", category: "Разработчики", title: "ArduPilot 4.5 — что нового", text: "Разбор основных фич нового релиза автопилота.", image: photo(7), tags: ["ArduPilot", "автопилот"], views: 1340, likes: 41, comments: 0, saves: 28, reposts: 7, isFollowing: true, commentList: [] },
+  { id: "p8", authorId: "u7", date: "4 дня назад", category: "Электросамокаты", title: "Моддинг контроллера на самокате", text: "Поставил кастомную прошивку, мощность +30%.", image: photo(8), tags: ["прошивка", "мод"], views: 520, likes: 19, comments: 0, saves: 3, reposts: 0, commentList: [] },
+  { id: "p9", authorId: "u1", date: "5 дней назад", category: "Автомодели", title: "Гонки в Краснодаре — итоги", text: "Прошли весенние гонки. Сделал фотоотчёт и обзор шасси участников.", image: photo(9), tags: ["гонки", "Краснодар"], views: 1880, likes: 64, comments: 1, saves: 19, reposts: 5, isFollowing: true, commentList: [cmt("c1", "u4", "4 дня назад", "Огонь репортаж!", 3)] },
+  { id: "p10", authorId: "u3", date: "неделю назад", category: "Квадрокоптеры", title: "Сборка 7-дюймового лонг-рейнджа", text: "Дальность 12 км, время полёта 25 минут. Конфигурация внутри.", image: photo(10), tags: ["7дюймов", "longrange"], views: 2960, likes: 95, comments: 1, saves: 52, reposts: 14, isFollowing: true, commentList: [cmt("c1", "u8", "6 дней назад", "Какая батарея?", 4)] },
+  { id: "p11", authorId: "u4", date: "неделю назад", category: "Самолёты", title: "Первый полёт планера 2.5м", text: "Сделал планер с пенополистирола, размах 2.5 м. Парит шикарно, термики ловит уверенно.", image: photo(21), tags: ["планер", "термики"], views: 720, likes: 28, comments: 0, saves: 9, reposts: 2, commentList: [] },
+  { id: "p12", authorId: "u2", date: "неделю назад", category: "Запчасти", title: "Распаковка нового сервопривода Savox", text: "Пришёл Savox SC-1256TG. Усилие 20 кг·см, скорость 0.15 сек.", image: photo(22), tags: ["Savox", "сервопривод"], views: 980, likes: 36, comments: 0, saves: 14, reposts: 3, commentList: [] },
+  { id: "p13", authorId: "u6", date: "10 дней назад", category: "Электроника", title: "Разбор приёмника FrSky R-XSR", text: "Маленький, лёгкий, бьёт далеко. Подробный обзор и тесты.", image: photo(23), tags: ["FrSky", "приёмник"], views: 1450, likes: 47, comments: 0, saves: 21, reposts: 6, isFollowing: true, commentList: [] },
+  { id: "p14", authorId: "u8", date: "10 дней назад", category: "Разработчики", title: "Настройка автопилота для дальних миссий", text: "Параметры failsafe, RTL, точки маршрута — мой подход.", image: photo(24), tags: ["автопилот", "missions"], views: 1120, likes: 39, comments: 0, saves: 27, reposts: 8, commentList: [] },
+  { id: "p15", authorId: "u1", date: "2 недели назад", category: "Автомодели", title: "Замена амортизаторов на 1:10", text: "Поставил алюминиевые на туринг. Машина перестала козлить на буграх.", image: photo(25), tags: ["1:10", "туринг", "амортизаторы"], views: 1340, likes: 51, comments: 0, saves: 16, reposts: 4, isFollowing: true, commentList: [] },
+  { id: "p16", authorId: "u3", date: "2 недели назад", category: "Квадрокоптеры", title: "Cinewhoop для съёмок интерьеров", text: "Собрал 3-дюймовый сайнвуп под GoPro Naked. Идеален для интерьеров.", image: photo(26), tags: ["Cinewhoop", "съёмка"], views: 2180, likes: 79, comments: 0, saves: 38, reposts: 12, commentList: [] },
+  { id: "p17", authorId: "u5", date: "2 недели назад", category: "Корабли", title: "Парусник на радиоуправлении", text: "Сделал парусную яхту 1:50. Ветер ловит — улетает по пруду.", image: photo(27), tags: ["парусник", "яхта"], views: 580, likes: 24, comments: 0, saves: 6, reposts: 1, commentList: [] },
+  { id: "p18", authorId: "u7", date: "3 недели назад", category: "Электросамокаты", title: "Новый аккумулятор 60V 30Ah", text: "Сборка из 21700 ячеек. Запас хода теперь +50%.", image: photo(28), tags: ["батарея", "21700"], views: 690, likes: 26, comments: 0, saves: 8, reposts: 2, commentList: [] },
+  { id: "p19", authorId: "u6", date: "3 недели назад", category: "Электроника", title: "Pixhawk 6C — обзор", text: "Новый Pixhawk вышел. Что внутри и зачем оно надо.", image: photo(29), tags: ["Pixhawk", "обзор"], views: 1820, likes: 62, comments: 0, saves: 33, reposts: 9, commentList: [] },
+  { id: "p20", authorId: "u2", date: "месяц назад", category: "Запчасти", title: "Подборка моторов для багги 1:8", text: "Сравнил Reds, OS, Picco. Кто лучше держит температуру.", image: photo(30), tags: ["моторы", "сравнение"], views: 2410, likes: 87, comments: 0, saves: 44, reposts: 13, isFollowing: true, commentList: [] },
 ];
 
 export const ads: Ad[] = [
