@@ -1,6 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Newspaper, Users2, MessageSquare, Megaphone, UserPlus, User, ShoppingBag, HelpCircle, ExternalLink } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 
 const items = [
   { to: "/", label: "Лента", icon: Newspaper },
@@ -16,8 +18,9 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:block w-60 shrink-0">
       <div className="sticky top-4 space-y-1">
-        <div className="px-3 py-3">
+        <div className="flex items-center justify-between px-3 py-3">
           <Link to="/"><Logo /></Link>
+          <ThemeToggle />
         </div>
         <nav className="space-y-0.5">
           {items.map(({ to, label, icon: Icon }) => {
