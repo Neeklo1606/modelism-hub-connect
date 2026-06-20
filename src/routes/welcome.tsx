@@ -18,43 +18,102 @@ export const Route = createFileRoute("/welcome")({
 function WelcomePage() {
   return (
     <div style={{ background: "var(--background)", color: "var(--foreground)", minHeight: "100vh" }}>
+      {/* ===== MOBILE ONBOARDING (md:hidden) ===== */}
+      <div className="md:hidden flex min-h-[100svh] flex-col px-[20px]" style={{ paddingTop: "max(20px, env(safe-area-inset-top))", paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}>
+        <div className="flex items-center justify-between">
+          <Logo />
+          <ThemeToggle />
+        </div>
+
+        <div className="relative mt-[20px] overflow-hidden" style={{ borderRadius: 24, boxShadow: "var(--shadow-float)" }}>
+          <img src={cover} alt="" className="block w-full" style={{ aspectRatio: "4/5", objectFit: "cover" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.78) 100%)" }} />
+          <div className="absolute bottom-[20px] left-[20px] right-[20px]">
+            <div
+              className="inline-flex items-center gap-[6px]"
+              style={{
+                background: "rgba(255,255,255,0.14)", color: "#fff",
+                fontFamily: "var(--font-mono)", fontSize: 10,
+                padding: "5px 10px", borderRadius: 999,
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <span style={{ width: 5, height: 5, borderRadius: 999, background: "var(--accent)" }} />
+              v2.1 · бета
+            </div>
+            <h1
+              className="mt-[12px]"
+              style={{ fontFamily: "var(--font-display)", color: "#fff", fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", fontWeight: 800 }}
+            >
+              МоДелизМ <span style={{ color: "var(--accent)" }}>Club</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.78)", fontSize: 14, marginTop: 8, lineHeight: 1.45 }}>
+              Сообщество RC-моделистов: сборки, чаты, объявления.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-[24px] flex flex-col gap-[10px]">
+          {[
+            { icon: Newspaper, t: "Лента сборок и обсуждений" },
+            { icon: MessageSquare, t: "Чаты по подкатегориям" },
+            { icon: Megaphone, t: "Объявления и обмен — от 20 ₽" },
+          ].map(({ icon: Ic, t }) => (
+            <div key={t} className="flex items-center gap-[12px]">
+              <div className="grid h-[36px] w-[36px] shrink-0 place-items-center" style={{ background: "var(--accent-soft)", color: "var(--accent)", borderRadius: 10 }}>
+                <Ic size={18} />
+              </div>
+              <span style={{ fontSize: 14, color: "var(--foreground-70)" }}>{t}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-auto pt-[24px] flex flex-col gap-[10px]">
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center gap-[6px]"
+            style={{ background: "var(--accent)", color: "#fff", fontWeight: 600, height: 52, borderRadius: 14, fontSize: 15, boxShadow: "var(--shadow-button)" }}
+          >
+            Создать аккаунт <ArrowRight size={16} />
+          </Link>
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center"
+            style={{ height: 48, borderRadius: 14, fontSize: 14, color: "var(--foreground-70)" }}
+          >
+            У меня уже есть аккаунт
+          </Link>
+        </div>
+      </div>
+
+      {/* ===== DESKTOP LANDING ===== */}
+      <div className="hidden md:block">
       <header
         className="sticky top-0 z-30 backdrop-blur"
         style={{ borderBottom: "1px solid var(--border)", background: "color-mix(in oklab, var(--background) 88%, transparent)" }}
       >
-        <div className="mx-auto flex items-center justify-between" style={{ maxWidth: "var(--container-max)", padding: "16px var(--container-pad)" }}>
+        <div className="mx-auto flex items-center justify-between" style={{ maxWidth: "var(--container-max)", padding: "14px var(--container-pad)" }}>
           <Logo />
-          <nav className="hidden items-center gap-[24px] md:flex" style={{ fontSize: "var(--fs-sm)", color: "var(--foreground-70)" }}>
+          <nav className="hidden items-center gap-[24px] md:flex" style={{ fontSize: 13, color: "var(--foreground-70)" }}>
             <a href="#features">Возможности</a>
             <a href="#pricing">Подписка</a>
             <a href="https://modelizm23.ru" target="_blank" rel="noreferrer">Маркет</a>
           </nav>
-          <div className="flex items-center gap-[12px]">
+          <div className="flex items-center gap-[8px]">
             <ThemeToggle />
-            <Link
-              to="/login"
-              style={{ fontSize: "var(--fs-sm)", color: "var(--foreground-70)", padding: "8px 12px" }}
-            >
-              Войти
-            </Link>
+            <Link to="/login" style={{ fontSize: 13, color: "var(--foreground-70)", padding: "8px 12px", borderRadius: "var(--r-button)" }}>Войти</Link>
             <Link
               to="/register"
-              className="inline-flex items-center gap-[8px]"
-              style={{
-                background: "var(--accent)",
-                color: "#fff",
-                fontSize: "var(--fs-sm)",
-                fontWeight: 600,
-                padding: "10px 18px",
-                borderRadius: "var(--r-button)",
-                boxShadow: "var(--shadow-button)",
-              }}
+              className="inline-flex items-center gap-[6px]"
+              style={{ background: "var(--accent)", color: "#fff", fontSize: 13, fontWeight: 600, padding: "9px 16px", borderRadius: "var(--r-button)", boxShadow: "var(--shadow-button)" }}
             >
-              Регистрация <ArrowRight size={16} />
+              Регистрация <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </header>
+
 
       {/* HERO */}
       <section
