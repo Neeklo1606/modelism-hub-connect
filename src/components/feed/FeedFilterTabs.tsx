@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export type FeedFilter = "all" | "following" | "categories";
+export type FeedFilter = "all" | "following" | "categories" | "saved";
 
 interface Props {
   value: FeedFilter;
@@ -11,6 +11,7 @@ const items: { id: FeedFilter; label: string }[] = [
   { id: "all", label: "Все" },
   { id: "following", label: "Подписки" },
   { id: "categories", label: "По категориям" },
+  { id: "saved", label: "Сохранённое" },
 ];
 
 export function FeedFilterTabs({ value, onChange }: Props) {
