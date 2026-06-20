@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
+import { X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdBanner } from "@/components/AdBanner";
 import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
@@ -21,17 +21,29 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Главная лента сообщества моделистов: новые проекты, фото, обсуждения." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    composer: (search.composer as string) || undefined,
+  }),
   component: FeedPage,
 });
 
 const PAGE_SIZE = 6;
 
 function FeedPage() {
+  const { composer } = Route.useSearch();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (composer === "open") {
+      setMobileOpen(true);
+      navigate({ to: "/", search: {}, replace: true });
+    }
+  }, [composer, navigate]);
 
   const toggleSave = (id: string) =>
     setSavedIds((prev) => {
@@ -244,15 +256,8 @@ function FeedPage() {
         </div>
       </div>
 
-      {/* Mobile floating + button */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        aria-label="Создать публикацию"
-        className="fixed bottom-[80px] right-[16px] z-40 flex h-[56px] w-[56px] items-center justify-center rounded-full transition-opacity hover:opacity-90 lg:hidden"
-        style={{ background: "var(--accent)", color: "#fff", boxShadow: "var(--shadow-button)" }}
-      >
-        <Plus className="h-[24px] w-[24px]" />
-      </button>
+      {/* FAB removed: BottomNav «+» is the single entry point for creating content */}
+
 
       {mobileOpen && (
         <div
