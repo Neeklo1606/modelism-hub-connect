@@ -10,7 +10,7 @@ export function CreateChooserModal({ open, onOpenChange }: { open: boolean; onOp
         <h3 className="font-display text-base font-semibold">Что создать?</h3>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
-            onClick={() => { onOpenChange(false); navigate({ to: "/" }); }}
+            onClick={() => { onOpenChange(false); navigate({ to: "/", search: { composer: "open" } }); }}
             className="flex flex-col items-center gap-2 rounded-xl border p-4 hover:bg-muted"
           >
             <Newspaper className="h-6 w-6 text-primary" />
