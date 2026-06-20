@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Cpu, MessageSquare, Megaphone, Users2, Newspaper } from "lucide-react";
+import { ArrowRight, Cpu, MessageSquare, Megaphone, Users2, Newspaper, Users, Tag } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import cover from "@/assets/cover-modelizm.jpg";
@@ -18,72 +18,105 @@ export const Route = createFileRoute("/welcome")({
 function WelcomePage() {
   return (
     <div style={{ background: "var(--background)", color: "var(--foreground)", minHeight: "100vh" }}>
-      {/* ===== MOBILE ONBOARDING (md:hidden) ===== */}
-      <div className="md:hidden flex min-h-[100svh] flex-col px-[20px]" style={{ paddingTop: "max(20px, env(safe-area-inset-top))", paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}>
-        <div className="flex items-center justify-between">
-          <Logo />
+      {/* ===== MOBILE ONBOARDING (md:hidden) — 2 track cards ===== */}
+      <div
+        className="md:hidden flex min-h-[100dvh] flex-col px-[24px]"
+        style={{
+          paddingTop: "max(24px, env(safe-area-inset-top))",
+          paddingBottom: "max(24px, env(safe-area-inset-bottom))",
+          background: "var(--background)",
+        }}
+      >
+        <div className="flex items-center justify-end">
           <ThemeToggle />
         </div>
 
-        <div className="relative mt-[20px] overflow-hidden" style={{ borderRadius: 24, boxShadow: "var(--shadow-float)" }}>
-          <img src={cover} alt="" className="block w-full" style={{ aspectRatio: "4/5", objectFit: "cover" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.78) 100%)" }} />
-          <div className="absolute bottom-[20px] left-[20px] right-[20px]">
-            <div
-              className="inline-flex items-center gap-[6px]"
-              style={{
-                background: "rgba(255,255,255,0.14)", color: "#fff",
-                fontFamily: "var(--font-mono)", fontSize: 10,
-                padding: "5px 10px", borderRadius: 999,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              <span style={{ width: 5, height: 5, borderRadius: 999, background: "var(--accent)" }} />
-              v2.1 · бета
-            </div>
-            <h1
-              className="mt-[12px]"
-              style={{ fontFamily: "var(--font-display)", color: "#fff", fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", fontWeight: 800 }}
-            >
-              МоДелизМ <span style={{ color: "var(--accent)" }}>Club</span>
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.78)", fontSize: 14, marginTop: 8, lineHeight: 1.45 }}>
-              Сообщество RC-моделистов: сборки, чаты, объявления.
-            </p>
+        {/* Hero */}
+        <div className="mt-[24px] flex flex-col items-center text-center">
+          <div
+            className="grid place-items-center"
+            style={{ width: 64, height: 64, borderRadius: 20, background: "var(--accent)", boxShadow: "0 8px 24px var(--accent-glow)" }}
+          >
+            <Cpu size={32} color="#fff" />
+          </div>
+          <h1
+            className="mt-[20px]"
+            style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", color: "var(--foreground)" }}
+          >
+            МоДЕЛИЗМ
+          </h1>
+          <div
+            className="mt-[8px]"
+            style={{ fontSize: 14, color: "var(--foreground-50)", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500 }}
+          >
+            Сообщество моделистов
           </div>
         </div>
 
-        <div className="mt-[24px] flex flex-col gap-[10px]">
+        {/* Two Track Cards */}
+        <div className="mt-[40px] flex flex-col gap-[12px]">
           {[
-            { icon: Newspaper, t: "Лента сборок и обсуждений" },
-            { icon: MessageSquare, t: "Чаты по подкатегориям" },
-            { icon: Megaphone, t: "Объявления и обмен — от 20 ₽" },
-          ].map(({ icon: Ic, t }) => (
-            <div key={t} className="flex items-center gap-[12px]">
-              <div className="grid h-[36px] w-[36px] shrink-0 place-items-center" style={{ background: "var(--accent-soft)", color: "var(--accent)", borderRadius: 10 }}>
-                <Ic size={18} />
-              </div>
-              <span style={{ fontSize: 14, color: "var(--foreground-70)" }}>{t}</span>
-            </div>
+            { icon: Users, title: "Общаться", subtitle: "Лента, чаты, сообщества, друзья", to: "/" as const },
+            { icon: Tag, title: "Продавать", subtitle: "Объявления, запчасти, модели", to: "/ads" as const },
+          ].map((card, i) => (
+            <motion.div
+              key={card.title}
+              custom={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Link
+                to={card.to}
+                className="flex items-center gap-[16px]"
+                style={{
+                  background: "var(--background-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 16,
+                  padding: 20,
+                }}
+              >
+                <div
+                  className="grid shrink-0 place-items-center"
+                  style={{ width: 48, height: 48, background: "var(--accent-soft)", borderRadius: 14 }}
+                >
+                  <card.icon size={24} color="var(--accent)" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--foreground)" }}>
+                    {card.title}
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--foreground-50)", marginTop: 2 }}>{card.subtitle}</div>
+                </div>
+                <ArrowRight size={18} color="var(--foreground-30)" />
+              </Link>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-auto pt-[24px] flex flex-col gap-[10px]">
+        {/* CTA */}
+        <div className="mt-auto pt-[32px]">
           <Link
             to="/register"
-            className="inline-flex items-center justify-center gap-[6px]"
-            style={{ background: "var(--accent)", color: "#fff", fontWeight: 600, height: 52, borderRadius: 14, fontSize: 15, boxShadow: "var(--shadow-button)" }}
+            className="flex items-center justify-center w-full"
+            style={{
+              height: 48,
+              background: "var(--accent)",
+              color: "#fff",
+              borderRadius: 14,
+              fontSize: 16,
+              fontWeight: 600,
+              boxShadow: "0 6px 20px var(--accent-glow)",
+            }}
           >
-            Создать аккаунт <ArrowRight size={16} />
+            Присоединиться
           </Link>
-          <Link
-            to="/login"
-            className="inline-flex items-center justify-center"
-            style={{ height: 48, borderRadius: 14, fontSize: 14, color: "var(--foreground-70)" }}
-          >
-            У меня уже есть аккаунт
-          </Link>
+          <div className="mt-[16px] text-center" style={{ fontSize: 13, color: "var(--foreground-50)", fontWeight: 500 }}>
+            Уже есть аккаунт?{" "}
+            <Link to="/login" style={{ color: "var(--accent)", fontWeight: 600 }}>
+              Войти
+            </Link>
+          </div>
         </div>
       </div>
 
