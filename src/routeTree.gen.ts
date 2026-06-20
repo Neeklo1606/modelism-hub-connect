@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunitiesIndexRouteImport } from './routes/communities.index'
@@ -87,6 +88,11 @@ const FriendsRoute = FriendsRouteImport.update({
   path: '/friends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdsRoute = AdsRouteImport.update({
+  id: '/ads',
+  path: '/ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -108,9 +114,9 @@ const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdsIndexRoute = AdsIndexRouteImport.update({
-  id: '/ads/',
-  path: '/ads/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdsRoute,
 } as any)
 const UserIdRoute = UserIdRouteImport.update({
   id: '/user/$id',
@@ -128,14 +134,14 @@ const CategoriesIdRoute = CategoriesIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdsNewRoute = AdsNewRouteImport.update({
-  id: '/ads/new',
-  path: '/ads/new',
-  getParentRoute: () => rootRouteImport,
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdsRoute,
 } as any)
 const AdsIdRoute = AdsIdRouteImport.update({
-  id: '/ads/$id',
-  path: '/ads/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdsRoute,
 } as any)
 const CategoriesIdSubIdRoute = CategoriesIdSubIdRouteImport.update({
   id: '/$subId',
@@ -146,6 +152,7 @@ const CategoriesIdSubIdRoute = CategoriesIdSubIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/ads': typeof AdsRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -195,6 +202,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/ads': typeof AdsRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -221,6 +229,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/ads'
     | '/friends'
     | '/help'
     | '/landing'
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/ads'
     | '/friends'
     | '/help'
     | '/landing'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdsRoute: typeof AdsRouteWithChildren
   FriendsRoute: typeof FriendsRoute
   HelpRoute: typeof HelpRoute
   LandingRoute: typeof LandingRoute
@@ -305,12 +316,9 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
   WelcomeRoute: typeof WelcomeRoute
-  AdsIdRoute: typeof AdsIdRoute
-  AdsNewRoute: typeof AdsNewRoute
   CategoriesIdRoute: typeof CategoriesIdRouteWithChildren
   CommunitiesIdRoute: typeof CommunitiesIdRoute
   UserIdRoute: typeof UserIdRoute
-  AdsIndexRoute: typeof AdsIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   CommunitiesIndexRoute: typeof CommunitiesIndexRoute
 }
@@ -394,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FriendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ads': {
+      id: '/ads'
+      path: '/ads'
+      fullPath: '/ads'
+      preLoaderRoute: typeof AdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -424,10 +439,10 @@ declare module '@tanstack/react-router' {
     }
     '/ads/': {
       id: '/ads/'
-      path: '/ads'
+      path: '/'
       fullPath: '/ads/'
       preLoaderRoute: typeof AdsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdsRoute
     }
     '/user/$id': {
       id: '/user/$id'
@@ -452,17 +467,17 @@ declare module '@tanstack/react-router' {
     }
     '/ads/new': {
       id: '/ads/new'
-      path: '/ads/new'
+      path: '/new'
       fullPath: '/ads/new'
       preLoaderRoute: typeof AdsNewRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdsRoute
     }
     '/ads/$id': {
       id: '/ads/$id'
-      path: '/ads/$id'
+      path: '/$id'
       fullPath: '/ads/$id'
       preLoaderRoute: typeof AdsIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdsRoute
     }
     '/categories/$id/$subId': {
       id: '/categories/$id/$subId'
@@ -473,6 +488,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdsRouteChildren {
+  AdsIdRoute: typeof AdsIdRoute
+  AdsNewRoute: typeof AdsNewRoute
+  AdsIndexRoute: typeof AdsIndexRoute
+}
+
+const AdsRouteChildren: AdsRouteChildren = {
+  AdsIdRoute: AdsIdRoute,
+  AdsNewRoute: AdsNewRoute,
+  AdsIndexRoute: AdsIndexRoute,
+}
+
+const AdsRouteWithChildren = AdsRoute._addFileChildren(AdsRouteChildren)
 
 interface CategoriesIdRouteChildren {
   CategoriesIdSubIdRoute: typeof CategoriesIdSubIdRoute
@@ -489,6 +518,7 @@ const CategoriesIdRouteWithChildren = CategoriesIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdsRoute: AdsRouteWithChildren,
   FriendsRoute: FriendsRoute,
   HelpRoute: HelpRoute,
   LandingRoute: LandingRoute,
@@ -500,12 +530,9 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
   WelcomeRoute: WelcomeRoute,
-  AdsIdRoute: AdsIdRoute,
-  AdsNewRoute: AdsNewRoute,
   CategoriesIdRoute: CategoriesIdRouteWithChildren,
   CommunitiesIdRoute: CommunitiesIdRoute,
   UserIdRoute: UserIdRoute,
-  AdsIndexRoute: AdsIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   CommunitiesIndexRoute: CommunitiesIndexRoute,
 }
