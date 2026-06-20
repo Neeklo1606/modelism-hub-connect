@@ -8,6 +8,20 @@ export interface User {
   interests: string;
   avatar: string;
   subscription?: "Тестовый" | "Месяц" | "Полгода" | "Год" | null;
+  bio?: string;
+  status?: string;
+  coverImage?: string;
+  joinedDate?: string;
+  friendIds?: ID[];
+  online?: boolean;
+}
+
+export interface FriendRequest {
+  id: ID;
+  fromId: ID;
+  toId: ID;
+  status: "pending" | "accepted" | "rejected";
+  date: string;
 }
 
 export interface Comment {
