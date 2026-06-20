@@ -10,14 +10,17 @@ import { RepostMenu } from "@/components/feed/RepostMenu";
 interface Props {
   post: Post;
   onTogglePost?: (id: string, patch: Partial<Post>) => void;
+  isSavedExternal?: boolean;
+  onToggleSave?: (id: string) => void;
 }
 
-export function PostCard({ post }: Props) {
+export function PostCard({ post, isSavedExternal, onToggleSave }: Props) {
   const author = userById(post.authorId);
   const reposter = post.repostedBy ? userById(post.repostedBy) : null;
 
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(!!post.isLiked);
+  const [savedInner, setSavedInner] = useState(!!post.isSaved);
+  const saved = isSavedExternal ?? savedInner;
   const [reposted, setReposted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -37,7 +40,8 @@ export function PostCard({ post }: Props) {
     setLikes((n) => n + (liked ? -1 : 1));
   };
   const toggleSave = () => {
-    setSaved((v) => !v);
+    if (onToggleSave) onToggleSave(post.id);
+    else setSavedInner((v) => !v);
     setSaves((n) => n + (saved ? -1 : 1));
   };
   const toggleRepost = () => {

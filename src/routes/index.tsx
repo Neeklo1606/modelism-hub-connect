@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Loader2, Newspaper, UserPlus, Compass } from "lucide-react";
+import { Plus, X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdBanner } from "@/components/AdBanner";
 import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
@@ -31,6 +31,15 @@ function FeedPage() {
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  const toggleSave = (id: string) =>
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   // initial skeleton load
   const [initialLoading, setInitialLoading] = useState(true);
@@ -42,8 +51,9 @@ function FeedPage() {
   const filtered = useMemo(() => {
     if (filter === "following") return posts.filter((p) => p.isFollowing);
     if (filter === "categories" && activeCategory) return posts.filter((p) => p.category === activeCategory);
+    if (filter === "saved") return posts.filter((p) => savedIds.has(p.id));
     return posts;
-  }, [posts, filter, activeCategory]);
+  }, [posts, filter, activeCategory, savedIds]);
 
   // infinite loading
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -181,6 +191,14 @@ function FeedPage() {
                 title="Выберите категорию"
                 description="Отфильтруйте ленту по интересующему вас направлению моделизма."
               />
+            ) : filter === "saved" ? (
+              <EmptyFeedState
+                icon={Bookmark}
+                title="Нет сохранённых публикаций"
+                description="Нажмите на иконку закладки у понравившейся публикации."
+                ctaLabel="Вернуться в ленту"
+                onCta={() => setFilter("all")}
+              />
             ) : (
               <EmptyFeedState
                 icon={Newspaper}
@@ -194,7 +212,14 @@ function FeedPage() {
               />
             )
           ) : (
-            slice.map((p) => <PostCard key={p.id} post={p} />)
+            slice.map((p) => (
+              <PostCard
+                key={p.id}
+                post={p}
+                isSavedExternal={savedIds.has(p.id)}
+                onToggleSave={toggleSave}
+              />
+            ))
           )}
 
           {!initialLoading && visible < filtered.length && (
