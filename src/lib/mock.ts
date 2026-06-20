@@ -10,6 +10,15 @@ export interface User {
   subscription?: "Тестовый" | "Месяц" | "Полгода" | "Год" | null;
 }
 
+export interface Comment {
+  id: ID;
+  authorId: ID;
+  time: string;
+  text: string;
+  likes?: number;
+  replies?: Comment[];
+}
+
 export interface Post {
   id: ID;
   authorId: ID;
@@ -23,7 +32,12 @@ export interface Post {
   views?: number;
   likes: number;
   comments: number;
+  saves?: number;
+  reposts?: number;
   status?: "published" | "moderation";
+  isFollowing?: boolean;
+  commentList?: Comment[];
+  repostedBy?: ID;
 }
 
 export interface Ad {
