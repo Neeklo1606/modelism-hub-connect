@@ -256,15 +256,8 @@ function FeedPage() {
         </div>
       </div>
 
-      {/* Mobile floating + button */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        aria-label="Создать публикацию"
-        className="fixed bottom-[80px] right-[16px] z-40 flex h-[56px] w-[56px] items-center justify-center rounded-full transition-opacity hover:opacity-90 lg:hidden"
-        style={{ background: "var(--accent)", color: "#fff", boxShadow: "var(--shadow-button)" }}
-      >
-        <Plus className="h-[24px] w-[24px]" />
-      </button>
+      {/* FAB removed: BottomNav «+» is the single entry point for creating content */}
+
 
       {mobileOpen && (
         <div
