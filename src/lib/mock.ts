@@ -158,14 +158,20 @@ const photo = (id: number) =>
   `https://picsum.photos/seed/modelizm${id}/800/600`;
 
 export const users: User[] = [
-  { id: "u1", name: "Александр RC", city: "Краснодар", interests: "RC авто, ДВС 1:8", avatar: avatar("Александр RC"), subscription: "Год" },
-  { id: "u2", name: "Сергей ДВС", city: "Москва", interests: "Двигатели, тюнинг", avatar: avatar("Сергей ДВС"), subscription: "Месяц" },
-  { id: "u3", name: "Михаил Квадро", city: "Санкт-Петербург", interests: "FPV, квадрокоптеры", avatar: avatar("Михаил Квадро"), subscription: "Полгода" },
-  { id: "u4", name: "Андрей Самолёты", city: "Новосибирск", interests: "Авиамодели, планеры", avatar: avatar("Андрей Самолёты"), subscription: null },
-  { id: "u5", name: "Дмитрий Моделист", city: "Екатеринбург", interests: "Корабли, катера", avatar: avatar("Дмитрий Моделист"), subscription: "Тестовый" },
-  { id: "u6", name: "Игорь Электрик", city: "Казань", interests: "Электроника, DIY", avatar: avatar("Игорь Электрик"), subscription: "Месяц" },
-  { id: "u7", name: "Павел Самокат", city: "Сочи", interests: "Электросамокаты, моды", avatar: avatar("Павел Самокат"), subscription: null },
-  { id: "u8", name: "Олег Разработчик", city: "Ростов-на-Дону", interests: "Автопилоты, прошивки", avatar: avatar("Олег Разработчик"), subscription: "Год" },
+  { id: "u1", name: "Александр RC", city: "Краснодар", interests: "RC авто, ДВС 1:8, багги, гонки", avatar: avatar("Александр RC"), subscription: "Год", bio: "Гоняю RC авто с 2015 года. Строю багги на базе HB Racing. Организую заезды в Краснодаре.", status: "В проекте с 2024", coverImage: photo(101), joinedDate: "2024-03-15T10:00:00Z", friendIds: ["u2","u3","u5","u6","u7"], online: true },
+  { id: "u2", name: "Сергей ДВС", city: "Москва", interests: "Двигатели, тюнинг, ДВС, нитро", avatar: avatar("Сергей ДВС"), subscription: "Месяц", bio: "Двигателист со стажем. Знаю о ДВС всё: от обкатки до форсирования. Помогу с настройкой.", status: "Чемпион гонок 2025", coverImage: photo(102), joinedDate: "2024-04-02T14:30:00Z", friendIds: ["u1","u4"], online: true },
+  { id: "u3", name: "Михаил Квадро", city: "Санкт-Петербург", interests: "FPV, квадрокоптеры, видео, 5дюймов", avatar: avatar("Михаил Квадро"), subscription: "Полгода", bio: "FPV-пилот. Летаю на 5-дюймовых рамах. Снимаю видео с коптера. Ищу напарников для совместных полётов.", coverImage: photo(103), joinedDate: "2024-05-20T08:00:00Z", friendIds: ["u1","u6","u8"], online: false },
+  { id: "u4", name: "Андрей Самолёты", city: "Новосибирск", interests: "Авиамодели, планеры, реставрация", avatar: avatar("Андрей Самолёты"), subscription: null, bio: "Авиамоделист. Восстанавливаю советские модели. Ищу редкие декали и чертежи.", coverImage: photo(104), joinedDate: "2024-06-10T12:00:00Z", friendIds: ["u2"], online: true },
+  { id: "u5", name: "Дмитрий Моделист", city: "Екатеринбург", interests: "Корабли, катера, парусники", avatar: avatar("Дмитрий Моделист"), subscription: "Тестовый", bio: "Судомоделист из Екатеринбурга. Строю катера на ДВС и электротяге.", coverImage: photo(105), joinedDate: "2024-07-01T09:00:00Z", friendIds: ["u1"], online: false },
+  { id: "u6", name: "Игорь Электрик", city: "Казань", interests: "Электроника, DIY, пайка, ESC", avatar: avatar("Игорь Электрик"), subscription: "Месяц", bio: "DIY-электронщик. Паяю контроллеры, ESC, датчики. Делюсь схемами и прошивками.", status: "Мастер пайки", coverImage: photo(106), joinedDate: "2024-08-15T16:00:00Z", friendIds: ["u1","u3"], online: true },
+  { id: "u7", name: "Павел Самокат", city: "Сочи", interests: "Электросамокаты, моды, аккумуляторы", avatar: avatar("Павел Самокат"), subscription: null, bio: "Моддинг электросамокатов: аккумуляторы, прошивки, контроллеры.", coverImage: photo(107), joinedDate: "2025-01-10T11:00:00Z", friendIds: ["u1"], online: false },
+  { id: "u8", name: "Олег Разработчик", city: "Ростов-на-Дону", interests: "Автопилоты, прошивки, STM32", avatar: avatar("Олег Разработчик"), subscription: "Год", bio: "Разрабатываю автопилоты на базе STM32. Пишу прошивки под ArduPilot и PX4.", status: "Разработчик", coverImage: photo(108), joinedDate: "2024-09-01T07:00:00Z", friendIds: ["u3"], online: true },
+];
+
+export const friendRequests: FriendRequest[] = [
+  { id: "fr1", fromId: "u4", toId: "u1", status: "pending", date: "2026-06-19T14:22:00Z" },
+  { id: "fr2", fromId: "u7", toId: "u1", status: "pending", date: "2026-06-18T09:15:00Z" },
+  { id: "fr3", fromId: "u8", toId: "u1", status: "pending", date: "2026-06-17T20:30:00Z" },
 ];
 
 export const me: User = users[0];
