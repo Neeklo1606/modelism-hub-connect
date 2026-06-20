@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessengerRouteImport } from './routes/messenger'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FriendsRouteImport } from './routes/friends'
@@ -23,14 +27,34 @@ import { Route as CategoriesIdRouteImport } from './routes/categories.$id'
 import { Route as AdsNewRouteImport } from './routes/ads.new'
 import { Route as CategoriesIdSubIdRouteImport } from './routes/categories.$id.$subId'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscriptionRoute = SubscriptionRouteImport.update({
   id: '/subscription',
   path: '/subscription',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoverRoute = RecoverRouteImport.update({
+  id: '/recover',
+  path: '/recover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessengerRoute = MessengerRouteImport.update({
@@ -98,8 +122,12 @@ export interface FileRoutesByFullPath {
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/recover': typeof RecoverRoute
+  '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -113,8 +141,12 @@ export interface FileRoutesByTo {
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/recover': typeof RecoverRoute
+  '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -129,8 +161,12 @@ export interface FileRoutesById {
   '/friends': typeof FriendsRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/recover': typeof RecoverRoute
+  '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -146,8 +182,12 @@ export interface FileRouteTypes {
     | '/friends'
     | '/login'
     | '/messenger'
+    | '/onboarding'
     | '/profile'
+    | '/recover'
+    | '/register'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -161,8 +201,12 @@ export interface FileRouteTypes {
     | '/friends'
     | '/login'
     | '/messenger'
+    | '/onboarding'
     | '/profile'
+    | '/recover'
+    | '/register'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -176,8 +220,12 @@ export interface FileRouteTypes {
     | '/friends'
     | '/login'
     | '/messenger'
+    | '/onboarding'
     | '/profile'
+    | '/recover'
+    | '/register'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -192,12 +240,23 @@ export interface RootRouteChildren {
   FriendsRoute: typeof FriendsRoute
   LoginRoute: typeof LoginRoute
   MessengerRoute: typeof MessengerRoute
+  OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
+  RecoverRoute: typeof RecoverRoute
+  RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
+  WelcomeRoute: typeof WelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscription': {
       id: '/subscription'
       path: '/subscription'
@@ -205,11 +264,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recover': {
+      id: '/recover'
+      path: '/recover'
+      fullPath: '/recover'
+      preLoaderRoute: typeof RecoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messenger': {
@@ -335,8 +415,12 @@ const rootRouteChildren: RootRouteChildren = {
   FriendsRoute: FriendsRoute,
   LoginRoute: LoginRoute,
   MessengerRoute: MessengerRoute,
+  OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
+  RecoverRoute: RecoverRoute,
+  RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
+  WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

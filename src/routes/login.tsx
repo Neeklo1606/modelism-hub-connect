@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
+import { AuthShell, inputStyle, primaryBtn } from "@/components/auth/AuthShell";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Вход — МоДелизМ Club" }] }),
@@ -9,54 +9,54 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [tab, setTab] = useState<"login" | "signup">("login");
-  const navigate = useNavigate();
+  const nav = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Вход выполнен (демо)");
-    navigate({ to: "/" });
+    setLoading(true);
+    setTimeout(() => {
+      toast.success("Вход выполнен (демо)");
+      nav({ to: "/" });
+    }, 400);
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-gradient-to-br from-primary to-slate-900 p-10 text-white lg:flex lg:flex-col lg:justify-between">
-        <Logo size={40} />
-        <div>
-          <h1 className="font-display text-4xl font-bold leading-tight">Сообщество моделистов России</h1>
-          <p className="mt-3 max-w-md text-white/80">RC авто, авиамодели, квадрокоптеры, корабли, электроника. Объявления, чаты и единомышленники в одном месте.</p>
-          <p className="mt-6 text-sm italic text-white/60">«Моделизм — это жизнь, остальное детали»</p>
-        </div>
-        <div className="text-xs text-white/40">© МоДелизМ Club</div>
-      </div>
-
-      <div className="flex flex-col justify-center px-6 py-10 sm:px-10">
-        <div className="lg:hidden mb-6"><Logo size={36} /></div>
-        <div className="mx-auto w-full max-w-sm">
-          <h2 className="font-display text-2xl font-bold">{tab === "login" ? "Вход" : "Регистрация"}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Добро пожаловать в МоДелизМ Club</p>
-
-          <div className="mt-6 grid grid-cols-2 rounded-lg bg-muted p-1">
-            <button onClick={() => setTab("login")} className={`rounded-md py-1.5 text-sm font-medium ${tab === "login" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Вход</button>
-            <button onClick={() => setTab("signup")} className={`rounded-md py-1.5 text-sm font-medium ${tab === "signup" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Регистрация</button>
-          </div>
-
-          <form onSubmit={submit} className="mt-6 space-y-3">
-            {tab === "signup" && (
-              <input required placeholder="ФИО" className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" />
-            )}
-            <input required type="email" placeholder="Email или телефон" className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" />
-            <input required type="password" placeholder="Пароль" className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary" />
-            <button type="submit" className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90">
-              {tab === "login" ? "Войти" : "Создать аккаунт"}
-            </button>
-          </form>
-
-          <Link to="/" className="mt-4 block text-center text-xs text-muted-foreground hover:text-primary">
-            Посмотреть прототип без входа →
+    <AuthShell
+      title="Вход"
+      subtitle="С возвращением в МоДелизМ Club"
+      footer={
+        <>
+          Ещё нет аккаунта?{" "}
+          <Link to="/register" style={{ color: "var(--accent)", fontWeight: 600 }}>
+            Зарегистрироваться
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={submit} className="space-y-[12px]">
+        <input required type="email" placeholder="Email или телефон" style={inputStyle} />
+        <input required type="password" placeholder="Пароль" style={inputStyle} />
+        <div className="flex items-center justify-between" style={{ fontSize: "var(--fs-xs)" }}>
+          <label className="flex items-center gap-[8px]" style={{ color: "var(--foreground-70)" }}>
+            <input type="checkbox" defaultChecked style={{ accentColor: "var(--accent)" }} />
+            Запомнить меня
+          </label>
+          <Link to="/recover" style={{ color: "var(--accent)", fontWeight: 600 }}>
+            Забыли пароль?
           </Link>
         </div>
-      </div>
-    </div>
+        <button type="submit" disabled={loading} style={{ ...primaryBtn, opacity: loading ? 0.7 : 1, marginTop: 8 }}>
+          {loading ? "Входим…" : "Войти"}
+        </button>
+      </form>
+      <Link
+        to="/"
+        className="mt-[16px] block text-center"
+        style={{ fontSize: "var(--fs-xs)", color: "var(--foreground-50)" }}
+      >
+        Посмотреть прототип без входа →
+      </Link>
+    </AuthShell>
   );
 }

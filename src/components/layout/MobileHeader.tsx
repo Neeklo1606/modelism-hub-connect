@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Bell, Search } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function MobileHeader() {
   return (
@@ -13,6 +14,7 @@ export function MobileHeader() {
         <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
           <Bell className="h-4 w-4" />
         </button>
+        <ThemeToggle />
       </div>
     </header>
   );
