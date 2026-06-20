@@ -189,3 +189,26 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--foreground-30); }
 
 ::selection { background: var(--accent-soft); color: var(--foreground); }
+
+/* Shimmer — Framer Motion driven skeleton loading */
+@keyframes shimmer-move {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--foreground-15) 0%,
+    var(--foreground-15) 40%,
+    var(--foreground-30) 50%,
+    var(--foreground-15) 60%,
+    var(--foreground-15) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.gpu-accelerated {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
