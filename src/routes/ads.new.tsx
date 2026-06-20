@@ -301,7 +301,7 @@ function StepData({ form, set, cat }: { form: Form; set: <K extends keyof Form>(
           </Field>
           <Field label="Подкатегория">
             <NativeSelect value={form.subcategoryId} onChange={(v) => set("subcategoryId", v)}
-              options={(cat as typeof categories[number]).subcategories.map((s) => ({ label: s.name, value: s.id }))} />
+              options={cat.subcategories.map((s) => ({ label: s.name, value: s.id }))} />
           </Field>
         </div>
       </Block>
@@ -333,7 +333,7 @@ function StepData({ form, set, cat }: { form: Form; set: <K extends keyof Form>(
 
 /* ────────── STEP 3: Preview ────────── */
 function StepPreview({ form, cat }: { form: Form; cat: (typeof categories)[number] }) {
-  const sub = (cat as typeof categories[number]).subcategories.find((s) => s.id === form.subcategoryId);
+  const sub = cat.subcategories.find((s) => s.id === form.subcategoryId);
   const status = form.status;
   const statusStyle = status === "Продаю"
     ? { bg: "var(--accent-soft)", fg: "var(--accent)" }
@@ -376,7 +376,7 @@ function StepPreview({ form, cat }: { form: Form; cat: (typeof categories)[numbe
               {Number(form.price || 0).toLocaleString("ru")} ₽
             </div>
             <div className="text-[11px]" style={{ color: "var(--foreground-50)" }}>
-              {(cat as typeof categories[number]).name} · {sub?.name}
+              {cat.name} · {sub?.name}
             </div>
           </div>
         </div>
