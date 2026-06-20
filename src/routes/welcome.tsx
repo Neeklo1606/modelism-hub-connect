@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Cpu, MessageSquare, Megaphone, Users2 } from "lucide-react";
+import { ArrowRight, Cpu, MessageSquare, Megaphone, Users2, Newspaper } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import cover from "@/assets/cover-modelizm.jpg";
@@ -259,8 +259,3 @@ function WelcomePage() {
   );
 }
 
-function Newspaper(props: any) {
-  // re-export from lucide to avoid extra import section above
-  const { default: Icon } = require("lucide-react");
-  return <Icon {...props} />;
-}

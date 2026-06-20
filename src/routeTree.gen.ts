@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MessengerRouteImport } from './routes/messenger'
@@ -23,6 +24,11 @@ import { Route as CategoriesIdRouteImport } from './routes/categories.$id'
 import { Route as AdsNewRouteImport } from './routes/ads.new'
 import { Route as CategoriesIdSubIdRouteImport } from './routes/categories.$id.$subId'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscriptionRoute = SubscriptionRouteImport.update({
   id: '/subscription',
   path: '/subscription',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/messenger': typeof MessengerRoute
   '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/messenger': typeof MessengerRoute
   '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/messenger': typeof MessengerRoute
   '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
+  '/welcome': typeof WelcomeRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/messenger'
     | '/profile'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/messenger'
     | '/profile'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/messenger'
     | '/profile'
     | '/subscription'
+    | '/welcome'
     | '/ads/new'
     | '/categories/$id'
     | '/categories/$id/$subId'
@@ -194,10 +206,18 @@ export interface RootRouteChildren {
   MessengerRoute: typeof MessengerRoute
   ProfileRoute: typeof ProfileRoute
   SubscriptionRoute: typeof SubscriptionRoute
+  WelcomeRoute: typeof WelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscription': {
       id: '/subscription'
       path: '/subscription'
@@ -337,6 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessengerRoute: MessengerRoute,
   ProfileRoute: ProfileRoute,
   SubscriptionRoute: SubscriptionRoute,
+  WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
