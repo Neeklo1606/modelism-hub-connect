@@ -406,55 +406,61 @@ function MessengerPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="flex items-end gap-[8px] px-[16px] py-[12px]">
-                  <button
-                    className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-full transition-colors duration-150"
-                    style={{ background: "var(--background-surface)", color: "var(--foreground-70)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--background-surface-hover)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--background-surface)")}
-                    aria-label="Прикрепить"
-                  >
-                    <Paperclip size={18} />
-                  </button>
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        send();
-                      }
-                    }}
-                    placeholder="Сообщение..."
-                    rows={1}
-                    className="flex-1 resize-none text-[14px] outline-none"
+                <div className="flex items-end gap-[8px] px-[12px] py-[10px]" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
+                  <div
+                    className="flex flex-1 items-end gap-[4px] pl-[6px] pr-[4px]"
                     style={{
-                      minHeight: 40,
-                      maxHeight: 120,
+                      minHeight: 42,
                       background: "var(--background-surface)",
-                      borderRadius: 20,
-                      padding: "10px 16px",
-                      border: "none",
-                      color: "var(--foreground)",
+                      borderRadius: 22,
+                      border: "1px solid var(--border)",
                     }}
-                  />
+                  >
+                    <button
+                      className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-full"
+                      style={{ color: "var(--foreground-50)" }}
+                      aria-label="Прикрепить"
+                    >
+                      <Paperclip size={18} />
+                    </button>
+                    <textarea
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          send();
+                        }
+                      }}
+                      placeholder="Сообщение..."
+                      rows={1}
+                      className="flex-1 resize-none bg-transparent text-[14px] outline-none"
+                      style={{
+                        minHeight: 36, maxHeight: 120,
+                        padding: "9px 4px",
+                        color: "var(--foreground)",
+                        lineHeight: 1.35,
+                      }}
+                    />
+                  </div>
                   <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
                     onClick={send}
                     disabled={!text.trim()}
-                    className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-full transition-opacity"
+                    className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full transition-opacity"
                     style={{
                       background: "var(--accent)",
                       color: "white",
-                      opacity: text.trim() ? 1 : 0.4,
+                      opacity: text.trim() ? 1 : 0.45,
                       cursor: text.trim() ? "pointer" : "not-allowed",
+                      boxShadow: text.trim() ? "0 4px 12px -2px color-mix(in oklab, var(--accent) 50%, transparent)" : "none",
                     }}
                     aria-label="Отправить"
                   >
                     <Send size={18} />
                   </motion.button>
                 </div>
+
               </div>
             </>
           )}
