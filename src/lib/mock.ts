@@ -40,6 +40,17 @@ export interface Post {
   repostedBy?: ID;
 }
 
+export type AdCondition = "Новое" | "Б/у — отлично" | "Б/у — хорошо" | "Под восстановление";
+
+export interface AdSeller {
+  id: ID;
+  name: string;
+  avatar: string;
+  rating: number;
+  deals: number;
+  since: string;
+}
+
 export interface Ad {
   id: ID;
   title: string;
@@ -48,10 +59,18 @@ export interface Ad {
   subcategory: string;
   city: string;
   image: string;
+  gallery?: string[];
+  description?: string;
   delivery: string[];
+  deliveryDetails?: string;
+  condition?: AdCondition;
   status: "Продаю" | "Куплю" | "Обменяю";
   contact: string;
   authorId: ID;
+  seller?: AdSeller;
+  views?: number;
+  likes?: number;
+  createdAt?: string;
   moderation?: "published" | "moderation" | "rejected";
 }
 
