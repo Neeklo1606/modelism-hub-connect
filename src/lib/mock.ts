@@ -108,6 +108,10 @@ export interface Community {
   members: number;
   category: string;
   joined?: boolean;
+  coverImage?: string;
+  avatarIcon?: string;
+  adminId?: ID;
+  postIds?: ID[];
 }
 
 export interface Banner {
