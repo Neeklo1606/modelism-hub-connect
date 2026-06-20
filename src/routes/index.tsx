@@ -30,11 +30,20 @@ export const Route = createFileRoute("/")({
 const PAGE_SIZE = 6;
 
 function FeedPage() {
+  const { composer } = Route.useSearch();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (composer === "open") {
+      setMobileOpen(true);
+      navigate({ to: "/", search: {}, replace: true });
+    }
+  }, [composer, navigate]);
 
   const toggleSave = (id: string) =>
     setSavedIds((prev) => {
