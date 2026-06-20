@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
+import { X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdBanner } from "@/components/AdBanner";
 import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
@@ -20,6 +20,9 @@ export const Route = createFileRoute("/")({
       { title: "Лента — МоДелизМ Club" },
       { name: "description", content: "Главная лента сообщества моделистов: новые проекты, фото, обсуждения." },
     ],
+  }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    composer: (search.composer as string) || undefined,
   }),
   component: FeedPage,
 });
