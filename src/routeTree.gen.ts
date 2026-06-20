@@ -21,6 +21,7 @@ import { Route as LandingRouteImport } from './routes/landing'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as CommunitiesRouteImport } from './routes/communities'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -94,6 +95,11 @@ const CommunitiesRoute = CommunitiesRouteImport.update({
   path: '/communities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdsRoute = AdsRouteImport.update({
   id: '/ads',
   path: '/ads',
@@ -115,9 +121,9 @@ const CommunitiesIndexRoute = CommunitiesIndexRouteImport.update({
   getParentRoute: () => CommunitiesRoute,
 } as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
-  id: '/categories/',
-  path: '/categories/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => CategoriesRoute,
 } as any)
 const AdsIndexRoute = AdsIndexRouteImport.update({
   id: '/',
@@ -135,9 +141,9 @@ const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
   getParentRoute: () => CommunitiesRoute,
 } as any)
 const CategoriesIdRoute = CategoriesIdRouteImport.update({
-  id: '/categories/$id',
-  path: '/categories/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CategoriesRoute,
 } as any)
 const AdsNewRoute = AdsNewRouteImport.update({
   id: '/new',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
+  '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
@@ -210,6 +217,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ads': typeof AdsRouteWithChildren
+  '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
@@ -238,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/ads'
+    | '/categories'
     | '/communities'
     | '/friends'
     | '/help'
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/ads'
+    | '/categories'
     | '/communities'
     | '/friends'
     | '/help'
@@ -315,6 +325,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdsRoute: typeof AdsRouteWithChildren
+  CategoriesRoute: typeof CategoriesRouteWithChildren
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
   FriendsRoute: typeof FriendsRoute
   HelpRoute: typeof HelpRoute
@@ -327,9 +338,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
   WelcomeRoute: typeof WelcomeRoute
-  CategoriesIdRoute: typeof CategoriesIdRouteWithChildren
   UserIdRoute: typeof UserIdRoute
-  CategoriesIndexRoute: typeof CategoriesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -418,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ads': {
       id: '/ads'
       path: '/ads'
@@ -448,10 +464,10 @@ declare module '@tanstack/react-router' {
     }
     '/categories/': {
       id: '/categories/'
-      path: '/categories'
+      path: '/'
       fullPath: '/categories/'
       preLoaderRoute: typeof CategoriesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof CategoriesRoute
     }
     '/ads/': {
       id: '/ads/'
@@ -476,10 +492,10 @@ declare module '@tanstack/react-router' {
     }
     '/categories/$id': {
       id: '/categories/$id'
-      path: '/categories/$id'
+      path: '/$id'
       fullPath: '/categories/$id'
       preLoaderRoute: typeof CategoriesIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof CategoriesRoute
     }
     '/ads/new': {
       id: '/ads/new'
@@ -519,6 +535,32 @@ const AdsRouteChildren: AdsRouteChildren = {
 
 const AdsRouteWithChildren = AdsRoute._addFileChildren(AdsRouteChildren)
 
+interface CategoriesIdRouteChildren {
+  CategoriesIdSubIdRoute: typeof CategoriesIdSubIdRoute
+}
+
+const CategoriesIdRouteChildren: CategoriesIdRouteChildren = {
+  CategoriesIdSubIdRoute: CategoriesIdSubIdRoute,
+}
+
+const CategoriesIdRouteWithChildren = CategoriesIdRoute._addFileChildren(
+  CategoriesIdRouteChildren,
+)
+
+interface CategoriesRouteChildren {
+  CategoriesIdRoute: typeof CategoriesIdRouteWithChildren
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
+}
+
+const CategoriesRouteChildren: CategoriesRouteChildren = {
+  CategoriesIdRoute: CategoriesIdRouteWithChildren,
+  CategoriesIndexRoute: CategoriesIndexRoute,
+}
+
+const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
+  CategoriesRouteChildren,
+)
+
 interface CommunitiesRouteChildren {
   CommunitiesIdRoute: typeof CommunitiesIdRoute
   CommunitiesIndexRoute: typeof CommunitiesIndexRoute
@@ -533,22 +575,11 @@ const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
   CommunitiesRouteChildren,
 )
 
-interface CategoriesIdRouteChildren {
-  CategoriesIdSubIdRoute: typeof CategoriesIdSubIdRoute
-}
-
-const CategoriesIdRouteChildren: CategoriesIdRouteChildren = {
-  CategoriesIdSubIdRoute: CategoriesIdSubIdRoute,
-}
-
-const CategoriesIdRouteWithChildren = CategoriesIdRoute._addFileChildren(
-  CategoriesIdRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdsRoute: AdsRouteWithChildren,
+  CategoriesRoute: CategoriesRouteWithChildren,
   CommunitiesRoute: CommunitiesRouteWithChildren,
   FriendsRoute: FriendsRoute,
   HelpRoute: HelpRoute,
@@ -561,9 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
   WelcomeRoute: WelcomeRoute,
-  CategoriesIdRoute: CategoriesIdRouteWithChildren,
   UserIdRoute: UserIdRoute,
-  CategoriesIndexRoute: CategoriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
