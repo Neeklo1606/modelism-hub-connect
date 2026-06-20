@@ -1,305 +1,1015 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Logo } from "@/components/Logo";
-import { users, ads, posts, banners, tariffs, categories, communities } from "@/lib/mock";
-import { StatusBadge } from "@/components/StatusBadge";
-import { Users, Layers, Megaphone, Newspaper, ImageIcon, CreditCard, Flag, Settings, Home, FolderTree, Check, X, Ban, Eye, Plus, Save } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  LayoutDashboard, Users, Newspaper, Megaphone, ShieldCheck, DollarSign, FolderTree,
+  Bell, BarChart3, Settings, Home, Eye, Ban, Check, X, Plus, Trash2, Pencil, Send,
+  Upload, UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { StatusBadge } from "@/components/StatusBadge";
+import {
+  adminStats, adminActions, adminUsers, promoCodes as initialPromos,
+  ads, posts, categories, tariffs, banners,
+  type AdminUser,
+} from "@/lib/mock";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Админка — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Club" }] }),
   component: AdminPage,
 });
 
-type Section = "users" | "categories" | "subcategories" | "ads" | "posts" | "banners" | "tariffs" | "reports" | "settings";
+type Section =
+  | "dashboard" | "users" | "content" | "ads" | "moderation"
+  | "monetization" | "categories" | "notifications" | "analytics" | "settings";
 
-const sections: { id: Section; label: string; icon: typeof Users }[] = [
+const navItems: { id: Section; label: string; icon: typeof Users }[] = [
+  { id: "dashboard", label: "Дашборд", icon: LayoutDashboard },
   { id: "users", label: "Пользователи", icon: Users },
-  { id: "categories", label: "Категории", icon: Layers },
-  { id: "subcategories", label: "Подкатегории", icon: FolderTree },
+  { id: "content", label: "Контент", icon: Newspaper },
   { id: "ads", label: "Объявления", icon: Megaphone },
-  { id: "posts", label: "Публикации", icon: Newspaper },
-  { id: "banners", label: "Реклама", icon: ImageIcon },
-  { id: "tariffs", label: "Тарифы", icon: CreditCard },
-  { id: "reports", label: "Жалобы", icon: Flag },
+  { id: "moderation", label: "Модерация", icon: ShieldCheck },
+  { id: "monetization", label: "Монетизация", icon: DollarSign },
+  { id: "categories", label: "Категории", icon: FolderTree },
+  { id: "notifications", label: "Уведомления", icon: Bell },
+  { id: "analytics", label: "Аналитика", icon: BarChart3 },
   { id: "settings", label: "Настройки", icon: Settings },
 ];
 
 function AdminPage() {
-  const [section, setSection] = useState<Section>("users");
+  const [section, setSection] = useState<Section>("dashboard");
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 px-4 py-2.5 backdrop-blur">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-30 flex items-center justify-between backdrop-blur"
+        style={{
+          height: "48px",
+          background: "color-mix(in oklab, var(--background) 85%, transparent)",
+          borderBottom: "1px solid var(--border)",
+          padding: "0 16px",
+        }}
+      >
+        <div className="flex items-center gap-[12px]">
           <Logo size={28} showText={false} />
-          <span className="font-display text-sm font-semibold">Админ-панель</span>
+          <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)" }}>Админ-панель</span>
         </div>
-        <Link to="/" className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs hover:bg-muted">
-          <Home className="h-3.5 w-3.5" />К сайту
-        </Link>
+        <div className="flex items-center gap-[8px]">
+          <ThemeToggle />
+          <Link
+            to="/"
+            className="inline-flex items-center gap-[6px]"
+            style={{
+              fontSize: "12px",
+              fontWeight: 500,
+              padding: "6px 12px",
+              borderRadius: "var(--r-card-sm)",
+              border: "1px solid var(--border)",
+              color: "var(--foreground-70)",
+            }}
+          >
+            <Home size={14} />К сайту
+          </Link>
+        </div>
       </header>
+
       <div className="flex">
-        <aside className="hidden w-56 shrink-0 border-r p-2 sm:block">
-          <nav className="space-y-0.5">
-            {sections.map((s) => (
-              <button key={s.id} onClick={() => setSection(s.id)} className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm ${section === s.id ? "bg-accent text-primary font-medium" : "hover:bg-muted"}`}>
-                <s.icon className="h-4 w-4" />{s.label}
-              </button>
-            ))}
+        {/* Sidebar */}
+        <aside
+          className="hidden md:block sticky"
+          style={{
+            width: "220px",
+            background: "var(--background-elevated)",
+            borderRight: "1px solid var(--border)",
+            height: "calc(100vh - 48px)",
+            top: "48px",
+            overflowY: "auto",
+            padding: "8px",
+            flexShrink: 0,
+          }}
+        >
+          <nav style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {navItems.map((n) => {
+              const active = section === n.id;
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => setSection(n.id)}
+                  className="flex w-full items-center"
+                  style={{
+                    gap: "10px",
+                    padding: "8px 12px",
+                    borderRadius: "var(--r-card-sm)",
+                    fontSize: "13px",
+                    fontWeight: active ? 600 : 500,
+                    color: active ? "var(--accent)" : "var(--foreground-70)",
+                    background: active ? "var(--accent-soft)" : "transparent",
+                    transition: "background 150ms ease",
+                    minHeight: "36px",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) e.currentTarget.style.background = "var(--background-surface)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <n.icon size={16} />
+                  {n.label}
+                </button>
+              );
+            })}
           </nav>
         </aside>
-        <main className="min-w-0 flex-1 p-4 sm:p-6">
-          <div className="mb-4 sm:hidden">
-            <select value={section} onChange={(e) => setSection(e.target.value as Section)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm">
-              {sections.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+
+        {/* Main */}
+        <main className="min-w-0 flex-1" style={{ padding: "24px" }}>
+          {/* Mobile selector */}
+          <div className="md:hidden" style={{ marginBottom: "16px" }}>
+            <select
+              value={section}
+              onChange={(e) => setSection(e.target.value as Section)}
+              className="w-full outline-none"
+              style={{
+                height: "44px",
+                background: "var(--background-elevated)",
+                border: "1.5px solid var(--border)",
+                borderRadius: "var(--r-input)",
+                padding: "0 12px",
+                fontSize: "14px",
+                color: "var(--foreground)",
+              }}
+            >
+              {navItems.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}
             </select>
           </div>
-          <Section name={section} />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={section}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SectionView section={section} />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
   );
 }
 
-function Section({ name }: { name: Section }) {
-  if (name === "users") return <UsersTable />;
-  if (name === "categories") return <CategoriesAdmin />;
-  if (name === "subcategories") return <SubcategoriesAdmin />;
-  if (name === "ads") return <AdsAdmin />;
-  if (name === "posts") return <PostsAdmin />;
-  if (name === "banners") return <BannersAdmin />;
-  if (name === "tariffs") return <TariffsAdmin />;
-  if (name === "reports") return <ReportsAdmin />;
-  return <SettingsAdmin />;
-}
-
 function H({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return <div className="mb-4 flex items-center justify-between"><h2 className="font-display text-xl font-bold">{children}</h2>{action}</div>;
+  return (
+    <div className="flex items-center justify-between flex-wrap gap-[12px]" style={{ marginBottom: "16px" }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--fs-h4)", color: "var(--foreground)" }}>
+        {children}
+      </h2>
+      {action}
+    </div>
+  );
 }
 
-function UsersTable() {
-  const [blocked, setBlocked] = useState<Set<string>>(new Set());
+const card = {
+  background: "var(--background-elevated)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--r-card)",
+};
+const inputStyle: React.CSSProperties = {
+  height: "40px",
+  background: "var(--background-elevated)",
+  border: "1.5px solid var(--border)",
+  borderRadius: "var(--r-input)",
+  padding: "0 14px",
+  fontSize: "13px",
+  color: "var(--foreground)",
+};
+const primaryBtn: React.CSSProperties = {
+  background: "var(--accent)",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: "13px",
+  borderRadius: "var(--r-button)",
+  padding: "0 16px",
+  height: "40px",
+};
+
+function SectionView({ section }: { section: Section }) {
+  if (section === "dashboard") return <Dashboard />;
+  if (section === "users") return <UsersSection />;
+  if (section === "content") return <ContentSection />;
+  if (section === "ads") return <AdsSection />;
+  if (section === "moderation") return <ModerationSection />;
+  if (section === "monetization") return <MonetizationSection />;
+  if (section === "categories") return <CategoriesSection />;
+  if (section === "notifications") return <NotificationsSection />;
+  if (section === "analytics") return <AnalyticsSection />;
+  return <SettingsSection />;
+}
+
+/* ============ DASHBOARD ============ */
+function Dashboard() {
+  const stats = [
+    { v: adminStats.totalUsers.toLocaleString("ru"), l: "Всего пользователей", icon: Users, ch: "+8%", up: true },
+    { v: `${adminStats.monthlyRevenue.toLocaleString("ru")} ₽`, l: "Доход за месяц", icon: DollarSign, ch: "+15%", up: true },
+    { v: adminStats.activeAds.toLocaleString("ru"), l: "Активных объявлений", icon: Megaphone, ch: "+5%", up: true },
+    { v: adminStats.totalPosts.toLocaleString("ru"), l: "Публикаций", icon: Newspaper, ch: "+22%", up: true },
+    { v: String(adminStats.inModeration), l: "На модерации", icon: ShieldCheck, ch: "", up: true, warn: true },
+    { v: String(adminStats.newToday), l: "Новых за сегодня", icon: UserPlus, ch: "+3%", up: true },
+  ];
+  const bars = [40, 65, 55, 80, 70, 90, 60];
+  const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+  return (
+    <div>
+      <H>Дашборд</H>
+      <motion.div
+        initial="hidden" animate="visible"
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+        style={{ gap: "12px" }}
+      >
+        {stats.map((s, i) => (
+          <motion.div
+            key={i}
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+            style={{ ...card, padding: "16px" }}
+          >
+            <div
+              style={{
+                width: "36px", height: "36px",
+                borderRadius: "var(--r-pill)",
+                background: s.warn ? "var(--warning-soft)" : "var(--accent-soft)",
+                display: "grid", placeItems: "center",
+                marginBottom: "12px",
+              }}
+            >
+              <s.icon size={18} style={{ color: s.warn ? "var(--warning)" : "var(--accent)" }} />
+            </div>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "28px", color: "var(--foreground)" }}>{s.v}</div>
+            <div style={{ fontSize: "12px", color: "var(--foreground-50)", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: "4px" }}>{s.l}</div>
+            {s.ch && <div style={{ fontSize: "11px", fontWeight: 500, color: "var(--success)", marginTop: "2px" }}>{s.ch} ↑</div>}
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Chart */}
+      <div style={{ ...card, padding: "20px", marginTop: "20px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>
+          Регистрации за 30 дней
+        </h4>
+        <div style={{ height: "200px", display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "16px", marginTop: "16px" }}>
+          {bars.map((h, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", height: "100%" }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${h}%` }}
+                  transition={{ duration: 0.6, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    width: "36px",
+                    background: "var(--accent)",
+                    borderRadius: "4px 4px 0 0",
+                    minHeight: "4px",
+                  }}
+                />
+              </div>
+              <span style={{ fontSize: "11px", color: "var(--foreground-50)" }}>{days[i]}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent actions */}
+      <div style={{ ...card, marginTop: "20px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", padding: "16px 16px 8px" }}>
+          Последние действия
+        </h4>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full" style={{ fontSize: "13px", minWidth: "600px" }}>
+            <tbody>
+              {adminActions.map((a) => (
+                <tr key={a.id} style={{ borderTop: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground)", fontWeight: 500 }}>{a.user}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{a.action}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{a.target}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-30)", fontSize: "12px", textAlign: "right" }}>{a.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============ USERS ============ */
+function UsersSection() {
+  const [query, setQuery] = useState("");
+  const [role, setRole] = useState<"all" | AdminUser["role"]>("all");
+  const [users, setUsers] = useState(adminUsers);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return users.filter((u) => {
+      const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+      const matchR = role === "all" || u.role === role;
+      return matchQ && matchR;
+    });
+  }, [users, query, role]);
+
+  const toggle = (id: string) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id !== id) return u;
+        const ns = u.status === "active" ? "blocked" : "active";
+        toast.success(ns === "blocked" ? "Пользователь заблокирован" : "Пользователь разблокирован");
+        return { ...u, status: ns };
+      })
+    );
+  };
+
+  const roleBadge = (r: AdminUser["role"]) => {
+    const map = {
+      admin: { bg: "var(--accent-soft)", c: "var(--accent)", l: "Админ" },
+      moderator: { bg: "var(--info-soft)", c: "var(--info)", l: "Модератор" },
+      user: { bg: "var(--background-surface)", c: "var(--foreground-50)", l: "Польз." },
+    };
+    const s = map[r];
+    return (
+      <span style={{ fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "var(--r-tag)", background: s.bg, color: s.c }}>
+        {s.l}
+      </span>
+    );
+  };
+
   return (
     <div>
       <H>Пользователи</H>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[700px] text-sm">
-          <thead className="border-b bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr><th className="p-3">Имя</th><th className="p-3">Контакт</th><th className="p-3">Подписка</th><th className="p-3">Регистрация</th><th className="p-3">Статус</th><th className="p-3">Действия</th></tr>
-          </thead>
-          <tbody>
-            {users.map((u) => {
-              const isBlocked = blocked.has(u.id);
-              return (
-                <tr key={u.id} className="border-b last:border-0">
-                  <td className="p-3"><div className="flex items-center gap-2"><img src={u.avatar} className="h-7 w-7 rounded-full" alt="" />{u.name}</div></td>
-                  <td className="p-3 text-muted-foreground">user_{u.id}@modelizm.ru</td>
-                  <td className="p-3">{u.subscription ?? "—"}</td>
-                  <td className="p-3 text-muted-foreground">12.03.2025</td>
-                  <td className="p-3">{isBlocked ? <StatusBadge variant="rejected">Заблокирован</StatusBadge> : <StatusBadge variant="published">Активен</StatusBadge>}</td>
-                  <td className="p-3">
-                    <div className="flex gap-1">
-                      <button className="rounded-md border p-1.5 hover:bg-muted"><Eye className="h-3.5 w-3.5" /></button>
-                      <button onClick={() => { const n = new Set(blocked); isBlocked ? n.delete(u.id) : n.add(u.id); setBlocked(n); toast.success(isBlocked ? "Разблокирован" : "Заблокирован"); }} className="rounded-md border p-1.5 hover:bg-muted"><Ban className="h-3.5 w-3.5" /></button>
+      <div className="flex flex-wrap" style={{ gap: "12px" }}>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Поиск по имени или email..."
+          className="outline-none"
+          style={{ ...inputStyle, width: "320px", maxWidth: "100%" }}
+        />
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as "all" | AdminUser["role"])}
+          className="outline-none"
+          style={{ ...inputStyle, padding: "0 12px" }}
+        >
+          <option value="all">Все роли</option>
+          <option value="user">Пользователь</option>
+          <option value="moderator">Модератор</option>
+          <option value="admin">Администратор</option>
+        </select>
+      </div>
+
+      <div style={{ ...card, marginTop: "16px", overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full" style={{ fontSize: "13px", minWidth: "780px" }}>
+            <thead>
+              <tr style={{ background: "var(--background-surface)" }}>
+                {["Имя", "Email", "Город", "Подписка", "Роль", "Статус", "Действия"].map((h) => (
+                  <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "var(--foreground-50)", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((u) => (
+                <tr key={u.id} style={{ borderTop: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px 16px" }}>
+                    <div className="flex items-center gap-[10px]">
+                      <img src={u.avatar} alt="" style={{ width: "32px", height: "32px", borderRadius: "var(--r-pill)" }} />
+                      <span style={{ color: "var(--foreground)", fontWeight: 500 }}>{u.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{u.email}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{u.city}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{u.subscription ?? "—"}</td>
+                  <td style={{ padding: "10px 16px" }}>{roleBadge(u.role)}</td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <StatusBadge variant={u.status === "active" ? "published" : "rejected"}>
+                      {u.status === "active" ? "Активен" : "Заблокирован"}
+                    </StatusBadge>
+                  </td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <div className="flex gap-[6px]">
+                      <IconBtn onClick={() => toast.info(`Просмотр: ${u.name}`)}><Eye size={14} /></IconBtn>
+                      <IconBtn danger onClick={() => toggle(u.id)}><Ban size={14} /></IconBtn>
                     </div>
                   </td>
                 </tr>
-              );
-            })}
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IconBtn({ children, onClick, danger, success }: { children: React.ReactNode; onClick: () => void; danger?: boolean; success?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: "32px", height: "32px",
+        borderRadius: "var(--r-card-sm)",
+        border: "1px solid var(--border)",
+        background: "transparent",
+        color: danger ? "var(--error)" : success ? "var(--success)" : "var(--foreground-70)",
+        display: "grid", placeItems: "center",
+        transition: "background 150ms ease",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = danger ? "var(--error-soft)" : success ? "var(--success-soft)" : "var(--background-surface)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ============ CONTENT ============ */
+function ContentSection() {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<"all" | "published" | "moderation" | "rejected">("all");
+  const items = posts.slice(0, 8).map((p, i) => ({
+    ...p,
+    st: (i === 3 || i === 6 ? "moderation" : i === 7 ? "rejected" : "published") as "published" | "moderation" | "rejected",
+  }));
+  const filtered = items.filter((p) => {
+    const q = query.trim().toLowerCase();
+    const matchQ = !q || p.title.toLowerCase().includes(q);
+    const matchS = status === "all" || p.st === status;
+    return matchQ && matchS;
+  });
+
+  return (
+    <div>
+      <H>Публикации</H>
+      <div className="flex flex-wrap" style={{ gap: "12px" }}>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Поиск по заголовку..." className="outline-none" style={{ ...inputStyle, width: "320px", maxWidth: "100%" }} />
+        <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="outline-none" style={{ ...inputStyle, padding: "0 12px" }}>
+          <option value="all">Все статусы</option>
+          <option value="published">Опубликовано</option>
+          <option value="moderation">На модерации</option>
+          <option value="rejected">Отклонено</option>
+        </select>
+      </div>
+      <div style={{ ...card, marginTop: "16px", overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full" style={{ fontSize: "13px", minWidth: "700px" }}>
+            <thead>
+              <tr style={{ background: "var(--background-surface)" }}>
+                {["Заголовок", "Автор", "Категория", "Статус", "Действия"].map((h) => (
+                  <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "var(--foreground-50)", textTransform: "uppercase", letterSpacing: "1px" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((p) => (
+                <tr key={p.id} style={{ borderTop: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground)", fontWeight: 500 }}>{p.title}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{p.authorId}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{p.category}</td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <StatusBadge variant={p.st}>
+                      {p.st === "published" ? "Опубликовано" : p.st === "moderation" ? "На модерации" : "Отклонено"}
+                    </StatusBadge>
+                  </td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <div className="flex gap-[6px]">
+                      <IconBtn onClick={() => toast.info("Открыть пост")}><Eye size={14} /></IconBtn>
+                      <IconBtn success onClick={() => toast.success("Одобрено")}><Check size={14} /></IconBtn>
+                      <IconBtn danger onClick={() => toast.error("Отклонено")}><X size={14} /></IconBtn>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============ ADS ============ */
+function AdsSection() {
+  const [query, setQuery] = useState("");
+  const items = ads.slice(0, 8).map((a, i) => ({
+    ...a,
+    st: (i < 6 ? "published" : i === 6 ? "moderation" : "rejected") as "published" | "moderation" | "rejected",
+  }));
+  const filtered = items.filter((a) => !query || a.title.toLowerCase().includes(query.toLowerCase()));
+
+  return (
+    <div>
+      <H>Объявления</H>
+      <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Поиск по заголовку..." className="outline-none" style={{ ...inputStyle, width: "320px", maxWidth: "100%" }} />
+      <div style={{ ...card, marginTop: "16px", overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="w-full" style={{ fontSize: "13px", minWidth: "700px" }}>
+            <thead>
+              <tr style={{ background: "var(--background-surface)" }}>
+                {["Заголовок", "Продавец", "Цена", "Категория", "Статус", "Действия"].map((h) => (
+                  <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "var(--foreground-50)", textTransform: "uppercase", letterSpacing: "1px" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((a) => (
+                <tr key={a.id} style={{ borderTop: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground)", fontWeight: 500 }}>{a.title}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{a.authorId}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground)", fontWeight: 600 }}>{a.price.toLocaleString("ru")} ₽</td>
+                  <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{a.category}</td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <StatusBadge variant={a.st}>
+                      {a.st === "published" ? "Опубликовано" : a.st === "moderation" ? "На модерации" : "Отклонено"}
+                    </StatusBadge>
+                  </td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <div className="flex gap-[6px]">
+                      <IconBtn onClick={() => toast.info("Открыть объявление")}><Eye size={14} /></IconBtn>
+                      <IconBtn success onClick={() => toast.success("Одобрено")}><Check size={14} /></IconBtn>
+                      <IconBtn danger onClick={() => toast.error("Отклонено")}><X size={14} /></IconBtn>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============ MODERATION ============ */
+function ModerationSection() {
+  const [postQueue, setPostQueue] = useState(posts.slice(0, 2).map((p) => ({ id: p.id, title: p.title, author: p.authorId, category: p.category })));
+  const [adQueue, setAdQueue] = useState(ads.slice(0, 1).map((a) => ({ id: a.id, title: a.title, author: a.authorId, category: a.category })));
+
+  const removePost = (id: string, ok: boolean) => {
+    setPostQueue((q) => q.filter((x) => x.id !== id));
+    ok ? toast.success("Пост одобрен") : toast.error("Пост отклонён");
+  };
+  const removeAd = (id: string, ok: boolean) => {
+    setAdQueue((q) => q.filter((x) => x.id !== id));
+    ok ? toast.success("Объявление одобрено") : toast.error("Объявление отклонено");
+  };
+
+  return (
+    <div>
+      <H>Модерация</H>
+      <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: "16px" }}>
+        <div>
+          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", marginBottom: "12px" }}>
+            Публикации на модерации ({postQueue.length})
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <AnimatePresence>
+              {postQueue.map((p) => (
+                <ModerationCard
+                  key={p.id}
+                  title={p.title}
+                  author={p.author}
+                  category={p.category}
+                  onApprove={() => removePost(p.id, true)}
+                  onReject={() => removePost(p.id, false)}
+                />
+              ))}
+            </AnimatePresence>
+            {postQueue.length === 0 && <EmptyQueue label="Нет постов на модерации" />}
+          </div>
+        </div>
+        <div>
+          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", marginBottom: "12px" }}>
+            Объявления на модерации ({adQueue.length})
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <AnimatePresence>
+              {adQueue.map((a) => (
+                <ModerationCard
+                  key={a.id}
+                  title={a.title}
+                  author={a.author}
+                  category={a.category}
+                  onApprove={() => removeAd(a.id, true)}
+                  onReject={() => removeAd(a.id, false)}
+                />
+              ))}
+            </AnimatePresence>
+            {adQueue.length === 0 && <EmptyQueue label="Нет объявлений на модерации" />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyQueue({ label }: { label: string }) {
+  return (
+    <div style={{ ...card, padding: "32px 16px", textAlign: "center", color: "var(--foreground-50)", fontSize: "13px" }}>
+      <ShieldCheck size={32} style={{ color: "var(--foreground-15)", margin: "0 auto 12px" }} />
+      {label}
+    </div>
+  );
+}
+
+function ModerationCard({ title, author, category, onApprove, onReject }: { title: string; author: string; category: string; onApprove: () => void; onReject: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, height: 0, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{ ...card, padding: "16px", overflow: "hidden" }}
+    >
+      <div style={{ fontWeight: 500, fontSize: "15px", color: "var(--foreground)" }}>{title}</div>
+      <div className="flex items-center gap-[8px] mt-[6px]">
+        <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>{author}</span>
+        <span style={{ fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "var(--r-tag)", background: "var(--accent-soft)", color: "var(--accent)" }}>
+          {category}
+        </span>
+      </div>
+      <div className="flex gap-[8px]" style={{ marginTop: "12px" }}>
+        <button onClick={onApprove} style={{ height: "36px", padding: "0 16px", background: "var(--success)", color: "#fff", fontWeight: 600, fontSize: "12px", borderRadius: "var(--r-button)" }}>Одобрить</button>
+        <button onClick={onReject} style={{ height: "36px", padding: "0 16px", background: "var(--error)", color: "#fff", fontWeight: 600, fontSize: "12px", borderRadius: "var(--r-button)" }}>Отклонить</button>
+        <button style={{ height: "36px", padding: "0 16px", background: "transparent", border: "1px solid var(--border)", color: "var(--foreground-70)", fontWeight: 500, fontSize: "12px", borderRadius: "var(--r-button)" }} onClick={() => toast.info("Открыть детали")}>Открыть</button>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ============ MONETIZATION ============ */
+function MonetizationSection() {
+  const [editedTariffs, setEditedTariffs] = useState(tariffs);
+  const [promos, setPromos] = useState(initialPromos);
+  const [newCode, setNewCode] = useState("");
+  const [newDisc, setNewDisc] = useState(10);
+
+  return (
+    <div>
+      <H>Монетизация</H>
+
+      {/* Tariffs */}
+      <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Управление тарифами</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "12px", marginTop: "12px" }}>
+          {editedTariffs.map((t, i) => (
+            <div key={t.id} style={{ border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)", padding: "12px" }}>
+              <input
+                value={t.name}
+                onChange={(e) => setEditedTariffs((p) => p.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
+                className="w-full outline-none"
+                style={{ fontSize: "13px", fontWeight: 600, color: "var(--foreground)", background: "transparent", border: "none", padding: 0 }}
+              />
+              <input
+                type="number"
+                value={t.price}
+                onChange={(e) => setEditedTariffs((p) => p.map((x, j) => j === i ? { ...x, price: +e.target.value } : x))}
+                className="w-full outline-none"
+                style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent)", background: "transparent", border: "none", padding: "4px 0", fontFamily: "var(--font-display)" }}
+              />
+              <input
+                value={t.period}
+                onChange={(e) => setEditedTariffs((p) => p.map((x, j) => j === i ? { ...x, period: e.target.value } : x))}
+                className="w-full outline-none"
+                style={{ fontSize: "12px", color: "var(--foreground-50)", background: "transparent", border: "none", padding: 0 }}
+              />
+            </div>
+          ))}
+        </div>
+        <button onClick={() => toast.success("Тарифы сохранены")} style={{ ...primaryBtn, marginTop: "12px" }}>Сохранить тарифы</button>
+      </div>
+
+      {/* Promocodes */}
+      <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Промокоды</h4>
+        <div className="flex flex-wrap" style={{ gap: "8px", marginTop: "8px" }}>
+          <input value={newCode} onChange={(e) => setNewCode(e.target.value.toUpperCase())} placeholder="Код" className="outline-none" style={{ ...inputStyle, flex: 1, minWidth: "120px" }} />
+          <input type="number" value={newDisc} onChange={(e) => setNewDisc(+e.target.value)} placeholder="Скидка %" className="outline-none" style={{ ...inputStyle, width: "120px" }} />
+          <button
+            onClick={() => {
+              if (!newCode.trim()) return toast.error("Введите код");
+              setPromos((p) => [...p, { id: String(Date.now()), code: newCode, discount: newDisc, usedCount: 0 }]);
+              setNewCode("");
+              toast.success("Промокод создан");
+            }}
+            style={{ ...primaryBtn }}
+          >
+            <Plus size={14} style={{ display: "inline", marginRight: "4px" }} />Создать
+          </button>
+        </div>
+        <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          {promos.map((p) => (
+            <div key={p.id} className="flex items-center justify-between" style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
+              <div className="flex items-center gap-[12px]">
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", fontWeight: 600, color: "var(--foreground)" }}>{p.code}</span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--accent)" }}>{p.discount}%</span>
+                <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>{p.usedCount} исп.</span>
+              </div>
+              <IconBtn danger onClick={() => { setPromos((q) => q.filter((x) => x.id !== p.id)); toast.success("Промокод удалён"); }}><Trash2 size={14} /></IconBtn>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Banners */}
+      <div style={{ ...card, padding: "20px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Рекламные баннеры</h4>
+        <div
+          style={{
+            border: "2px dashed var(--border)",
+            borderRadius: "var(--r-card)",
+            height: "120px",
+            marginTop: "12px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            gap: "8px",
+          }}
+        >
+          <Upload size={32} style={{ color: "var(--foreground-30)" }} />
+          <span style={{ fontSize: "14px", color: "var(--foreground-50)" }}>Перетащите баннер или нажмите для загрузки</span>
+        </div>
+        <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          {banners.map((b) => (
+            <div key={b.id} className="flex items-center justify-between" style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--foreground)" }}>{b.title}</div>
+                <div style={{ fontSize: "11px", color: "var(--foreground-50)" }}>до {b.until}</div>
+              </div>
+              <IconBtn danger onClick={() => toast.success("Баннер удалён")}><Trash2 size={14} /></IconBtn>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============ CATEGORIES ============ */
+function CategoriesSection() {
+  const [open, setOpen] = useState<Record<string, boolean>>({ c1: true });
+  return (
+    <div>
+      <H
+        action={
+          <div className="flex gap-[8px]">
+            <button style={{ ...primaryBtn }} onClick={() => toast.success("Категория добавлена")}>
+              <Plus size={14} style={{ display: "inline", marginRight: "4px" }} />Добавить
+            </button>
+            <button style={{ ...primaryBtn, background: "transparent", color: "var(--foreground)", border: "1px solid var(--border)" }} onClick={() => toast.success("Порядок сохранён")}>
+              Сохранить порядок
+            </button>
+          </div>
+        }
+      >
+        Категории
+      </H>
+      <div style={{ ...card, padding: "16px" }}>
+        {categories.map((c) => (
+          <div key={c.id} style={{ marginBottom: "4px" }}>
+            <div className="flex items-center justify-between" style={{ padding: "8px 0" }}>
+              <button onClick={() => setOpen((p) => ({ ...p, [c.id]: !p[c.id] }))} className="flex items-center gap-[8px] flex-1">
+                <motion.span animate={{ rotate: open[c.id] ? 90 : 0 }} style={{ display: "inline-block", color: "var(--foreground-50)", fontSize: "10px" }}>▶</motion.span>
+                <span style={{ fontWeight: 600, fontSize: "15px", color: "var(--foreground)" }}>{c.name}</span>
+                <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>({c.members.toLocaleString("ru")} уч.)</span>
+              </button>
+              <div className="flex gap-[4px]">
+                <IconBtn onClick={() => toast.info("Добавить подкатегорию")}><Plus size={14} /></IconBtn>
+                <IconBtn onClick={() => toast.info("Редактировать")}><Pencil size={14} /></IconBtn>
+                <IconBtn danger onClick={() => toast.success("Удалено")}><Trash2 size={14} /></IconBtn>
+              </div>
+            </div>
+            <AnimatePresence>
+              {open[c.id] && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  style={{ overflow: "hidden", borderLeft: "1px solid var(--border)", marginLeft: "8px", paddingLeft: "16px" }}
+                >
+                  {c.subcategories.map((s) => (
+                    <div key={s.id} className="flex items-center justify-between" style={{ padding: "6px 0" }}>
+                      <span style={{ fontSize: "14px", color: "var(--foreground-70)" }}>{s.name}</span>
+                      <div className="flex gap-[4px]">
+                        <IconBtn onClick={() => toast.info("Редактировать")}><Pencil size={14} /></IconBtn>
+                        <IconBtn danger onClick={() => toast.success("Удалено")}><Trash2 size={14} /></IconBtn>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============ NOTIFICATIONS ============ */
+function NotificationsSection() {
+  const emailTpl = [
+    ["Приветствие", "Добро пожаловать в МоДЕЛИЗМ Club!", "01.06.2026"],
+    ["Подтверждение почты", "Подтвердите ваш email", "15.05.2026"],
+    ["Сброс пароля", "Восстановление доступа", "10.05.2026"],
+    ["Оповещение о модерации", "Ваш пост проверен", "05.06.2026"],
+  ];
+  const pushTpl = [
+    ["Новый пост в ленте", "В ленте новый пост от {{author}}", "20.05.2026"],
+    ["Новое сообщение", "{{sender}} написал вам", "18.05.2026"],
+    ["Объявление одобрено", "Ваше объявление прошло модерацию", "12.05.2026"],
+  ];
+
+  const renderTable = (title: string, rows: string[][]) => (
+    <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
+      <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", marginBottom: "12px" }}>{title}</h4>
+      <div style={{ overflowX: "auto" }}>
+        <table className="w-full" style={{ fontSize: "13px", minWidth: "600px" }}>
+          <thead>
+            <tr style={{ background: "var(--background-surface)" }}>
+              {["Название", "Тема", "Изменено", "Действия"].map((h) => (
+                <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "var(--foreground-50)", textTransform: "uppercase", letterSpacing: "1px" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} style={{ borderTop: "1px solid var(--border)" }}>
+                <td style={{ padding: "10px 16px", color: "var(--foreground)", fontWeight: 500 }}>{r[0]}</td>
+                <td style={{ padding: "10px 16px", color: "var(--foreground-70)" }}>{r[1]}</td>
+                <td style={{ padding: "10px 16px", color: "var(--foreground-30)", fontSize: "12px" }}>{r[2]}</td>
+                <td style={{ padding: "10px 16px" }}>
+                  <div className="flex gap-[6px]">
+                    <IconBtn onClick={() => toast.info("Редактировать")}><Pencil size={14} /></IconBtn>
+                    <IconBtn onClick={() => toast.success("Тестовое уведомление отправлено")}><Send size={14} /></IconBtn>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   );
-}
 
-function CategoriesAdmin() {
   return (
     <div>
-      <H action={<button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"><Plus className="h-3.5 w-3.5" />Добавить</button>}>Категории</H>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[500px] text-sm">
-          <thead className="border-b bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Название</th><th className="p-3">Подкатегории</th><th className="p-3">Участники</th><th className="p-3">Действия</th></tr></thead>
-          <tbody>{categories.map((c) => (
-            <tr key={c.id} className="border-b last:border-0">
-              <td className="p-3 font-medium">{c.name}</td>
-              <td className="p-3">{c.subcategories.length}</td>
-              <td className="p-3 text-muted-foreground">{c.members.toLocaleString("ru")}</td>
-              <td className="p-3"><div className="flex gap-1"><button className="rounded-md border px-2 py-1 text-xs hover:bg-muted">Изменить</button><button className="rounded-md border px-2 py-1 text-xs text-destructive hover:bg-destructive/10">Удалить</button></div></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
+      <H>Уведомления</H>
+      {renderTable("Email-шаблоны", emailTpl)}
+      {renderTable("Push-шаблоны", pushTpl)}
+      <button
+        onClick={() => toast.success("Уведомление отправлено всем пользователям")}
+        style={{ ...primaryBtn, height: "44px", padding: "0 24px", fontSize: "14px", marginTop: "16px" }}
+      >
+        Отправить уведомление всем
+      </button>
     </div>
   );
 }
 
-function SubcategoriesAdmin() {
-  return (
-    <div>
-      <H action={<button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"><Plus className="h-3.5 w-3.5" />Добавить</button>}>Подкатегории — Автомодели</H>
-      <ul className="space-y-1">
-        {categories[0].subcategories.map((s) => (
-          <li key={s.id} className="flex items-center justify-between rounded-lg border bg-card p-3">
-            <span className="text-sm font-medium">{s.name}</span>
-            <div className="flex gap-1">
-              <button className="rounded-md border px-2 py-1 text-xs hover:bg-muted">Изменить</button>
-              <button className="rounded-md border px-2 py-1 text-xs text-destructive hover:bg-destructive/10">Удалить</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function AdsAdmin() {
-  const [statuses, setStatuses] = useState<Record<string, "published" | "moderation" | "rejected">>(() => Object.fromEntries(ads.map((a, i) => [a.id, i < 7 ? "published" : i === 7 ? "moderation" : "rejected"])));
-  return (
-    <div>
-      <H>Объявления</H>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[700px] text-sm">
-          <thead className="border-b bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Объявление</th><th className="p-3">Автор</th><th className="p-3">Цена</th><th className="p-3">Категория</th><th className="p-3">Статус</th><th className="p-3">Действия</th></tr></thead>
-          <tbody>{ads.map((a) => {
-            const st = statuses[a.id];
-            return (
-              <tr key={a.id} className="border-b last:border-0">
-                <td className="p-3 font-medium">{a.title}</td>
-                <td className="p-3 text-muted-foreground">{a.authorId}</td>
-                <td className="p-3">{a.price.toLocaleString("ru")} ₽</td>
-                <td className="p-3 text-muted-foreground">{a.category}</td>
-                <td className="p-3"><StatusBadge variant={st}>{st === "published" ? "Опубликовано" : st === "moderation" ? "На модерации" : "Отклонено"}</StatusBadge></td>
-                <td className="p-3"><div className="flex gap-1">
-                  <button onClick={() => { setStatuses({ ...statuses, [a.id]: "published" }); toast.success("Одобрено"); }} className="rounded-md border p-1.5 hover:bg-success/10"><Check className="h-3.5 w-3.5 text-success" /></button>
-                  <button onClick={() => { setStatuses({ ...statuses, [a.id]: "rejected" }); toast.error("Отклонено"); }} className="rounded-md border p-1.5 hover:bg-destructive/10"><X className="h-3.5 w-3.5 text-destructive" /></button>
-                </div></td>
-              </tr>
-            );
-          })}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function PostsAdmin() {
-  return (
-    <div>
-      <H>Публикации</H>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[600px] text-sm">
-          <thead className="border-b bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Заголовок</th><th className="p-3">Автор</th><th className="p-3">Категория</th><th className="p-3">Статус</th><th className="p-3">Действия</th></tr></thead>
-          <tbody>{posts.map((p, i) => (
-            <tr key={p.id} className="border-b last:border-0">
-              <td className="p-3 font-medium">{p.title}</td>
-              <td className="p-3 text-muted-foreground">{p.authorId}</td>
-              <td className="p-3">{p.category}</td>
-              <td className="p-3"><StatusBadge variant={i < 8 ? "published" : "moderation"}>{i < 8 ? "Опубликовано" : "На модерации"}</StatusBadge></td>
-              <td className="p-3"><div className="flex gap-1">
-                <button onClick={() => toast.success("Одобрено")} className="rounded-md border p-1.5"><Check className="h-3.5 w-3.5 text-success" /></button>
-                <button onClick={() => toast.error("Отклонено")} className="rounded-md border p-1.5"><X className="h-3.5 w-3.5 text-destructive" /></button>
-              </div></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function BannersAdmin() {
-  return (
-    <div>
-      <H action={<button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"><Plus className="h-3.5 w-3.5" />Добавить рекламу</button>}>Реклама</H>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[600px] text-sm">
-          <thead className="border-b bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Название</th><th className="p-3">Начало</th><th className="p-3">Окончание</th><th className="p-3">Статус</th><th className="p-3">Действия</th></tr></thead>
-          <tbody>{banners.map((b, i) => (
-            <tr key={b.id} className="border-b last:border-0">
-              <td className="p-3 font-medium">{b.title}</td>
-              <td className="p-3 text-muted-foreground">01.06.2026</td>
-              <td className="p-3 text-muted-foreground">{b.until}</td>
-              <td className="p-3"><StatusBadge variant={i < 2 ? "published" : "default"}>{i < 2 ? "Активен" : "Выключен"}</StatusBadge></td>
-              <td className="p-3"><button className="rounded-md border px-2 py-1 text-xs">Изменить</button></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function TariffsAdmin() {
-  const [vals, setVals] = useState({ test: 1, month: 100, half: 500, year: 800, ad: 20 });
-  return (
-    <div>
-      <H>Тарифы</H>
-      <div className="grid max-w-md gap-3 rounded-xl border bg-card p-4">
-        {([
-          ["test", "Тестовый доступ (1 день), ₽"],
-          ["month", "Месяц, ₽"],
-          ["half", "Полгода, ₽"],
-          ["year", "Год, ₽"],
-          ["ad", "Размещение объявления, ₽"],
-        ] as const).map(([k, label]) => (
-          <label key={k} className="grid grid-cols-[1fr_120px] items-center gap-3 text-sm">
-            <span className="text-muted-foreground">{label}</span>
-            <input type="number" value={vals[k]} onChange={(e) => setVals({ ...vals, [k]: +e.target.value })} className="rounded-lg border bg-background px-3 py-1.5 text-right" />
-          </label>
-        ))}
-        <button onClick={() => toast.success("Тарифы сохранены")} className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          <Save className="h-3.5 w-3.5" />Сохранить
-        </button>
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">Текущие значения по умолчанию: {tariffs.map((t) => `${t.name} — ${t.price}₽`).join(" · ")}</p>
-    </div>
-  );
-}
-
-function ReportsAdmin() {
-  const rep = [
-    { id: 1, from: "Сергей ДВС", target: "Объявление #a3", reason: "Подозрение на мошенничество" },
-    { id: 2, from: "Михаил Квадро", target: "Пост #p4", reason: "Спам" },
-    { id: 3, from: "Андрей Самолёты", target: "Пользователь Олег", reason: "Оскорбление" },
+/* ============ ANALYTICS ============ */
+function AnalyticsSection() {
+  const charts = [
+    "DAU / MAU (Daily/Monthly Active Users)",
+    "Доход по месяцам",
+    "Объявления: создано / продано",
+    "Топ категорий по активности",
+    "Конверсия в подписку",
+    "География пользователей",
   ];
   return (
     <div>
-      <H>Жалобы</H>
-      <ul className="space-y-2">
-        {rep.map((r) => (
-          <li key={r.id} className="flex items-center justify-between rounded-xl border bg-card p-3 text-sm">
-            <div>
-              <div className="font-medium">{r.target}</div>
-              <div className="text-xs text-muted-foreground">От: {r.from} · {r.reason}</div>
+      <H>Аналитика</H>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px" }}>
+        {charts.map((c, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: i * 0.05 }}
+            style={{ ...card, padding: "20px" }}
+          >
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "15px", color: "var(--foreground)" }}>{c}</div>
+            <div style={{ height: "180px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <BarChart3 size={32} style={{ color: "var(--foreground-15)" }} />
+              <div style={{ fontSize: "13px", color: "var(--foreground-30)", textAlign: "center", maxWidth: "240px" }}>
+                График будет доступен после подключения аналитики
+              </div>
             </div>
-            <div className="flex gap-1">
-              <button className="rounded-md border px-2 py-1 text-xs hover:bg-muted">Открыть</button>
-              <button className="rounded-md border px-2 py-1 text-xs text-success hover:bg-success/10">Принять</button>
-              <button className="rounded-md border px-2 py-1 text-xs text-destructive hover:bg-destructive/10">Отклонить</button>
-            </div>
-          </li>
+          </motion.div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
-function SettingsAdmin() {
+/* ============ SETTINGS ============ */
+function SettingsSection() {
+  const [toggles, setToggles] = useState({ modPosts: true, modAds: true, regOpen: true, emailReq: true });
+
+  const field = (label: string, defaultValue: string, type = "text") => (
+    <label style={{ display: "grid", gap: "6px" }}>
+      <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--foreground-50)" }}>{label}</span>
+      <input
+        type={type}
+        defaultValue={defaultValue}
+        className="outline-none"
+        style={{
+          height: "40px",
+          background: "var(--background)",
+          border: "1.5px solid var(--border)",
+          borderRadius: "var(--r-input)",
+          padding: "0 14px",
+          fontSize: "13px",
+          color: "var(--foreground)",
+        }}
+      />
+    </label>
+  );
+
+  const Toggle = ({ label, k }: { label: string; k: keyof typeof toggles }) => (
+    <button
+      onClick={() => setToggles((p) => ({ ...p, [k]: !p[k] }))}
+      className="flex items-center justify-between w-full"
+      style={{ padding: "8px 0" }}
+    >
+      <span style={{ fontSize: "13px", color: "var(--foreground)" }}>{label}</span>
+      <div
+        style={{
+          width: "44px", height: "24px",
+          borderRadius: "var(--r-pill)",
+          background: toggles[k] ? "var(--accent)" : "var(--background-surface)",
+          position: "relative",
+          transition: "background 200ms ease",
+        }}
+      >
+        <motion.div
+          animate={{ x: toggles[k] ? 22 : 2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          style={{
+            width: "20px", height: "20px",
+            borderRadius: "var(--r-pill)",
+            background: "#fff",
+            position: "absolute",
+            top: "2px",
+            boxShadow: "var(--shadow-card)",
+          }}
+        />
+      </div>
+    </button>
+  );
+
   return (
     <div>
       <H>Настройки</H>
-      <div className="grid max-w-md gap-3 rounded-xl border bg-card p-4 text-sm">
-        <label className="grid gap-1"><span className="text-muted-foreground text-xs">Название проекта</span><input defaultValue="МоДелизМ Club" className="rounded-lg border bg-background px-3 py-1.5" /></label>
-        <label className="grid gap-1"><span className="text-muted-foreground text-xs">Email поддержки</span><input defaultValue="support@modelizm-club.ru" className="rounded-lg border bg-background px-3 py-1.5" /></label>
-        <label className="grid gap-1"><span className="text-muted-foreground text-xs">URL магазина</span><input defaultValue="https://modelizm23.ru" className="rounded-lg border bg-background px-3 py-1.5" /></label>
-        <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-primary" />Модерация постов вручную</label>
-        <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-primary" />Модерация объявлений вручную</label>
-        <button onClick={() => toast.success("Настройки сохранены")} className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          <Save className="h-3.5 w-3.5" />Сохранить
+      <div style={{ ...card, padding: "24px", maxWidth: "600px" }}>
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", marginBottom: "16px" }}>
+          Настройки платформы
+        </h4>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {field("Название проекта", "МоДЕЛИЗМ Club")}
+          {field("Домен", "modelizm-club.ru")}
+          {field("Email поддержки", "support@modelizm-club.ru")}
+          {field("Платёжный ключ ЮKassa (Shop ID)", "••••••••", "password")}
+          {field("Платёжный ключ Т-Банк (Terminal Key)", "••••••••", "password")}
+          {field("SMTP сервер", "smtp.mail.ru")}
+          {field("SMTP порт", "587", "number")}
+          {field("SMTP логин", "noreply@modelizm-club.ru")}
+          {field("SMTP пароль", "••••••••", "password")}
+        </div>
+        <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "4px" }}>
+          <Toggle label="Модерация постов вручную" k="modPosts" />
+          <Toggle label="Модерация объявлений вручную" k="modAds" />
+          <Toggle label="Регистрация открыта" k="regOpen" />
+          <Toggle label="Email-подтверждение обязательно" k="emailReq" />
+        </div>
+        <button
+          onClick={() => toast.success("Настройки сохранены")}
+          style={{ ...primaryBtn, height: "44px", padding: "0 32px", fontSize: "14px", marginTop: "20px" }}
+        >
+          Сохранить
         </button>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">Сообществ всего: {communities.length}</p>
     </div>
   );
 }
