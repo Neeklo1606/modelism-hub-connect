@@ -1,25 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
-  Eye,
-  Heart,
-  MapPin,
-  Pencil,
-  Archive,
-  Trash2,
-  Upload,
-  ImageOff,
-  Clock,
+  Eye, Heart, MapPin, Pencil, Archive, Trash2, Upload, ImageOff, MoreHorizontal,
 } from "lucide-react";
+import { useState } from "react";
 import type { Ad } from "@/lib/mock";
 
 export type MyAdStatus = "active" | "archived" | "moderation" | "rejected";
 
-const STATUS_BADGE: Record<MyAdStatus, { bg: string; fg: string; border: string; label: string }> = {
-  active:     { bg: "var(--success-soft)",   fg: "var(--success)",   border: "var(--success)",   label: "Активно"      },
-  archived:   { bg: "var(--foreground-15)",  fg: "var(--foreground-50)", border: "var(--border)", label: "В архиве"    },
-  moderation: { bg: "var(--warning-soft)",   fg: "var(--warning)",   border: "var(--warning)",   label: "На модерации" },
-  rejected:   { bg: "var(--error-soft)",     fg: "var(--error)",     border: "var(--error)",     label: "Отклонено"    },
+const STATUS_BADGE: Record<MyAdStatus, { dot: string; fg: string; label: string }> = {
+  active:     { dot: "var(--success)", fg: "var(--success)", label: "Активно" },
+  archived:   { dot: "var(--foreground-30)", fg: "var(--foreground-50)", label: "В архиве" },
+  moderation: { dot: "var(--warning)", fg: "var(--warning)", label: "На модерации" },
+  rejected:   { dot: "var(--error)",   fg: "var(--error)",   label: "Отклонено" },
 };
 
 interface Props {
@@ -35,6 +28,8 @@ interface Props {
 export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish, onDelete }: Props) {
   const badge = STATUS_BADGE[status];
   const hero = ad.gallery?.[0] ?? ad.image;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const archived = status === "archived" || status === "rejected";
 
   return (
     <motion.div
@@ -43,43 +38,24 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.22, ease: [0.19, 1, 0.22, 1] }}
-      className="flex items-stretch gap-[14px] p-[14px]"
+      className="relative grid grid-cols-[88px_minmax(0,1fr)_auto] items-stretch gap-[12px] p-[10px] sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:p-[12px]"
       style={{
-        background: "var(--background-surface)",
+        background: "var(--background)",
         border: `1px solid ${selected ? "var(--accent)" : "var(--border)"}`,
         borderRadius: "var(--r-card)",
-        boxShadow: "var(--shadow-card)",
+        boxShadow: selected ? "0 0 0 3px color-mix(in oklab, var(--accent) 15%, transparent)" : "var(--shadow-card)",
         transition: "border-color 180ms var(--ease-out-expo), box-shadow 180ms var(--ease-out-expo)",
       }}
     >
-      {/* Select checkbox */}
-      {onSelect && (
-        <label
-          className="flex items-start pt-[2px]"
-          style={{ cursor: "pointer" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="checkbox"
-            checked={!!selected}
-            onChange={(e) => onSelect(ad.id, e.target.checked)}
-            className="h-[18px] w-[18px] cursor-pointer"
-            style={{ accentColor: "var(--accent)" }}
-            aria-label="Выбрать объявление"
-          />
-        </label>
-      )}
-
       {/* Photo */}
       <Link
         to="/ads/$id"
         params={{ id: ad.id }}
         className="relative shrink-0 overflow-hidden"
         style={{
-          width: 96,
-          height: 96,
+          aspectRatio: "1 / 1",
           borderRadius: "var(--r-card-sm)",
-          background: "var(--background-surface-hover)",
+          background: "var(--background-surface)",
         }}
       >
         {hero ? (
@@ -89,107 +65,130 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
             <ImageOff size={22} style={{ color: "var(--foreground-30)" }} />
           </div>
         )}
+        {onSelect && (
+          <label
+            onClick={(e) => e.stopPropagation()}
+            className="absolute left-[6px] top-[6px] grid h-[22px] w-[22px] cursor-pointer place-items-center rounded-md"
+            style={{
+              background: selected ? "var(--accent)" : "color-mix(in oklab, var(--background) 85%, transparent)",
+              border: `1.5px solid ${selected ? "var(--accent)" : "var(--border-strong)"}`,
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={!!selected}
+              onChange={(e) => onSelect(ad.id, e.target.checked)}
+              className="sr-only"
+              aria-label="Выбрать объявление"
+            />
+            {selected && <span style={{ color: "#fff", fontSize: 13, lineHeight: 1, fontWeight: 700 }}>✓</span>}
+          </label>
+        )}
       </Link>
 
       {/* Body */}
-      <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
-        <div className="flex flex-wrap items-start justify-between gap-[8px]">
+      <div className="flex min-w-0 flex-col justify-between gap-[6px] py-[2px]">
+        <div className="min-w-0">
           <Link
             to="/ads/$id"
             params={{ id: ad.id }}
-            className="text-[15px] font-semibold leading-[1.35] hover:underline"
-            style={{
-              color: "var(--foreground)",
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
+            className="block min-w-0 truncate font-display text-[14px] font-semibold leading-[1.3] sm:text-[15px]"
+            style={{ color: "var(--foreground)" }}
           >
             {ad.title}
           </Link>
-          <span
-            className="inline-flex items-center whitespace-nowrap px-[10px] py-[3px] text-[11px] font-semibold"
-            style={{
-              background: badge.bg,
-              color: badge.fg,
-              border: `1px solid ${badge.border}`,
-              borderRadius: "var(--r-pill)",
-            }}
+          <div
+            className="mt-[4px] font-display text-[18px] font-bold leading-none sm:text-[20px]"
+            style={{ color: "var(--accent)", letterSpacing: "-0.01em" }}
           >
-            {badge.label}
+            {ad.price.toLocaleString("ru")} ₽
+          </div>
+        </div>
+
+        <div className="flex items-center gap-[10px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
+          <span className="inline-flex min-w-0 items-center gap-[4px]">
+            <MapPin size={12} className="shrink-0" />
+            <span className="truncate">{ad.city}</span>
           </span>
-        </div>
-
-        <div
-          className="font-display text-[20px] font-bold leading-none"
-          style={{ color: "var(--accent)" }}
-        >
-          {ad.price.toLocaleString("ru")} ₽
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
-          <span className="inline-flex items-center gap-[4px]"><MapPin size={12} /> {ad.city}</span>
-          <span className="inline-flex items-center gap-[4px]"><Clock size={12} /> {ad.createdAt ?? "недавно"}</span>
-          <span className="inline-flex items-center gap-[4px]"><Eye size={12} /> {ad.views ?? 0}</span>
-          <span className="inline-flex items-center gap-[4px]"><Heart size={12} /> {ad.likes ?? 0}</span>
+          <span className="inline-flex shrink-0 items-center gap-[4px]"><Eye size={12} /> {ad.views ?? 0}</span>
+          <span className="inline-flex shrink-0 items-center gap-[4px]"><Heart size={12} /> {ad.likes ?? 0}</span>
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Right column: status + menu */}
       <div className="flex shrink-0 flex-col items-end justify-between gap-[6px]">
-        <div className="flex items-center gap-[4px]">
-          <Link
-            to="/ads/$id"
-            params={{ id: ad.id }}
-            title="Редактировать"
-            className="grid h-[34px] w-[34px] place-items-center transition-colors"
-            style={{ color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-soft)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground-50)"; e.currentTarget.style.background = "transparent"; }}
-          >
-            <Pencil size={16} />
-          </Link>
+        <span
+          className="inline-flex items-center gap-[5px] whitespace-nowrap font-mono text-[10.5px] font-medium uppercase tracking-[0.06em]"
+          style={{ color: badge.fg }}
+        >
+          <span className="h-[6px] w-[6px] rounded-full" style={{ background: badge.dot }} />
+          {badge.label}
+        </span>
 
-          {status === "archived" || status === "rejected" ? (
-            <button
-              type="button"
-              title="Опубликовать"
-              onClick={() => onPublish?.(ad.id)}
-              className="grid h-[34px] w-[34px] place-items-center transition-colors"
-              style={{ color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--success)"; e.currentTarget.style.background = "var(--success-soft)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground-50)"; e.currentTarget.style.background = "transparent"; }}
-            >
-              <Upload size={16} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              title="Архивировать"
-              onClick={() => onArchive?.(ad.id)}
-              className="grid h-[34px] w-[34px] place-items-center transition-colors"
-              style={{ color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--warning)"; e.currentTarget.style.background = "var(--warning-soft)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground-50)"; e.currentTarget.style.background = "transparent"; }}
-            >
-              <Archive size={16} />
-            </button>
-          )}
-
+        <div className="relative">
           <button
             type="button"
-            title="Удалить"
-            onClick={() => onDelete?.(ad.id)}
-            className="grid h-[34px] w-[34px] place-items-center transition-colors"
-            style={{ color: "var(--foreground-50)", borderRadius: "var(--r-pill)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--error)"; e.currentTarget.style.background = "var(--error-soft)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground-50)"; e.currentTarget.style.background = "transparent"; }}
+            onClick={() => setMenuOpen((v) => !v)}
+            onBlur={() => setTimeout(() => setMenuOpen(false), 120)}
+            aria-label="Действия"
+            className="grid h-[32px] w-[32px] place-items-center rounded-full transition-colors"
+            style={{ color: "var(--foreground-50)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--background-surface)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
-            <Trash2 size={16} />
+            <MoreHorizontal size={18} />
           </button>
+          {menuOpen && (
+            <div
+              className="absolute right-0 top-[36px] z-20 flex flex-col py-[6px]"
+              style={{
+                minWidth: 180,
+                background: "var(--background-elevated)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-card-sm)",
+                boxShadow: "var(--shadow-float)",
+              }}
+            >
+              <MenuItem to="/ads/$id" params={{ id: ad.id }} icon={<Pencil size={14} />} label="Редактировать" />
+              {archived ? (
+                <MenuItem onClick={() => onPublish?.(ad.id)} icon={<Upload size={14} />} label="Опубликовать" color="var(--success)" />
+              ) : (
+                <MenuItem onClick={() => onArchive?.(ad.id)} icon={<Archive size={14} />} label="В архив" color="var(--warning)" />
+              )}
+              <MenuItem onClick={() => onDelete?.(ad.id)} icon={<Trash2 size={14} />} label="Удалить" color="var(--error)" />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function MenuItem({
+  icon, label, onClick, to, params, color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  to?: "/ads/$id";
+  params?: { id: string };
+  color?: string;
+}) {
+  const cls = "flex items-center gap-[10px] px-[14px] py-[8px] text-left text-[13px] font-medium transition-colors";
+  const style: React.CSSProperties = { color: color ?? "var(--foreground)" };
+  const onEnter = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.background = "var(--background-surface)");
+  const onLeave = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.background = "transparent");
+  if (to && params) {
+    return (
+      <Link to={to} params={params} className={cls} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+        {icon} {label}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onMouseDown={onClick} className={cls} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+      {icon} {label}
+    </button>
   );
 }

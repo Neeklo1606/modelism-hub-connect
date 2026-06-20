@@ -5,17 +5,46 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function MobileHeader() {
   return (
-    <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 px-4 py-2.5 backdrop-blur">
-      <Link to="/"><Logo /></Link>
-      <div className="flex items-center gap-2">
-        <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
-          <Search className="h-4 w-4" />
-        </button>
-        <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
-          <Bell className="h-4 w-4" />
-        </button>
+    <header
+      className="lg:hidden sticky top-0 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] px-[14px]"
+      style={{
+        height: 52,
+        background: "color-mix(in oklab, var(--background) 92%, transparent)",
+        backdropFilter: "saturate(180%) blur(12px)",
+        WebkitBackdropFilter: "saturate(180%) blur(12px)",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
+      <Link to="/" className="min-w-0 inline-flex items-center" aria-label="На главную">
+        <Logo />
+      </Link>
+      <div className="flex shrink-0 items-center gap-[2px]">
+        <IconBtn aria-label="Поиск"><Search size={18} /></IconBtn>
+        <IconBtn aria-label="Уведомления">
+          <span className="relative inline-flex">
+            <Bell size={18} />
+            <span
+              className="absolute -top-[2px] -right-[2px] h-[6px] w-[6px] rounded-full"
+              style={{ background: "var(--accent)", boxShadow: "0 0 0 2px var(--background)" }}
+            />
+          </span>
+        </IconBtn>
         <ThemeToggle />
       </div>
     </header>
+  );
+}
+
+function IconBtn({ children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...rest}
+      className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors duration-150"
+      style={{ color: "var(--foreground-70)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--background-surface)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+    >
+      {children}
+    </button>
   );
 }
