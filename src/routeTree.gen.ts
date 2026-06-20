@@ -18,6 +18,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessengerRouteImport } from './routes/messenger'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as CategoriesRouteImport } from './routes/categories'
@@ -74,6 +75,11 @@ const LoginRoute = LoginRouteImport.update({
 const LandingRoute = LandingRouteImport.update({
   id: '/landing',
   path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FriendsRoute = FriendsRouteImport.update({
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
+  '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
+  '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/friends': typeof FriendsRoute
+  '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/messenger': typeof MessengerRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/communities'
     | '/friends'
+    | '/help'
     | '/landing'
     | '/login'
     | '/messenger'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/communities'
     | '/friends'
+    | '/help'
     | '/landing'
     | '/login'
     | '/messenger'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/communities'
     | '/friends'
+    | '/help'
     | '/landing'
     | '/login'
     | '/messenger'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRouteWithChildren
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
   FriendsRoute: typeof FriendsRoute
+  HelpRoute: typeof HelpRoute
   LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   MessengerRoute: typeof MessengerRoute
@@ -361,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/landing'
       fullPath: '/landing'
       preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/friends': {
@@ -505,6 +525,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRouteWithChildren,
   CommunitiesRoute: CommunitiesRouteWithChildren,
   FriendsRoute: FriendsRoute,
+  HelpRoute: HelpRoute,
   LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   MessengerRoute: MessengerRoute,

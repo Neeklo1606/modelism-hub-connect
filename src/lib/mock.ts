@@ -448,3 +448,137 @@ export function formatRelativeTime(iso: string): string {
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
 
+
+// ============= v6.0 additions =============
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  periodLabel: string;
+  savingsLabel?: string;
+  isBestValue?: boolean;
+  isPopular?: boolean;
+  features: string[];
+  accent?: boolean;
+}
+
+export interface FAQItem {
+  id: string;
+  category: "general" | "ads" | "payment" | "account" | "communities" | "moderation";
+  question: string;
+  answer: string;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  monthlyRevenue: number;
+  activeAds: number;
+  totalPosts: number;
+  inModeration: number;
+  newToday: number;
+}
+
+export interface AdminAction {
+  id: string;
+  user: string;
+  action: string;
+  target: string;
+  time: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  avatar: string;
+  email: string;
+  city: string;
+  subscription: string | null;
+  role: "admin" | "moderator" | "user";
+  status: "active" | "blocked";
+  registeredAt: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount: number;
+  usedCount: number;
+}
+
+export const subscriptionPlans: SubscriptionPlan[] = [
+  { id: "test", name: "Тестовый доступ", price: 1, periodLabel: "1 день", features: ["Доступ ко всем разделам", "Чат в подкатегориях", "Просмотр объявлений", "1 размещение объявления"] },
+  { id: "month", name: "Месяц", price: 100, periodLabel: "месяц", features: ["Всё из Тестового", "Безлимитные объявления", "Приоритет в ленте", "Поддержка 24/7"], accent: true },
+  { id: "half", name: "Полгода", price: 500, periodLabel: "полгода", savingsLabel: "Экономия 100₽", isPopular: true, features: ["Всё из «Месяц»", "Скидки в магазине 10%", "Бейдж «Club» в профиле", "Комиссия 0% на продажи"], accent: true },
+  { id: "year", name: "Год", price: 800, periodLabel: "год", savingsLabel: "Экономия 400₽", isBestValue: true, features: ["Всё из «Полгода»", "3 бесплатных объявления/мес", "Бейдж «Club Pro» в профиле", "Без рекламы на платформе", "Приоритетная поддержка"] },
+];
+
+export const faqItems: FAQItem[] = [
+  { id: "f1", category: "general", question: "Что такое МоДЕЛИЗМ Club?", answer: "Это социальная платформа для моделистов, где можно общаться, делиться проектами, продавать и покупать запчасти и модели." },
+  { id: "f2", category: "general", question: "Как зарегистрироваться?", answer: "Нажмите «Регистрация» на главной, укажите имя, email и пароль. Подтвердите почту и заполните профиль." },
+  { id: "f3", category: "general", question: "Нужна ли подписка?", answer: "Базовый доступ бесплатный. Для расширенных функций нужна подписка — от 1 ₽ за тестовый день." },
+  { id: "f4", category: "ads", question: "Как разместить объявление?", answer: "Нажмите «Создать» → «Объявление», заполните форму (название, цена, фото), оплатите 20 ₽ и ждите модерации." },
+  { id: "f5", category: "ads", question: "Сколько стоит размещение?", answer: "20 ₽ за одно объявление. Подписчики «Год» получают 3 бесплатных размещения в месяц." },
+  { id: "f6", category: "ads", question: "Как долго висит объявление?", answer: "30 дней. После этого можно продлить или снять с публикации." },
+  { id: "f7", category: "payment", question: "Какие способы оплаты?", answer: "ЮKassa и Т-Банк. В production добавим также СБП и криптовалюту." },
+  { id: "f8", category: "payment", question: "Можно ли вернуть деньги?", answer: "Да, в течение 24 часов после оплаты. Напишите в поддержку." },
+  { id: "f9", category: "payment", question: "Что такое промокод?", answer: "Специальный код на скидку. Введите на странице подписки и нажмите «Применить»." },
+  { id: "f10", category: "account", question: "Как изменить профиль?", answer: "Перейдите в Профиль → нажмите «Редактировать». Можно сменить аватар, имя, город, интересы." },
+  { id: "f11", category: "account", question: "Как удалить аккаунт?", answer: "Напишите в поддержку с темой «Удаление аккаунта». Данные будут удалены в течение 7 дней." },
+  { id: "f12", category: "account", question: "Что такое верификация?", answer: "Подтверждение личности для доступа к расширенным функциям. Загрузите фото документа в профиле." },
+  { id: "f13", category: "communities", question: "Как создать сообщество?", answer: "В разделе «Сообщества» нажмите «Создать». Укажите название, описание, категорию." },
+  { id: "f14", category: "communities", question: "Кто может вступить в сообщество?", answer: "Любой зарегистрированный пользователь. Администратор может ограничить доступ." },
+  { id: "f15", category: "communities", question: "Как работают чаты подкатегорий?", answer: "В каждой подкатегории (например, «Масштаб 1:10») есть общий чат. Все сообщения видны участникам." },
+  { id: "f16", category: "moderation", question: "Почему мой пост на модерации?", answer: "Все публикации проходят проверку. Обычно это занимает до 2 часов." },
+  { id: "f17", category: "moderation", question: "Что нельзя публиковать?", answer: "Запрещены: спам, оскорбления, контент 18+, мошеннические объявления, политическая реклама." },
+  { id: "f18", category: "moderation", question: "Как пожаловаться на нарушение?", answer: "Нажмите «Пожаловаться» на посте или объявлении. Модератор рассмотрит в течение 24 часов." },
+];
+
+export const faqCategories: { id: FAQItem["category"] | "all"; label: string }[] = [
+  { id: "all", label: "Все" },
+  { id: "general", label: "Общее" },
+  { id: "ads", label: "Объявления" },
+  { id: "payment", label: "Оплата" },
+  { id: "account", label: "Аккаунт" },
+  { id: "communities", label: "Сообщества" },
+  { id: "moderation", label: "Модерация" },
+];
+
+export const adminStats: AdminStats = {
+  totalUsers: 12480,
+  monthlyRevenue: 384200,
+  activeAds: 2156,
+  totalPosts: 8742,
+  inModeration: 34,
+  newToday: 127,
+};
+
+export const adminActions: AdminAction[] = [
+  { id: "a1", user: "Александр RC", action: "Опубликовал пост", target: "Новый двигатель OS Speed", time: "5 мин назад" },
+  { id: "a2", user: "Сергей ДВС", action: "Разместил объявление", target: "Продам сервоприводы", time: "12 мин назад" },
+  { id: "a3", user: "Модератор", action: "Одобрил объявление", target: "FPV-очки DJI", time: "28 мин назад" },
+  { id: "a4", user: "Михаил Квадро", action: "Зарегистрировался", target: "—", time: "1 час назад" },
+  { id: "a5", user: "Андрей Самолёты", action: "Обновил профиль", target: "—", time: "2 часа назад" },
+  { id: "a6", user: "Модератор", action: "Отклонил пост", target: "Спам-пост #247", time: "3 часа назад" },
+  { id: "a7", user: "Олег DIY", action: "Вступил в сообщество", target: "Электроника и DIY", time: "4 часа назад" },
+  { id: "a8", user: "Дмитрий Моделист", action: "Оплатил подписку", target: "Тариф «Год»", time: "5 часов назад" },
+];
+
+const ava = (s: string) => `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s)}&backgroundColor=c8102e,1f2937,374151,6b7280`;
+
+export const adminUsers: AdminUser[] = [
+  { id: "au1", name: "Александр Ракетов", avatar: ava("Александр Ракетов"), email: "alex@modelizm.ru", city: "Краснодар", subscription: "Год", role: "admin", status: "active", registeredAt: "12.03.2025" },
+  { id: "au2", name: "Сергей Моторин", avatar: ava("Сергей Моторин"), email: "sergey@modelizm.ru", city: "Краснодар", subscription: "Месяц", role: "user", status: "active", registeredAt: "01.04.2025" },
+  { id: "au3", name: "Михаил Летов", avatar: ava("Михаил Летов"), email: "mikhail@modelizm.ru", city: "Москва", subscription: "Полгода", role: "moderator", status: "active", registeredAt: "15.04.2025" },
+  { id: "au4", name: "Андрей Крылов", avatar: ava("Андрей Крылов"), email: "andrey@modelizm.ru", city: "СПб", subscription: null, role: "user", status: "active", registeredAt: "20.04.2025" },
+  { id: "au5", name: "Олег Паяльник", avatar: ava("Олег Паяльник"), email: "oleg@modelizm.ru", city: "Новосибирск", subscription: "Тестовый", role: "user", status: "active", registeredAt: "05.05.2025" },
+  { id: "au6", name: "Дмитрий Шасси", avatar: ava("Дмитрий Шасси"), email: "dima@modelizm.ru", city: "Краснодар", subscription: null, role: "user", status: "blocked", registeredAt: "10.05.2025" },
+  { id: "au7", name: "Игорь Пропеллер", avatar: ava("Игорь Пропеллер"), email: "igor@modelizm.ru", city: "Екатеринбург", subscription: "Год", role: "user", status: "active", registeredAt: "12.05.2025" },
+  { id: "au8", name: "Виктор Рулевой", avatar: ava("Виктор Рулевой"), email: "victor@modelizm.ru", city: "Казань", subscription: "Месяц", role: "user", status: "active", registeredAt: "01.06.2025" },
+];
+
+export const promoCodes: PromoCode[] = [
+  { id: "pr1", code: "START2026", discount: 20, usedCount: 34 },
+  { id: "pr2", code: "MODELIZM", discount: 15, usedCount: 128 },
+  { id: "pr3", code: "HALFPRICE", discount: 50, usedCount: 5 },
+];
