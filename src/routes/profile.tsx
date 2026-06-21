@@ -8,6 +8,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { me, posts, ads, communities, userById } from "@/lib/mock";
 import type { User } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
