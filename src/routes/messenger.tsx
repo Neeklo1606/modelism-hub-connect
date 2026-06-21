@@ -3,14 +3,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
-  Paperclip, Search, Send, Users, X,
+  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
+import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/messenger")({
   head: () => ({ meta: [{ title: "Мессенджер — МоДелизМ Club" }] }),
@@ -157,6 +159,7 @@ function MessageBubble({
 
 function MessengerPage() {
   const dlgs = useStore(selectors.dialogsList);
+  const dialogMetaMap = useStore((s) => s.dialogMeta);
   const { chat } = Route.useSearch();
   const [activeId, setActiveId] = useState<string | null>(chat ?? dlgs[0]?.id ?? null);
   const [query, setQuery] = useState("");
@@ -165,7 +168,12 @@ function MessengerPage() {
   const [mobileView, setMobileView] = useState<"list" | "chat">(chat ? "chat" : "list");
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const getMeta = (id: string) => dialogMetaMap[id] ?? { archived: false, muted: false, blocked: false };
+
 
   // Respond to ?chat= search-param changes (e.g. "Написать" from another page)
   useEffect(() => {
@@ -197,12 +205,32 @@ function MessengerPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return dlgs;
-    return dlgs.filter((d) => {
+    const base = dlgs.filter((d) => {
+      const m = getMeta(d.id);
+      return showArchived ? m.archived : !m.archived;
+    });
+    if (!q) return base;
+    return base.filter((d) => {
       const u = userById(d.userId);
       return u.name.toLowerCase().includes(q) || d.lastMessage.toLowerCase().includes(q);
     });
-  }, [dlgs, query]);
+  }, [dlgs, query, dialogMetaMap, showArchived]);
+
+  const archivedCount = useMemo(
+    () => dlgs.filter((d) => getMeta(d.id).archived).length,
+    [dlgs, dialogMetaMap]
+  );
+
+  const handleCreateChat = (userId: string) => {
+    const id = openOrCreateDialogWith(userId);
+    setCreateOpen(false);
+    setActiveId(id);
+    setMobileView("chat");
+    setShowArchived(false);
+    actions.markRead(id);
+    toast.success("Чат открыт", { description: "Можете начать переписку прямо сейчас" });
+  };
+
 
   useEffect(() => {
     if (!scrollRef.current || chatLoading) return;
@@ -218,6 +246,10 @@ function MessengerPage() {
 
   const send = () => {
     if (!text.trim() || !active) return;
+    if (getMeta(active.id).blocked) {
+      toast.error("Пользователь заблокирован", { description: "Разблокируйте его, чтобы отправлять сообщения" });
+      return;
+    }
     const m: Message = {
       id: `nm${Date.now()}`,
       authorId: me.id,
@@ -230,6 +262,7 @@ function MessengerPage() {
     setText("");
     setReplyTo(null);
   };
+
 
 
   return (
@@ -248,28 +281,64 @@ function MessengerPage() {
           className={`flex min-h-0 flex-col md:flex ${mobileView === "list" ? "flex" : "hidden"}`}
           style={{ background: "var(--background-elevated)", borderRight: "1px solid var(--border)" }}
         >
-          <div className="sticky top-0 z-10 px-[16px] py-[12px]" style={{ background: "var(--background-elevated)", borderBottom: "1px solid var(--border)" }}>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Поиск диалога"
-                className="w-full text-[14px] outline-none"
-                style={{
-                  height: 40,
-                  paddingLeft: 36,
-                  paddingRight: 12,
-                  background: "var(--background-surface)",
-                  borderRadius: 10,
-                  border: "1.5px solid transparent",
-                  color: "var(--foreground)",
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--background)"; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.background = "var(--background-surface)"; }}
-              />
+          <div className="sticky top-0 z-10 flex flex-col gap-[10px] px-[16px] py-[12px]" style={{ background: "var(--background-elevated)", borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-[8px]">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Поиск диалога"
+                  className="w-full text-[14px] outline-none"
+                  style={{
+                    height: 40,
+                    paddingLeft: 36,
+                    paddingRight: 12,
+                    background: "var(--background-surface)",
+                    borderRadius: 10,
+                    border: "1.5px solid transparent",
+                    color: "var(--foreground)",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--background)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.background = "var(--background-surface)"; }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                aria-label="Новый чат"
+                title="Новый чат"
+                className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px]"
+                style={{ background: "var(--accent)", color: "white" }}
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+            <div className="flex items-center gap-[6px]">
+              {([
+                { key: false, label: "Активные" },
+                { key: true, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
+              ] as const).map((t) => {
+                const active = showArchived === t.key;
+                return (
+                  <button
+                    key={String(t.key)}
+                    onClick={() => setShowArchived(t.key)}
+                    className="inline-flex items-center text-[12px] font-semibold transition-colors"
+                    style={{
+                      height: 28, padding: "0 12px", borderRadius: 999,
+                      background: active ? "var(--accent-soft)" : "transparent",
+                      color: active ? "var(--accent)" : "var(--foreground-50)",
+                      border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
+
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {loading ? (
@@ -304,12 +373,17 @@ function MessengerPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-[8px]">
-                            <span className="truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>{u.name}</span>
+                            <span className="flex min-w-0 items-center gap-[6px] truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                              <span className="truncate">{u.name}</span>
+                              {getMeta(d.id).muted && <BellOff size={12} style={{ color: "var(--foreground-50)", flexShrink: 0 }} />}
+                              {getMeta(d.id).blocked && <Ban size={12} style={{ color: "var(--error)", flexShrink: 0 }} />}
+                              {getMeta(d.id).archived && <Archive size={12} style={{ color: "var(--foreground-50)", flexShrink: 0 }} />}
+                            </span>
                             <span className="shrink-0 font-mono text-[11px]" style={{ color: "var(--foreground-50)" }}>{formatRelativeTime(d.time)}</span>
                           </div>
                           <div className="truncate text-[13px]" style={{ color: "var(--foreground-50)" }}>{d.lastMessage}</div>
                         </div>
-                        {!!d.unread && (
+                        {!!d.unread && !getMeta(d.id).muted && (
                           <span
                             className="grid h-[20px] w-[20px] place-items-center rounded-full text-[11px] font-semibold"
                             style={{ background: "var(--accent)", color: "white" }}
@@ -317,6 +391,7 @@ function MessengerPage() {
                             {d.unread}
                           </span>
                         )}
+
                       </button>
                     </motion.li>
                   );
@@ -359,7 +434,7 @@ function MessengerPage() {
                   </div>
                 </Link>
                 <div className="ml-auto flex items-center gap-[4px]">
-                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} />
+                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} dialogId={active.id} />
                 </div>
 
               </header>
@@ -467,6 +542,7 @@ function MessengerPage() {
           )}
         </section>
       </div>
+      <CreateChatDialog open={createOpen} onClose={() => setCreateOpen(false)} onPick={handleCreateChat} />
     </AppLayout>
   );
 }

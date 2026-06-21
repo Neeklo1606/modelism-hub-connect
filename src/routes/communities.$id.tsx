@@ -11,6 +11,7 @@ import {
 } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
 import { PostCard } from "@/components/PostCard";
+import { useStore, actions, selectors } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/communities/$id")({
@@ -32,7 +33,8 @@ const TABS: { key: Tab; label: string; Icon: typeof FileText }[] = [
 function CommunityDetailPage() {
   const { id } = Route.useParams();
   const community = communities.find((c) => c.id === id);
-  const [joined, setJoined] = useState(!!community?.joined);
+  const currentUserId = useStore((s) => s.currentUserId);
+  const joined = useStore(selectors.isCommunityMember(currentUserId, id));
   const [tab, setTab] = useState<Tab>("posts");
   const [msgs, setMsgs] = useState<Message[]>(chatMessages);
   const [text, setText] = useState("");
@@ -132,8 +134,13 @@ function CommunityDetailPage() {
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
               onClick={() => {
-                setJoined((s) => !s);
-                toast.success(joined ? "Вы покинули сообщество" : `Вы вступили в «${community.name}»`);
+                if (joined) {
+                  actions.leaveCommunity(currentUserId, community.id);
+                  toast.success("Вы покинули сообщество", { description: `Вы больше не участник «${community.name}»` });
+                } else {
+                  actions.joinCommunity(currentUserId, community.id);
+                  toast.success(`Вы вступили в «${community.name}»`, { description: "Сообщество добавлено в ваш профиль" });
+                }
               }}
               className="font-semibold transition-colors duration-150"
               style={{

@@ -23,7 +23,14 @@ import type {
   ID,
 } from "./mock";
 
-export type AdStatusKey = "active" | "archived" | "moderation" | "rejected" | "deleted";
+export type AdStatusKey =
+  | "active"
+  | "archived"
+  | "moderation"
+  | "rejected"
+  | "deleted"
+  | "draft"
+  | "unpublished";
 
 export interface Friendship {
   id: string;
@@ -32,12 +39,20 @@ export interface Friendship {
   since: string;
 }
 
+export interface DialogMeta {
+  archived: boolean;
+  muted: boolean;
+  blocked: boolean;
+  mutedUntil?: string;
+}
+
 export interface AppState {
   users: Record<ID, User>;
   posts: Record<ID, Post>;
   ads: Record<ID, Ad>;
   adStatus: Record<ID, AdStatusKey>;
   dialogs: Record<ID, Dialog>;
+  dialogMeta: Record<ID, DialogMeta>;
   communities: Record<ID, Community>;
   communityMemberships: Record<ID, ID[]>; // userId -> communityIds
   friendRequests: FriendRequest[];
@@ -89,6 +104,9 @@ export function createInitialState(): AppState {
   adStatus["a17"] = "archived";
   adStatus["a22"] = "moderation";
   adStatus["a11"] = "rejected";
+  if (mockAds[12]) adStatus[mockAds[12].id] = "draft";
+  if (mockAds[13]) adStatus[mockAds[13].id] = "unpublished";
+  if (mockAds[14]) adStatus[mockAds[14].id] = "deleted";
 
   return {
     users: toRecord(mockUsers),
@@ -96,6 +114,7 @@ export function createInitialState(): AppState {
     ads: toRecord(mockAds),
     adStatus,
     dialogs: toRecord(mockDialogs),
+    dialogMeta: {},
     communities: toRecord(mockCommunities),
     communityMemberships,
     friendRequests: [...mockFriendRequests],
@@ -133,7 +152,8 @@ type Action =
   | { type: "CREATE_POST"; post: Post }
   | { type: "LIKE_POST"; postId: ID; like: boolean }
   | { type: "SAVE_POST"; postId: ID; save: boolean }
-  | { type: "ADD_COMMENT"; postId: ID; comment: Comment };
+  | { type: "ADD_COMMENT"; postId: ID; comment: Comment }
+  | { type: "SET_DIALOG_META"; dialogId: ID; patch: Partial<DialogMeta> };
 
 function reducer(s: AppState, a: Action): AppState {
   switch (a.type) {
@@ -278,6 +298,10 @@ function reducer(s: AppState, a: Action): AppState {
         },
       };
     }
+    case "SET_DIALOG_META": {
+      const prev = s.dialogMeta[a.dialogId] ?? { archived: false, muted: false, blocked: false };
+      return { ...s, dialogMeta: { ...s.dialogMeta, [a.dialogId]: { ...prev, ...a.patch } } };
+    }
     default:
       return s;
   }
@@ -318,6 +342,7 @@ export const actions = {
   likePost: (postId: ID, like: boolean) => dispatch({ type: "LIKE_POST", postId, like }),
   savePost: (postId: ID, save: boolean) => dispatch({ type: "SAVE_POST", postId, save }),
   addComment: (postId: ID, comment: Comment) => dispatch({ type: "ADD_COMMENT", postId, comment }),
+  setDialogMeta: (dialogId: ID, patch: Partial<DialogMeta>) => dispatch({ type: "SET_DIALOG_META", dialogId, patch }),
 };
 
 // Imperative helper: find an existing dialog with the given user, or create one.
@@ -355,4 +380,12 @@ export const selectors = {
       .filter((c): c is Community => Boolean(c)),
   myAds: (userId: ID) => (s: AppState): Ad[] =>
     Object.values(s.ads).filter((a) => a.authorId === userId),
+  isCommunityMember: (userId: ID, communityId: ID) => (s: AppState): boolean =>
+    (s.communityMemberships[userId] ?? []).includes(communityId),
+  recommendedCommunities: (userId: ID) => (s: AppState): Community[] => {
+    const mine = new Set(s.communityMemberships[userId] ?? []);
+    return Object.values(s.communities).filter((c) => !mine.has(c.id));
+  },
+  dialogMeta: (dialogId: ID) => (s: AppState): DialogMeta =>
+    s.dialogMeta[dialogId] ?? { archived: false, muted: false, blocked: false },
 };

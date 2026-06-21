@@ -6,13 +6,16 @@ import {
 import { useState } from "react";
 import type { Ad } from "@/lib/mock";
 
-export type MyAdStatus = "active" | "archived" | "moderation" | "rejected";
+export type MyAdStatus = "active" | "archived" | "moderation" | "rejected" | "draft" | "unpublished" | "deleted";
 
 const STATUS_BADGE: Record<MyAdStatus, { dot: string; fg: string; label: string }> = {
-  active:     { dot: "var(--success)", fg: "var(--success)", label: "Активно" },
-  archived:   { dot: "var(--foreground-30)", fg: "var(--foreground-50)", label: "В архиве" },
-  moderation: { dot: "var(--warning)", fg: "var(--warning)", label: "На модерации" },
-  rejected:   { dot: "var(--error)",   fg: "var(--error)",   label: "Отклонено" },
+  active:      { dot: "var(--success)",       fg: "var(--success)",       label: "Активно" },
+  archived:    { dot: "var(--foreground-30)", fg: "var(--foreground-50)", label: "В архиве" },
+  moderation:  { dot: "var(--warning)",       fg: "var(--warning)",       label: "На модерации" },
+  rejected:    { dot: "var(--error)",         fg: "var(--error)",         label: "С ошибками" },
+  draft:       { dot: "var(--foreground-50)", fg: "var(--foreground-70)", label: "Черновик" },
+  unpublished: { dot: "var(--foreground-50)", fg: "var(--foreground-70)", label: "Не опубликовано" },
+  deleted:     { dot: "var(--error)",         fg: "var(--error)",         label: "Удалено" },
 };
 
 interface Props {
@@ -29,7 +32,7 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
   const badge = STATUS_BADGE[status];
   const hero = ad.gallery?.[0] ?? ad.image;
   const [menuOpen, setMenuOpen] = useState(false);
-  const archived = status === "archived" || status === "rejected";
+  const archived = status !== "active" && status !== "moderation";
 
   return (
     <motion.div

@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
-import { Phone, MoreHorizontal, Info, Search, Trash2, Ban, X } from "lucide-react";
+import { Phone, MoreHorizontal, Info, Search, Bell, BellOff, Archive, ArchiveRestore, Ban, ShieldOff, X } from "lucide-react";
 import { toast } from "sonner";
+import { actions, useStore, selectors } from "@/lib/store";
 
 interface Props {
   partnerId: string;
   partnerName: string;
+  dialogId?: string;
+  onSearch?: () => void;
 }
 
-export function ChatHeaderActions({ partnerId, partnerName }: Props) {
+export function ChatHeaderActions({ partnerId, partnerName, dialogId, onSearch }: Props) {
+  const meta = useStore(dialogId ? selectors.dialogMeta(dialogId) : () => ({ archived: false, muted: false, blocked: false }));
   const [open, setOpen] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -40,19 +44,47 @@ export function ChatHeaderActions({ partnerId, partnerName }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [callOpen]);
 
+  const close = () => setOpen(false);
+
   const goProfile = () => {
-    setOpen(false);
+    close();
     navigate({ to: "/user/$id", params: { id: partnerId } });
   };
 
-  const block = () => {
-    setOpen(false);
-    toast.success(`${partnerName} заблокирован`);
+  const toggleMute = () => {
+    close();
+    if (!dialogId) return;
+    if (meta.muted) {
+      actions.setDialogMeta(dialogId, { muted: false, mutedUntil: undefined });
+      toast.success("Уведомления включены", { description: `Вы снова получаете уведомления от ${partnerName}` });
+    } else {
+      actions.setDialogMeta(dialogId, { muted: true });
+      toast.success("Уведомления отключены", { description: `Чат с ${partnerName} больше не присылает уведомления` });
+    }
   };
 
-  const placeholder = (label: string) => () => {
-    setOpen(false);
-    toast(`${label}: будет доступно позже`);
+  const toggleArchive = () => {
+    close();
+    if (!dialogId) return;
+    if (meta.archived) {
+      actions.setDialogMeta(dialogId, { archived: false });
+      toast.success("Чат восстановлен", { description: "Диалог вернулся в активный список" });
+    } else {
+      actions.setDialogMeta(dialogId, { archived: true });
+      toast.success("Чат заархивирован", { description: "Чат перемещён в архив. Вы можете найти его в списке архивированных." });
+    }
+  };
+
+  const toggleBlock = () => {
+    close();
+    if (!dialogId) return;
+    if (meta.blocked) {
+      actions.setDialogMeta(dialogId, { blocked: false });
+      toast.success(`${partnerName} разблокирован`, { description: "Вы снова можете обмениваться сообщениями" });
+    } else {
+      actions.setDialogMeta(dialogId, { blocked: true });
+      toast.success(`${partnerName} заблокирован`, { description: "Вы больше не будете получать сообщения от этого пользователя" });
+    }
   };
 
   return (
@@ -87,7 +119,7 @@ export function ChatHeaderActions({ partnerId, partnerName }: Props) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.96 }}
               transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute right-0 top-full z-[60] mt-[6px] w-[240px] overflow-hidden rounded-[12px] border"
+              className="absolute right-0 top-full z-[60] mt-[6px] w-[260px] overflow-hidden rounded-[12px] border"
               style={{
                 background: "var(--background-elevated)",
                 borderColor: "var(--border)",
@@ -95,10 +127,24 @@ export function ChatHeaderActions({ partnerId, partnerName }: Props) {
               }}
             >
               <Item icon={Info} label="Информация" onClick={goProfile} />
-              <Item icon={Search} label="Поиск в чате" onClick={placeholder("Поиск")} />
-              <Item icon={Trash2} label="Очистить историю" onClick={placeholder("Очистка")} />
+              {onSearch && <Item icon={Search} label="Поиск в чате" onClick={() => { close(); onSearch(); }} />}
+              <Item
+                icon={meta.muted ? Bell : BellOff}
+                label={meta.muted ? "Включить уведомления" : "Отключить уведомления"}
+                onClick={toggleMute}
+              />
+              <Item
+                icon={meta.archived ? ArchiveRestore : Archive}
+                label={meta.archived ? "Вернуть из архива" : "Архивировать"}
+                onClick={toggleArchive}
+              />
               <div className="border-t" style={{ borderColor: "var(--border)" }} />
-              <Item icon={Ban} label="Заблокировать" onClick={block} danger />
+              <Item
+                icon={meta.blocked ? ShieldOff : Ban}
+                label={meta.blocked ? "Разблокировать" : "Заблокировать"}
+                onClick={toggleBlock}
+                danger={!meta.blocked}
+              />
             </motion.div>
           )}
         </AnimatePresence>

@@ -5,7 +5,9 @@ import {
   Car, Plane, Ship, Send, Code2, Wrench, Cpu, BatteryCharging, Users, Search,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { communities as initial } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
+import type { Community } from "@/lib/mock";
+import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/communities/")({
@@ -22,23 +24,53 @@ const pulse = {
   transition: { duration: 1.2, repeat: Infinity, ease: "easeInOut" as const },
 };
 
+type SectionKey = "my" | "recommended";
+
 function CommunitiesPage() {
-  const [list, setList] = useState(initial);
+  const currentUserId = useStore((s) => s.currentUserId);
+  const myCommunities = useStore(selectors.userCommunities(currentUserId));
+  const recommended = useStore(selectors.recommendedCommunities(currentUserId));
+
   const [query, setQuery] = useState("");
+  const debounced = useDebounce(query, 250);
   const [sort, setSort] = useState<"popular" | "new">("popular");
+  const [section, setSection] = useState<SectionKey>("my");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
+    const t = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(t);
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const arr = list.filter((c) => !q || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q));
+  // If user has no memberships, default to recommended
+  useEffect(() => {
+    if (myCommunities.length === 0) setSection("recommended");
+  }, [myCommunities.length]);
+
+  const apply = (list: Community[]) => {
+    const q = debounced.trim().toLowerCase();
+    const arr = list.filter(
+      (c) => !q || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q)
+    );
     if (sort === "popular") return [...arr].sort((a, b) => b.members - a.members);
     return [...arr].reverse();
-  }, [list, query, sort]);
+  };
+
+  const myFiltered = useMemo(() => apply(myCommunities), [myCommunities, debounced, sort]);
+  const recFiltered = useMemo(() => apply(recommended), [recommended, debounced, sort]);
+
+  const visible = section === "my" ? myFiltered : recFiltered;
+
+  const handleToggle = (c: Community) => {
+    const isMember = myCommunities.some((x) => x.id === c.id);
+    if (isMember) {
+      actions.leaveCommunity(currentUserId, c.id);
+      toast.success("Вы покинули сообщество", { description: `Вы больше не участник «${c.name}»` });
+    } else {
+      actions.joinCommunity(currentUserId, c.id);
+      toast.success(`Вы вступили в «${c.name}»`, { description: "Сообщество добавлено в ваш профиль" });
+    }
+  };
 
   return (
     <AppLayout rightColumn={false}>
@@ -47,6 +79,46 @@ function CommunitiesPage() {
           <h1 className="font-display text-[28px] font-bold" style={{ color: "var(--foreground)" }}>Сообщества</h1>
           <p className="mt-[4px] text-[14px]" style={{ color: "var(--foreground-50)" }}>Тематические группы моделистов</p>
         </header>
+
+        {/* Section tabs */}
+        <nav role="tablist" className="relative flex items-center gap-[4px]" style={{ borderBottom: "1px solid var(--border)" }}>
+          {([
+            { key: "my" as const, label: "Мои сообщества", count: myCommunities.length },
+            { key: "recommended" as const, label: "Рекомендованные", count: recommended.length },
+          ]).map((t) => {
+            const active = section === t.key;
+            return (
+              <button
+                key={t.key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setSection(t.key)}
+                className="relative inline-flex items-center gap-[8px] px-[16px] py-[12px] text-[14px] font-semibold transition-colors"
+                style={{ color: active ? "var(--foreground)" : "var(--foreground-50)" }}
+              >
+                {t.label}
+                <span
+                  className="inline-flex h-[20px] min-w-[20px] items-center justify-center px-[6px] text-[11px] font-bold"
+                  style={{
+                    background: active ? "var(--accent-soft)" : "var(--background-surface)",
+                    color: active ? "var(--accent)" : "var(--foreground-50)",
+                    borderRadius: 999,
+                  }}
+                >
+                  {t.count}
+                </span>
+                {active && (
+                  <motion.span
+                    layoutId="communities-tab-underline"
+                    className="absolute bottom-[-1px] left-[8px] right-[8px]"
+                    style={{ height: 3, background: "var(--accent)", borderRadius: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
         <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center">
           <div className="relative flex-1">
@@ -99,17 +171,35 @@ function CommunitiesPage() {
                   <div className="flex-1 space-y-[8px]">
                     <motion.div {...pulse} className="h-[14px] rounded-[6px]" style={{ background: "var(--background-surface)", width: "60%" }} />
                     <motion.div {...pulse} className="h-[12px] rounded-[6px]" style={{ background: "var(--background-surface)", width: "90%" }} />
-                    <motion.div {...pulse} className="h-[12px] rounded-[6px]" style={{ background: "var(--background-surface)", width: "80%" }} />
                   </div>
                 </div>
               </div>
             ))}
           </div>
+        ) : visible.length === 0 ? (
+          <div className="grid place-items-center gap-[10px] py-[60px] text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
+            <div className="grid h-[56px] w-[56px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-50)" }}>
+              <Users size={24} />
+            </div>
+            <div className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
+              {section === "my" ? "Вы ещё не вступили ни в одно сообщество" : "Ничего не найдено"}
+            </div>
+            {section === "my" && (
+              <button
+                onClick={() => setSection("recommended")}
+                className="mt-[4px] inline-flex h-[36px] items-center px-[16px] text-[13px] font-semibold"
+                style={{ background: "var(--accent)", color: "white", borderRadius: 10 }}
+              >
+                Посмотреть рекомендованные
+              </button>
+            )}
+          </div>
         ) : (
           <AnimatePresence mode="popLayout">
-            <motion.div className="grid gap-[16px] sm:grid-cols-2">
-              {filtered.map((g) => {
+            <motion.div key={section} className="grid gap-[16px] sm:grid-cols-2">
+              {visible.map((g) => {
                 const Icon = ICON_MAP[g.avatarIcon ?? "Users"] ?? Users;
+                const isMember = myCommunities.some((x) => x.id === g.id);
                 return (
                   <article
                     key={g.id}
@@ -140,19 +230,16 @@ function CommunitiesPage() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      onClick={() => {
-                        setList((p) => p.map((c) => c.id === g.id ? { ...c, joined: !c.joined } : c));
-                        toast.success(g.joined ? "Вы покинули сообщество" : `Вы вступили в сообщество «${g.name}»`);
-                      }}
+                      onClick={() => handleToggle(g)}
                       className="w-full font-semibold transition-colors duration-150"
                       style={{
                         height: 38, borderRadius: 10, fontSize: 13,
-                        background: g.joined ? "transparent" : "var(--accent)",
-                        color: g.joined ? "var(--foreground-70)" : "white",
-                        border: g.joined ? "1px solid var(--border)" : "none",
+                        background: isMember ? "transparent" : "var(--accent)",
+                        color: isMember ? "var(--foreground-70)" : "white",
+                        border: isMember ? "1px solid var(--border)" : "none",
                       }}
                     >
-                      {g.joined ? "Покинуть" : "Вступить"}
+                      {isMember ? "Покинуть" : "Вступить"}
                     </motion.button>
                   </article>
                 );
