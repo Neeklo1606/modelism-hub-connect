@@ -23,7 +23,14 @@ import type {
   ID,
 } from "./mock";
 
-export type AdStatusKey = "active" | "archived" | "moderation" | "rejected" | "deleted";
+export type AdStatusKey =
+  | "active"
+  | "archived"
+  | "moderation"
+  | "rejected"
+  | "deleted"
+  | "draft"
+  | "unpublished";
 
 export interface Friendship {
   id: string;
@@ -32,12 +39,20 @@ export interface Friendship {
   since: string;
 }
 
+export interface DialogMeta {
+  archived: boolean;
+  muted: boolean;
+  blocked: boolean;
+  mutedUntil?: string;
+}
+
 export interface AppState {
   users: Record<ID, User>;
   posts: Record<ID, Post>;
   ads: Record<ID, Ad>;
   adStatus: Record<ID, AdStatusKey>;
   dialogs: Record<ID, Dialog>;
+  dialogMeta: Record<ID, DialogMeta>;
   communities: Record<ID, Community>;
   communityMemberships: Record<ID, ID[]>; // userId -> communityIds
   friendRequests: FriendRequest[];
