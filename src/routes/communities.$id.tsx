@@ -11,6 +11,7 @@ import {
 } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
 import { PostCard } from "@/components/PostCard";
+import { useStore, actions, selectors } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/communities/$id")({
