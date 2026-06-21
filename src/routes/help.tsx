@@ -328,7 +328,7 @@ function HelpPage() {
             <div style={{ fontSize: "13px", color: "var(--foreground-50)" }}>Ответ в течение 15 минут в рабочее время</div>
           </div>
           <a
-            href="https://t.me/modelizm_club_support"
+            href="https://t.me/modelizm_forum_support"
             target="_blank"
             rel="noreferrer"
             style={{
