@@ -111,6 +111,7 @@ export function createInitialState(): AppState {
     ads: toRecord(mockAds),
     adStatus,
     dialogs: toRecord(mockDialogs),
+    dialogMeta: {},
     communities: toRecord(mockCommunities),
     communityMemberships,
     friendRequests: [...mockFriendRequests],
