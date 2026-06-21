@@ -207,7 +207,7 @@ export function PostCard({ post, isSavedExternal, onToggleSave }: Props) {
           <span>{commentsCount}</span>
         </button>
 
-        <RepostMenu reposted={reposted} count={reposts} onRepost={toggleRepost} />
+        <RepostMenu postId={post.id} reposted={reposted} count={reposts} onRepost={toggleRepost} />
 
         <button
           onClick={toggleSave}
