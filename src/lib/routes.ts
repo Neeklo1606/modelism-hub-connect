@@ -1,0 +1,47 @@
+// Single source of truth for application routes.
+// Always import from here instead of hardcoding paths in components.
+
+export const ROUTES = {
+  home: "/",
+  feed: "/",
+  communities: "/communities",
+  community: (id: string) => `/communities/${id}` as const,
+  ads: "/ads",
+  ad: (id: string) => `/ads/${id}` as const,
+  adCreate: "/ads/new",
+  messenger: "/messenger",
+  messengerChat: (chatId: string) => `/messenger?chat=${chatId}` as const,
+  profile: "/profile",
+  user: (userId: string) => `/user/${userId}` as const,
+  friends: "/friends",
+  categories: "/categories",
+  category: (id: string) => `/categories/${id}` as const,
+  subcategory: (id: string, subId: string) => `/categories/${id}/${subId}` as const,
+  subscription: "/subscription",
+  help: "/help",
+  admin: "/admin",
+} as const;
+
+// Maps sidebar section ids to URL prefixes that should highlight it.
+export const SIDEBAR_ROUTE_MAP: Record<string, string[]> = {
+  feed: ["/", "/categories"],
+  communities: ["/communities"],
+  ads: ["/ads"],
+  messenger: ["/messenger"],
+  profile: ["/profile", "/user"],
+  friends: ["/friends"],
+  subscription: ["/subscription"],
+  help: ["/help"],
+  admin: ["/admin"],
+};
+
+export function getActiveSection(pathname: string): string | null {
+  // Exact-match priority pass so "/" doesn't claim every URL.
+  for (const [section, patterns] of Object.entries(SIDEBAR_ROUTE_MAP)) {
+    if (patterns.some((p) => p !== "/" && (pathname === p || pathname.startsWith(p + "/")))) {
+      return section;
+    }
+  }
+  if (pathname === "/") return "feed";
+  return null;
+}

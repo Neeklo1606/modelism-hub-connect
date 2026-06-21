@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Bookmark, Eye, MoreHorizontal, Repeat2 } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Eye, Repeat2 } from "lucide-react";
 import type { Post, Comment } from "@/lib/mock";
 import { userById, me } from "@/lib/mock";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CommentSection } from "@/components/feed/CommentSection";
 import { RepostMenu } from "@/components/feed/RepostMenu";
+import { PostActionMenu } from "@/components/post/PostActionMenu";
 
 interface Props {
   post: Post;
@@ -109,13 +110,8 @@ export function PostCard({ post, isSavedExternal, onToggleSave }: Props) {
             {post.date} · {post.category}
           </div>
         </div>
-        <button
-          className="grid h-[32px] w-[32px] place-items-center rounded-[8px] hover:bg-[var(--background-surface)]"
-          style={{ color: "var(--foreground-70)" }}
-          aria-label="Меню"
-        >
-          <MoreHorizontal className="h-[16px] w-[16px]" />
-        </button>
+        <PostActionMenu postId={post.id} saved={saved} title={post.title} text={post.text} />
+
       </header>
 
       <button
@@ -211,7 +207,7 @@ export function PostCard({ post, isSavedExternal, onToggleSave }: Props) {
           <span>{commentsCount}</span>
         </button>
 
-        <RepostMenu reposted={reposted} count={reposts} onRepost={toggleRepost} />
+        <RepostMenu postId={post.id} reposted={reposted} count={reposts} onRepost={toggleRepost} />
 
         <button
           onClick={toggleSave}

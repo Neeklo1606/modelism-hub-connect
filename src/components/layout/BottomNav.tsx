@@ -2,21 +2,26 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Newspaper, MessageSquare, Plus, Megaphone, User } from "lucide-react";
 import { useState } from "react";
 import { CreateChooserModal } from "@/components/CreateChooserModal";
+import { getActiveSection } from "@/lib/routes";
 
-type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper };
+type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper; section: string };
+
 
 const LEFT: Item[] = [
-  { to: "/", label: "Лента", icon: Newspaper },
-  { to: "/messenger", label: "Чаты", icon: MessageSquare },
+  { to: "/", label: "Лента", icon: Newspaper, section: "feed" },
+  { to: "/messenger", label: "Чаты", icon: MessageSquare, section: "messenger" },
 ];
 const RIGHT: Item[] = [
-  { to: "/ads", label: "Объявления", icon: Megaphone },
-  { to: "/profile", label: "Профиль", icon: User },
+  { to: "/ads", label: "Объявления", icon: Megaphone, section: "ads" },
+  { to: "/profile", label: "Профиль", icon: User, section: "profile" },
 ];
+
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const activeSection = getActiveSection(pathname);
   const [open, setOpen] = useState(false);
+
 
   return (
     <>
@@ -31,7 +36,7 @@ export function BottomNav() {
         }}
       >
         <ul className="grid grid-cols-5 items-center" style={{ height: 60 }}>
-          {LEFT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to} />)}
+          {LEFT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
           <li className="flex items-center justify-center">
             <button
               onClick={() => setOpen(true)}
@@ -48,7 +53,7 @@ export function BottomNav() {
               <Plus size={22} strokeWidth={2.4} />
             </button>
           </li>
-          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to || (it.to === "/profile" && pathname.startsWith("/profile"))} />)}
+          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
         </ul>
       </nav>
       <CreateChooserModal open={open} onOpenChange={setOpen} />

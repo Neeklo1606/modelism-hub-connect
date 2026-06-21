@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { users, me, userById, formatRelativeTime } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/friends")({
@@ -27,6 +27,8 @@ function FriendsPage() {
   const friendIds = useStore(selectors.friendsOf(me.id));
   const requests = useStore(selectors.pendingRequests(me.id));
   const [loading, setLoading] = useState(true);
+  const navigateMessenger = useNavigate();
+
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 450);
@@ -217,9 +219,18 @@ function FriendsPage() {
                           >
                             {isAdded ? <><Check size={12} />В друзьях</> : <><UserPlus size={12} />Добавить</>}
                           </button>
-                          <Link to="/messenger" className="inline-flex items-center gap-[4px] font-medium" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const dialogId = openOrCreateDialogWith(u.id);
+                              navigateMessenger({ to: "/messenger", search: { chat: dialogId } });
+                            }}
+                            className="inline-flex items-center gap-[4px] font-medium"
+                            style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}
+                          >
                             <MessageSquare size={12} /> Написать
-                          </Link>
+                          </button>
+
                         </div>
                       </div>
                     </article>

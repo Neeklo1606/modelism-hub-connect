@@ -1,85 +1,68 @@
-# v4.0 — Раздел объявлений (МоДелизМ Club)
+## Context
 
-Апгрейд транзакционного трека: карточки, детальная страница, мастер создания, продвинутый список. Всё bespoke, только `var(--...)` токены, Framer Motion, без shadcn-дефолтов.
+The uploaded spec is written for a React Router DOM project with `src/pages/` and `src/App.tsx`. Our project uses **TanStack Router** with file-based `src/routes/`, and our paths are already different (`/` not `/feed`, `/messenger` not `/messages`, `/ads` not `/market`, `/user/$id` not `/profile/:userId`, `/categories/$id/$subId` not `/feed/category/:id/:sub`).
 
-## Что меняется / добавляется
+I will keep our existing routes and translate the spec's API/file conventions to ours. The actual bug fixes are what matters; the routing constants will point at our real paths.
 
-### Файлы
-**Изменить:**
-- `src/components/AdCard.tsx` — полный rewrite (v2)
-- `src/routes/ads.tsx` — sticky-фильтры, поиск с debounce, сортировка, пагинация, skeleton
-- `src/routes/ads.new.tsx` — 3-шаговый мастер
-- `src/lib/mock.ts` — расширить `Ad` (gallery, description, seller, deliveryDetails, condition, createdAt, views, likes) + 30+ объявлений
+## Scope: 11 bug fixes (all in spec)
 
-**Создать:**
-- `src/routes/ads.$id.tsx` — детальная страница
-- `src/components/ads/AdGallery.tsx` — Embla карусель + thumbnails
-- `src/components/ads/SellerCard.tsx` — карточка продавца
-- `src/components/ads/SimilarAds.tsx` — горизонтальный скролл похожих
-- `src/components/ads/AdCardSkeleton.tsx` — shimmer-скелет
-- `src/components/ads/AdFilters.tsx` — sticky-сайдбар фильтров (desktop) + bottom sheet (mobile)
-- `src/components/ads/AdSortBar.tsx` — поиск + сортировка
-- `src/components/ads/wizard/StepIndicator.tsx` — индикатор 3-х шагов
-- `src/components/ads/wizard/StepPhotos.tsx`, `StepData.tsx`, `StepPreview.tsx`
-- `src/components/ads/wizard/SuccessModal.tsx` — AnimatePresence модалка
-- `src/components/ui-bespoke/RadioCard.tsx`, `Checkbox.tsx` — кастомные контролы
+| # | Severity | Bug | Fix |
+|---|----------|-----|-----|
+| 17 | CRITICAL | «Написать» on a user card opens chat with the wrong user (falls back to first dialog) | Look up dialog by `userId` from THAT card's data; if no dialog exists, dispatch `createDialog` then navigate to it; never fall back to `dialogs[0]` |
+| 5  | MEDIUM | «...» on post card does nothing | Wire `PostActionMenu` (Save/Copy link/Share/Hide/Report) with framer-motion popover, Escape + outside click |
+| 8  | HIGH | Repost menu actions dead | Wire Repost menu: "В ленту" (toast), "В сообщения" (chat picker), "Скопировать ссылку" (clipboard + toast), "Внешние сети" (Web Share + fallback) |
+| 3  | HIGH | «Подробнее» on ad card dead | Add `ctaType` to `Ad` mock (`internalPage` / `externalLink` / `modal`); wire button per type |
+| 12 | HIGH | Call + «...» in messenger header dead | Custom action menu: Информация → `/user/$id`, Заблокировать → toast, Поиск/Очистить → "Будет доступно позже", Call → confirm modal |
+| 2  | MEDIUM | Banner in feed: click breaks, close button cascades | Whole banner is link OR button; close has `stopPropagation`; `action.type === 'none'` is no-op |
+| 9  | MEDIUM | Subcategory click shows intermediate category page | Subcategory in sidebar links DIRECTLY to `/categories/$id/$subId` |
+| 1  | MEDIUM | «Помощь» button has no route | Already exists at `/help` — verify sidebar link works |
+| —  | — | Dead clicks anywhere (empty `onClick={() => {}}`) | Replace with toast «Будет доступно позже» |
+| —  | — | `window.location.*` / `location.reload()` | Replace with `useNavigate` / `Link` |
+| —  | — | Active sidebar highlighting for nested routes | `useLocation` + `getActiveSection(pathname)` |
 
-## Дизайн-контракт
+## Architecture changes
 
-- Все цвета — `var(--accent)`, `var(--background-*)`, `var(--foreground-*)`, `var(--border*)`, `var(--success/warning/error)` и их `*-soft`
-- Радиусы — `var(--r-card)`, `var(--r-card-sm)`, `var(--r-button)`, `var(--r-input)`, `var(--r-tag)`, `var(--r-pill)`, `var(--r-modal)`
-- Тени — `var(--shadow-card)`, `--shadow-card-hover`, `--shadow-float`, `--shadow-glow-accent`, `--shadow-button`
-- Spacing/font-size — точные px через `[16px]`-нотацию
-- Анимации — только Framer Motion, без `layoutId`, ≤800ms, springs только на клик
-- Работает в light+dark, RU-копия, без horizontal scroll, touch ≥44px
+**New files**
+- `src/lib/routes.ts` — typed `ROUTES` constants and `getActiveSection(pathname)` mapped to OUR paths (`/`, `/messenger`, `/ads`, `/categories/$id/$subId`, `/user/$id`, etc.)
+- `src/components/post/PostActionMenu.tsx` — custom framer-motion popover (no shadcn Dialog/DropdownMenu)
+- `src/components/messenger/ChatHeaderActions.tsx` — call confirm + «...» menu
+- `src/components/ads/AdCTAButton.tsx` — handles 3 cta types
+- `src/components/feed/FeedBanner.tsx` — safe-click banner wrapper
 
-## AdCard v2
+**Modified files**
+- `src/lib/store.ts` — add `createDialog(toUserId)` action that returns/creates a dialog id; add `repostPost`, `hideOrReportPost` (toast-only) stubs
+- `src/lib/mock.ts` — add `ctaType` + `ctaUrl` to `Ad`
+- `src/routes/messenger.tsx` — wire ChatHeaderActions; remove dead buttons
+- `src/routes/friends.tsx`, `src/routes/user.$id.tsx` — «Написать» calls `store.openOrCreateDialogWith(userId)` then `navigate({ to: '/messenger', search: { chat: id } })` — **no fallback to first dialog**
+- `src/components/PostCard.tsx` — mount `PostActionMenu` on «...» and Repost; route share link to `/` + post anchor (we don't have `/post/$id`; I'll add a thin redirect route or use feed scroll)
+- `src/components/layout/Sidebar.tsx` + `BottomNav.tsx` — use `ROUTES` constants + `getActiveSection`; nested-route highlight; subcategory direct link
+- `src/components/AdBanner.tsx` (the in-feed banner) — split clickable bg vs close button
 
-Bespoke карточка: фото 4:3 с hover-zoom, бейдж статуса (Продаю/Куплю/Обмен) в углу, иконка bookmark, заголовок (2 строки clamp), цена крупно `--font-display`, мета (категория · подкатегория), строка city + delivery icons, footer с views/likes/createdAt. Hover: подъём `--shadow-card-hover`, image scale 1.04. Состояния: default / liked / moderated (полупрозрачность + бейдж) / rejected (border --error).
+## What I am NOT doing (out of scope of this pass)
 
-## Детальная страница `/ads/$id`
+- Renaming our existing routes to `/feed` `/messages` `/market` (would break every existing link, tests, deep-link suite). Routes stay; only constants centralize them.
+- Replacing existing shadcn components elsewhere — only the menus listed above are rebuilt with framer-motion as the spec requires.
+- Adding a new `/post/$id` route unless needed for the share-link feature (will use a hash anchor on the feed if a full route adds too much surface area; tell me if you want a real post detail page).
 
-Layout: 2 колонки (gallery + sticky правая info-панель), под ней блоки описание, доставка, продавец (SellerCard), похожие (SimilarAds horizontal scroll). Embla с thumbnails и стрелками. Кнопки «Написать», «Показать контакт» (раскрытие), «В избранное», «Поделиться».
+## Verification
 
-## Wizard `/ads/new` (3 шага)
+After implementing, I'll run a Playwright sweep covering the spec's bug-by-bug table:
+1. «Написать» on each user → correct chat id, never first
+2. Post «...» menu opens, all 5 items work
+3. Repost menu — 4 paths, clipboard verified
+4. Ad «Подробнее» — 3 cta types
+5. Messenger header — call modal + 3 menu items
+6. Banner — bg click vs close button
+7. Subcategory click — lands directly on `/categories/$id/$subId`
+8. `/help` reachable from sidebar
+9. Sidebar active state for `/categories/c1`, `/messenger`, `/user/$id`
+10. No `window.location.*` in repo (`rg` check)
 
-1. **Photos** — drag&drop зона, до 10, превью с reorder и удалением, первая = главная
-2. **Data** — RadioCard (Продаю/Куплю/Обмен), название, описание, цена, категория/подкатегория, состояние, город, контакт, чекбоксы доставки
-3. **Preview** — рендер как AdCard + детальный блок, кнопка «Оплатить 20 ₽ и опубликовать» → SuccessModal → redirect `/ads`
+## Open question
 
-Custom StepIndicator (3 кружка + соединяющая полоса с заполнением), кастомный progress, валидация на каждом шаге, sticky bottom bar «Назад/Далее».
+The spec aggressively prescribes `/feed`, `/messages`, `/market` paths. Want me to:
+- **(A)** Keep current paths (`/`, `/messenger`, `/ads`) and only centralize them in `ROUTES` — recommended, zero regression risk
+- **(B)** Add redirects from `/feed` → `/`, `/messages` → `/messenger`, `/market` → `/ads` so both work
+- **(C)** Full rename (risky: breaks all deep links / tests / saved URLs)
 
-## `/ads` — список
-
-- Sticky-сайдбар фильтров (desktop, 280px): категория, подкатегория, статус, цена range, город, состояние, доставка, чек «только с фото»
-- Mobile: кнопка «Фильтры» → Bottom Sheet (Framer Motion drag)
-- Topbar: search с debounce 300ms, сортировка (новые/дешевле/дороже/популярные), переключатель grid/list
-- Skeleton 8 шт. при загрузке (имитируем 400ms)
-- Пагинация «Показать ещё» по 12, без infinite
-- Empty state с reset-фильтров
-
-## Mock-данные (`src/lib/mock.ts`)
-
-Расширяем `Ad`:
-```ts
-gallery: string[]; description: string; condition: "Новое" | "Б/у — отлично" | "Б/у — хорошо" | "Под восстановление";
-seller: { id; name; avatar; rating; deals; since };
-deliveryDetails: string; views: number; likes: number; createdAt: string;
-```
-30+ реалистичных объявлений по категориям RC: ДВС/электро, шасси, кузова, аккумуляторы, регуляторы, серво, передатчики, инструменты, краски, запчасти 1:8/1:10. Использовать Unsplash для gallery (4-6 фото на объявление).
-
-## Технические заметки
-
-- TanStack Router file-based: `ads.$id.tsx` + `createFileRoute("/ads/$id")`
-- `<Link to="/ads/$id" params={{ id }}>` — никогда `<a href>`
-- Embla: `bun add embla-carousel-react` (уже есть)
-- Debounce: ручной `useEffect` + `setTimeout`, без lodash
-- BottomSheet: `motion.div` с `drag="y"`, `dragConstraints`, `onDragEnd` для close
-- Skeleton shimmer — переиспользовать паттерн из `feed/Skeleton.tsx`
-- Все `<img>` с `aspect-ratio` или явными w/h, `loading="lazy"` только off-screen
-
-## Что НЕ трогаем
-
-- `src/styles.css` (токены уже есть)
-- Лента `/`, профиль, чаты, авторизация, layout (Sidebar/MobileHeader/BottomNav)
-- shadcn-файлы под `src/components/ui/*` (не используем, но не удаляем)
+I'll proceed with **(A)** unless you say otherwise.

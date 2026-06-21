@@ -2,19 +2,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare, MoreHorizontal,
-  Paperclip, Phone, Search, Send, Users, X,
+  ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
+  Paperclip, Search, Send, Users, X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
 import { useStore, actions, selectors } from "@/lib/store";
+import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/messenger")({
   head: () => ({ meta: [{ title: "Мессенджер — МоДелизМ Club" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    chat: typeof search.chat === "string" ? search.chat : undefined,
+  }),
   component: MessengerPage,
 });
+
 
 const pulse = {
   animate: { opacity: [0.4, 0.7, 0.4] },
@@ -152,19 +157,32 @@ function MessageBubble({
 
 function MessengerPage() {
   const dlgs = useStore(selectors.dialogsList);
-  const [activeId, setActiveId] = useState<string | null>(dlgs[0]?.id ?? null);
+  const { chat } = Route.useSearch();
+  const [activeId, setActiveId] = useState<string | null>(chat ?? dlgs[0]?.id ?? null);
   const [query, setQuery] = useState("");
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Message | null>(null);
-  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [mobileView, setMobileView] = useState<"list" | "chat">(chat ? "chat" : "list");
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Respond to ?chat= search-param changes (e.g. "Написать" from another page)
+  useEffect(() => {
+    if (!chat) return;
+    const exists = dlgs.some((d) => d.id === chat);
+    if (exists) {
+      setActiveId(chat);
+      setMobileView("chat");
+      actions.markRead(chat);
+    }
+  }, [chat, dlgs]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
   }, []);
+
 
   useEffect(() => {
     if (activeId) {
@@ -341,13 +359,9 @@ function MessengerPage() {
                   </div>
                 </Link>
                 <div className="ml-auto flex items-center gap-[4px]">
-                  <button className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)]" style={{ color: "var(--foreground-50)" }} aria-label="Позвонить">
-                    <Phone size={18} />
-                  </button>
-                  <button className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)]" style={{ color: "var(--foreground-50)" }} aria-label="Меню">
-                    <MoreHorizontal size={18} />
-                  </button>
+                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} />
                 </div>
+
               </header>
 
               {/* Messages */}

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -8,7 +8,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { me, posts, ads, communities, userById } from "@/lib/mock";
 import type { User } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
@@ -39,7 +39,9 @@ const ICON_MAP: Record<string, typeof Car> = {
 export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
   const [tab, setTab] = useState<TabKey>("posts");
   const [editOpen, setEditOpen] = useState(false);
+  const navigateToMessenger = useNavigate();
   const friendIds = useStore(selectors.friendsOf(me.id));
+
   const [isFriend, setIsFriend] = useState(!isOwn && friendIds.includes(user.id));
   const [subscribed, setSubscribed] = useState(false);
   const [draft, setDraft] = useState<User>(user);
@@ -117,13 +119,18 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                     <UserPlus size={14} /> В друзья
                   </button>
                 )}
-                <Link
-                  to="/messenger"
+                <button
+                  type="button"
+                  onClick={() => {
+                    const dialogId = openOrCreateDialogWith(user.id);
+                    navigateToMessenger({ to: "/messenger", search: { chat: dialogId } });
+                  }}
                   className="inline-flex flex-1 items-center justify-center gap-[6px] font-medium transition-colors duration-150 md:flex-none"
                   style={{ height: 40, padding: "0 16px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
                 >
                   <MessageSquare size={14} /> Написать
-                </Link>
+                </button>
+
                 <button
                   onClick={() => { setSubscribed((s) => !s); toast.success(subscribed ? "Вы отписались" : "Вы подписались"); }}
                   className="grid h-[40px] w-[40px] shrink-0 place-items-center transition-colors duration-150"

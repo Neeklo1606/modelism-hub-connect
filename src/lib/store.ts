@@ -2,7 +2,7 @@
 // State lives at module scope, so all mutations survive client-side navigation.
 // Components subscribe via useSyncExternalStore and re-render on every change.
 
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import {
   users as mockUsers,
   posts as mockPosts,
@@ -292,12 +292,13 @@ function dispatch(a: Action): void {
 }
 
 export function useStore<T>(selector: (s: AppState) => T): T {
-  return useSyncExternalStore(
-    subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getSnapshot()),
-  );
+  // Subscribe to whole state (referentially stable — only changes on dispatch),
+  // then derive via useMemo. Avoids infinite loops from selectors that build
+  // new arrays/objects on every call.
+  const snap = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useMemo(() => selector(snap), [snap, selector]);
 }
+
 
 export const actions = {
   addMessage: (dialogId: ID, message: Message) => dispatch({ type: "ADD_MESSAGE", dialogId, message }),
@@ -318,6 +319,26 @@ export const actions = {
   savePost: (postId: ID, save: boolean) => dispatch({ type: "SAVE_POST", postId, save }),
   addComment: (postId: ID, comment: Comment) => dispatch({ type: "ADD_COMMENT", postId, comment }),
 };
+
+// Imperative helper: find an existing dialog with the given user, or create one.
+// Always returns the dialogId — never falls back to dialogs[0]. Bug #17.
+export function openOrCreateDialogWith(userId: ID): ID {
+  const existing = Object.values(state.dialogs).find((d) => d.userId === userId);
+  if (existing) return existing.id;
+  const id = `d_${userId}_${Date.now()}`;
+  const dialog: Dialog = {
+    id,
+    userId,
+    lastMessage: "",
+    time: new Date().toISOString(),
+    unread: 0,
+    messages: [],
+  };
+  state = { ...state, dialogs: { ...state.dialogs, [id]: dialog } };
+  emit();
+  return id;
+}
+
 
 export const selectors = {
   currentUser: (s: AppState): User => s.users[s.currentUserId],
