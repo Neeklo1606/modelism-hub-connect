@@ -988,13 +988,13 @@ function SettingsSection() {
         </h4>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {field("Название проекта", "МоДЕЛИЗМ Форум")}
-          {field("Домен", "modelizm-club.ru")}
-          {field("Email поддержки", "support@modelizm-club.ru")}
+          {field("Домен", "modelizm-forum.ru")}
+          {field("Email поддержки", "support@modelizm-forum.ru")}
           {field("Платёжный ключ ЮKassa (Shop ID)", "••••••••", "password")}
           {field("Платёжный ключ Т-Банк (Terminal Key)", "••••••••", "password")}
           {field("SMTP сервер", "smtp.mail.ru")}
           {field("SMTP порт", "587", "number")}
-          {field("SMTP логин", "noreply@modelizm-club.ru")}
+          {field("SMTP логин", "noreply@modelizm-forum.ru")}
           {field("SMTP пароль", "••••••••", "password")}
         </div>
         <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "4px" }}>

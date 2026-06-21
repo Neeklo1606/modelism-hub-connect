@@ -1,68 +1,97 @@
-## Context
+# Тёмная тема + Welcome v2 + переименование «Клаб» → «Форум»
 
-The uploaded spec is written for a React Router DOM project with `src/pages/` and `src/App.tsx`. Our project uses **TanStack Router** with file-based `src/routes/`, and our paths are already different (`/` not `/feed`, `/messenger` not `/messages`, `/ads` not `/market`, `/user/$id` not `/profile/:userId`, `/categories/$id/$subId` not `/feed/category/:id/:sub`).
+Большая, многослойная задача. Прежде чем выкатывать всё разом, фиксирую план и подсвечиваю места, где спека не совпадает со стеком проекта — иначе сборка упадёт.
 
-I will keep our existing routes and translate the spec's API/file conventions to ours. The actual bug fixes are what matters; the routing constants will point at our real paths.
+## Несоответствия спеки и проекта (нужно решение)
 
-## Scope: 11 bug fixes (all in spec)
+1. **Стек.** Спека написана под Vite + React Router DOM + `src/pages/*` + `src/index.css`. У нас — **TanStack Start** с file-based routing (`src/routes/*`), `src/styles.css`, без `react-router-dom`, без `App.tsx`, без `src/pages/`. Создавать `src/pages/WelcomePage.tsx` и импортить `react-router-dom`/`react-router` нельзя — сборка упадёт.
+   - Welcome v2 заменит существующий `src/routes/welcome.tsx` (и/или `src/routes/landing.tsx`).
+   - Логика «неавторизованных редиректит на /» уже частично есть в `src/routes/index.tsx` — добавлю редирект авторизованных с `/welcome` на `/`.
+   - Навигация — только `@tanstack/react-router` (`Link`, `useNavigate`).
 
-| # | Severity | Bug | Fix |
-|---|----------|-----|-----|
-| 17 | CRITICAL | «Написать» on a user card opens chat with the wrong user (falls back to first dialog) | Look up dialog by `userId` from THAT card's data; if no dialog exists, dispatch `createDialog` then navigate to it; never fall back to `dialogs[0]` |
-| 5  | MEDIUM | «...» on post card does nothing | Wire `PostActionMenu` (Save/Copy link/Share/Hide/Report) with framer-motion popover, Escape + outside click |
-| 8  | HIGH | Repost menu actions dead | Wire Repost menu: "В ленту" (toast), "В сообщения" (chat picker), "Скопировать ссылку" (clipboard + toast), "Внешние сети" (Web Share + fallback) |
-| 3  | HIGH | «Подробнее» on ad card dead | Add `ctaType` to `Ad` mock (`internalPage` / `externalLink` / `modal`); wire button per type |
-| 12 | HIGH | Call + «...» in messenger header dead | Custom action menu: Информация → `/user/$id`, Заблокировать → toast, Поиск/Очистить → "Будет доступно позже", Call → confirm modal |
-| 2  | MEDIUM | Banner in feed: click breaks, close button cascades | Whole banner is link OR button; close has `stopPropagation`; `action.type === 'none'` is no-op |
-| 9  | MEDIUM | Subcategory click shows intermediate category page | Subcategory in sidebar links DIRECTLY to `/categories/$id/$subId` |
-| 1  | MEDIUM | «Помощь» button has no route | Already exists at `/help` — verify sidebar link works |
-| —  | — | Dead clicks anywhere (empty `onClick={() => {}}`) | Replace with toast «Будет доступно позже» |
-| —  | — | `window.location.*` / `location.reload()` | Replace with `useNavigate` / `Link` |
-| —  | — | Active sidebar highlighting for nested routes | `useLocation` + `getActiveSection(pathname)` |
+2. **Существующий дизайн-токен слой.** В `src/styles.css` уже большой набор переменных (`--background`, `--accent`, `--r-card`, шрифты Space Grotesk/Inter/JetBrains Mono и т.д.) и shadcn-токены `@theme inline`. Полностью «заменить :root» как просит спека — снесёт shadcn и сломает половину UI. Сделаю так:
+   - Добавлю **новый набор переменных** из спеки (`--bg-primary`, `--text-primary`, `--accent: #e53935` и т.д.) + светлую тему через `[data-theme='light']`.
+   - **Перемапплю старые имена** на новые (`--background` → `var(--bg-primary)`, `--foreground` → `var(--text-primary)`, `--accent` → `#e53935` и т.д.), чтобы существующие компоненты автоматически перекрасились без массовой правки 50+ файлов.
+   - Шрифты: подгружу Inter + IBM Plex Mono через `<link>` в `src/routes/__root.tsx` (Tailwind v4 запрещает `@import` URL в `styles.css`). Space Grotesk оставлю как fallback для display, чтобы не ломать существующий вид заголовков, либо переключу `--font-display` на Inter — уточню ниже.
 
-## Architecture changes
+3. **Темизация.** Уже есть `src/components/ThemeToggle.tsx`, который пишет класс `dark` на `<html>` и ключ `theme` в localStorage. Спека требует `data-theme="dark"/"light"` атрибут и контекст `ThemeProvider`. Сделаю:
+   - Новый `src/components/ThemeProvider.tsx` с контекстом, `data-theme` атрибутом, дефолт = dark.
+   - Перепишу `ThemeToggle.tsx` на использование контекста (API совместимое — те же импорты).
+   - В `src/styles.css` темы будут селектиться **и** по `[data-theme='dark'/'light']`, **и** по классу `.dark` (для обратной совместимости с shadcn).
+   - Обёрну приложение в `<ThemeProvider>` в `src/routes/__root.tsx`.
 
-**New files**
-- `src/lib/routes.ts` — typed `ROUTES` constants and `getActiveSection(pathname)` mapped to OUR paths (`/`, `/messenger`, `/ads`, `/categories/$id/$subId`, `/user/$id`, etc.)
-- `src/components/post/PostActionMenu.tsx` — custom framer-motion popover (no shadcn Dialog/DropdownMenu)
-- `src/components/messenger/ChatHeaderActions.tsx` — call confirm + «...» menu
-- `src/components/ads/AdCTAButton.tsx` — handles 3 cta types
-- `src/components/feed/FeedBanner.tsx` — safe-click banner wrapper
+4. **Видео для Welcome.** Реального URL нет, спека сама помечает PLACEHOLDER. Сделаю постер-фоллбек по умолчанию (используем существующий `src/assets/cover-modelizm.jpg`), видео-блок с `onError` → постер. Без внешних URL, которые могут быть заблокированы.
 
-**Modified files**
-- `src/lib/store.ts` — add `createDialog(toUserId)` action that returns/creates a dialog id; add `repostPost`, `hideOrReportPost` (toast-only) stubs
-- `src/lib/mock.ts` — add `ctaType` + `ctaUrl` to `Ad`
-- `src/routes/messenger.tsx` — wire ChatHeaderActions; remove dead buttons
-- `src/routes/friends.tsx`, `src/routes/user.$id.tsx` — «Написать» calls `store.openOrCreateDialogWith(userId)` then `navigate({ to: '/messenger', search: { chat: id } })` — **no fallback to first dialog**
-- `src/components/PostCard.tsx` — mount `PostActionMenu` on «...» and Repost; route share link to `/` + post anchor (we don't have `/post/$id`; I'll add a thin redirect route or use feed scroll)
-- `src/components/layout/Sidebar.tsx` + `BottomNav.tsx` — use `ROUTES` constants + `getActiveSection`; nested-route highlight; subcategory direct link
-- `src/components/AdBanner.tsx` (the in-feed banner) — split clickable bg vs close button
+5. **Акцент меняется с лаймового на красный `#e53935`.** Это глобально перекрасит все кнопки/ссылки/активные состояния. Подтверждаю: это и есть требование спеки.
 
-## What I am NOT doing (out of scope of this pass)
+6. **«Club» / «Клаб» в коде.** По проверке `rg` ранее английских/«Club» строк уже не осталось (в прошлой итерации заменили на «Форум»). Пройдусь ещё раз `rg -i 'club|клаб'` и зачищу остатки если найдутся (включая `index.html` title).
 
-- Renaming our existing routes to `/feed` `/messages` `/market` (would break every existing link, tests, deep-link suite). Routes stay; only constants centralize them.
-- Replacing existing shadcn components elsewhere — only the menus listed above are rebuilt with framer-motion as the spec requires.
-- Adding a new `/post/$id` route unless needed for the share-link feature (will use a hash anchor on the feed if a full route adds too much surface area; tell me if you want a real post detail page).
+## Что делаю
 
-## Verification
+### Новые файлы
+- `src/components/ThemeProvider.tsx` — контекст + `data-theme` атрибут + localStorage + system preference + слушатель prefers-color-scheme.
 
-After implementing, I'll run a Playwright sweep covering the spec's bug-by-bug table:
-1. «Написать» on each user → correct chat id, never first
-2. Post «...» menu opens, all 5 items work
-3. Repost menu — 4 paths, clipboard verified
-4. Ad «Подробнее» — 3 cta types
-5. Messenger header — call modal + 3 menu items
-6. Banner — bg click vs close button
-7. Subcategory click — lands directly on `/categories/$id/$subId`
-8. `/help` reachable from sidebar
-9. Sidebar active state for `/categories/c1`, `/messenger`, `/user/$id`
-10. No `window.location.*` in repo (`rg` check)
+### Изменяемые файлы
+- `src/styles.css` — добавляю полный набор переменных из спеки (dark + light через `[data-theme]`), маплю старые токены (`--background`, `--foreground`, `--accent`, `--border`, `--r-card`, `--shadow-*` и т.д.) на новые значения, ставлю dark как дефолт. Сохраняю `@theme inline` блок для shadcn, переводя его на новые токены. Убираю любые `@import url(...)` шрифтов (если есть) — шрифты грузятся `<link>`.
+- `src/routes/__root.tsx` — добавляю `<link>` теги для Inter + IBM Plex Mono в `head()`, оборачиваю выдачу в `<ThemeProvider>`, ставлю `data-theme="dark"` на `<html>` через inline скрипт в head чтобы убрать FOUC.
+- `src/components/ThemeToggle.tsx` — перевожу на `useTheme()` из `ThemeProvider`, оставляю текущий внешний вид (Sun/Moon с rotate-анимацией).
+- `src/routes/welcome.tsx` — переписываю на новый full-viewport hero: постер `cover-modelizm.jpg` + градиентные overlays, тег «Сообщество моделистов России», заголовок «МОДЕЛИЗМ Форум», подзаголовок, две CTA (Создать аккаунт → `/register`, Войти → `/login`), три stat-блока (5 000+, 12, 24/7), bouncing scroll indicator. Видео опционально: если есть `VIDEO_URL` env — рендерим `<video>` с `onError` фоллбеком на постер, иначе сразу постер. Анимация: stagger 120 ms, delay 400 ms, ease-out, без `layout`/`layoutId`. Mobile (< 480 px): постер, CTA full-width стэком.
+- `src/routes/index.tsx` — если пользователь неавторизован, рендерим Welcome inline или редиректим на `/welcome`; авторизованных оставляем на ленте. (Проверю существующую логику и сделаю минимальное изменение.)
+- `index.html` — обновляю `<title>` и `<html data-theme="dark">`.
+- Любой остаточный `Club`/`Клаб` (если найдётся `rg`) — заменяю на «Форум».
+- При необходимости — точечные правки `Logo.tsx` / `AuthShell.tsx` / footer (если где-то осталось старое название).
 
-## Open question
+### Что НЕ делаю
+- Не переименовываю файлы (`src/routes/*` → `src/pages/*`) — сломает routing.
+- Не добавляю `react-router-dom`.
+- Не переписываю 50 страниц вручную под `bg-[var(--bg-primary)]` — благодаря мапу старых токенов на новые они перекрасятся автоматически. Если после визуальной проверки где-то останется белый артефакт (например, хардкод `bg-white` в конкретном компоненте) — точечно поправлю.
+- Не трогаю shadcn компоненты — они уже на токенах.
 
-The spec aggressively prescribes `/feed`, `/messages`, `/market` paths. Want me to:
-- **(A)** Keep current paths (`/`, `/messenger`, `/ads`) and only centralize them in `ROUTES` — recommended, zero regression risk
-- **(B)** Add redirects from `/feed` → `/`, `/messages` → `/messenger`, `/market` → `/ads` so both work
-- **(C)** Full rename (risky: breaks all deep links / tests / saved URLs)
+## Технический раздел
 
-I'll proceed with **(A)** unless you say otherwise.
+### Маппинг старых токенов
+В `src/styles.css` в `:root`:
+```css
+--background: var(--bg-primary);
+--foreground: var(--text-primary);
+--card: var(--bg-elevated);
+--border: var(--border-color);
+--input: var(--bg-input);
+--primary: var(--accent);
+--primary-foreground: #ffffff;
+--muted: var(--bg-tertiary);
+--muted-foreground: var(--text-tertiary);
+--accent-soft: rgba(229, 57, 53, 0.12);
+--r-card: 14px;
+--shadow-card: var(--shadow-card);
+/* и т.д. */
+```
+Это покрывает 95% существующих компонентов без правок.
+
+### data-theme на html
+В `<head>` добавляю inline-скрипт (через `head().scripts`):
+```js
+(function(){var t=localStorage.getItem('theme');if(!t){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.toggle('dark',t==='dark');})()
+```
+Это устраняет FOUC до гидрации React.
+
+### Шрифты
+В `__root.tsx` `head().links`:
+```ts
+{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+{ rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap' }
+```
+В `styles.css`: `--font-body: 'Inter', ...; --font-mono: 'IBM Plex Mono', ...`. `--font-display` оставлю Inter (спека не выделяет display отдельно).
+
+### Welcome page redirect
+В `src/routes/index.tsx` или через beforeLoad — если в store нет `currentUserId`, редиректим на `/welcome`. (Проверю текущий код перед изменением.)
+
+## Объём
+Реалистично: ~6 файлов изменены, 1 новый. Без массовой правки 50+ страниц — за счёт перемаппинга токенов.
+
+## Подтверждаешь?
+Главные решения, которые отличаются от буквы спеки:
+- (a) Маппинг старых токенов вместо ручной правки 50+ страниц — **OK?**
+- (b) Видео — постер-фоллбек по умолчанию (нет реального URL) — **OK?**
+- (c) Стек TanStack Start, не Vite+RRD — пути и импорты адаптирую — **OK?**
