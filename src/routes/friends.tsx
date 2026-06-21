@@ -24,8 +24,8 @@ const pulse = {
 function FriendsPage() {
   const [tab, setTab] = useState<Tab>("all");
   const [q, setQ] = useState("");
-  const [added, setAdded] = useState<Set<string>>(new Set(me.friendIds ?? []));
-  const [requests, setRequests] = useState(initialRequests);
+  const friendIds = useStore(selectors.friendsOf(me.id));
+  const requests = useStore(selectors.pendingRequests(me.id));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,15 +57,16 @@ function FriendsPage() {
     { key: "requests", label: "Заявки", count: requests.length },
   ];
 
-  const accept = (id: string, fromId: string) => {
-    setRequests((p) => p.filter((r) => r.id !== id));
-    setAdded((p) => new Set(p).add(fromId));
+  const accept = (id: string) => {
+    actions.acceptFriendRequest(id);
     toast.success("Заявка принята");
   };
   const decline = (id: string) => {
-    setRequests((p) => p.filter((r) => r.id !== id));
+    actions.declineFriendRequest(id);
     toast.success("Заявка отклонена");
   };
+  const added = new Set(friendIds);
+
 
   return (
     <AppLayout rightColumn={false}>
