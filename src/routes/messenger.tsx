@@ -434,7 +434,7 @@ function MessengerPage() {
                   </div>
                 </Link>
                 <div className="ml-auto flex items-center gap-[4px]">
-                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} />
+                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} dialogId={active.id} />
                 </div>
 
               </header>
