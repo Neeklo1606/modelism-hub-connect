@@ -346,13 +346,9 @@ function MessengerPage() {
                   </div>
                 </Link>
                 <div className="ml-auto flex items-center gap-[4px]">
-                  <button className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)]" style={{ color: "var(--foreground-50)" }} aria-label="Позвонить">
-                    <Phone size={18} />
-                  </button>
-                  <button className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)]" style={{ color: "var(--foreground-50)" }} aria-label="Меню">
-                    <MoreHorizontal size={18} />
-                  </button>
+                  <ChatHeaderActions partnerId={partner!.id} partnerName={partner!.name} />
                 </div>
+
               </header>
 
               {/* Messages */}
