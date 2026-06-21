@@ -542,6 +542,7 @@ function MessengerPage() {
           )}
         </section>
       </div>
+      <CreateChatDialog open={createOpen} onClose={() => setCreateOpen(false)} onPick={handleCreateChat} />
     </AppLayout>
   );
 }
