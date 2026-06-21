@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { users, me, userById, formatRelativeTime } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/friends")({
