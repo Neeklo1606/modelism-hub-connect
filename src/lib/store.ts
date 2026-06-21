@@ -295,6 +295,10 @@ function reducer(s: AppState, a: Action): AppState {
         },
       };
     }
+    case "SET_DIALOG_META": {
+      const prev = s.dialogMeta[a.dialogId] ?? { archived: false, muted: false, blocked: false };
+      return { ...s, dialogMeta: { ...s.dialogMeta, [a.dialogId]: { ...prev, ...a.patch } } };
+    }
     default:
       return s;
   }
