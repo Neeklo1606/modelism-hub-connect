@@ -234,7 +234,12 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
             draft={draft}
             setDraft={setDraft}
             onClose={() => setEditOpen(false)}
-            onSave={() => { setEditOpen(false); toast.success("Профиль обновлён"); }}
+            onSave={() => {
+              if (isOwn) actions.updateProfile(user.id, draft);
+              setEditOpen(false);
+              toast.success("Профиль обновлён");
+            }}
+
           />
         )}
       </AnimatePresence>
