@@ -157,19 +157,32 @@ function MessageBubble({
 
 function MessengerPage() {
   const dlgs = useStore(selectors.dialogsList);
-  const [activeId, setActiveId] = useState<string | null>(dlgs[0]?.id ?? null);
+  const { chat } = Route.useSearch();
+  const [activeId, setActiveId] = useState<string | null>(chat ?? dlgs[0]?.id ?? null);
   const [query, setQuery] = useState("");
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Message | null>(null);
-  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [mobileView, setMobileView] = useState<"list" | "chat">(chat ? "chat" : "list");
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Respond to ?chat= search-param changes (e.g. "Написать" from another page)
+  useEffect(() => {
+    if (!chat) return;
+    const exists = dlgs.some((d) => d.id === chat);
+    if (exists) {
+      setActiveId(chat);
+      setMobileView("chat");
+      actions.markRead(chat);
+    }
+  }, [chat, dlgs]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
   }, []);
+
 
   useEffect(() => {
     if (activeId) {
