@@ -149,7 +149,8 @@ type Action =
   | { type: "CREATE_POST"; post: Post }
   | { type: "LIKE_POST"; postId: ID; like: boolean }
   | { type: "SAVE_POST"; postId: ID; save: boolean }
-  | { type: "ADD_COMMENT"; postId: ID; comment: Comment };
+  | { type: "ADD_COMMENT"; postId: ID; comment: Comment }
+  | { type: "SET_DIALOG_META"; dialogId: ID; patch: Partial<DialogMeta> };
 
 function reducer(s: AppState, a: Action): AppState {
   switch (a.type) {
