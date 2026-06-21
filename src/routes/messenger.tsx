@@ -205,12 +205,32 @@ function MessengerPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return dlgs;
-    return dlgs.filter((d) => {
+    const base = dlgs.filter((d) => {
+      const m = getMeta(d.id);
+      return showArchived ? m.archived : !m.archived;
+    });
+    if (!q) return base;
+    return base.filter((d) => {
       const u = userById(d.userId);
       return u.name.toLowerCase().includes(q) || d.lastMessage.toLowerCase().includes(q);
     });
-  }, [dlgs, query]);
+  }, [dlgs, query, dialogMetaMap, showArchived]);
+
+  const archivedCount = useMemo(
+    () => dlgs.filter((d) => getMeta(d.id).archived).length,
+    [dlgs, dialogMetaMap]
+  );
+
+  const handleCreateChat = (userId: string) => {
+    const id = openOrCreateDialogWith(userId);
+    setCreateOpen(false);
+    setActiveId(id);
+    setMobileView("chat");
+    setShowArchived(false);
+    actions.markRead(id);
+    toast.success("Чат открыт", { description: "Можете начать переписку прямо сейчас" });
+  };
+
 
   useEffect(() => {
     if (!scrollRef.current || chatLoading) return;
