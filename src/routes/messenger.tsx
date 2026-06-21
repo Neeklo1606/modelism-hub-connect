@@ -159,6 +159,7 @@ function MessageBubble({
 
 function MessengerPage() {
   const dlgs = useStore(selectors.dialogsList);
+  const dialogMetaMap = useStore((s) => s.dialogMeta);
   const { chat } = Route.useSearch();
   const [activeId, setActiveId] = useState<string | null>(chat ?? dlgs[0]?.id ?? null);
   const [query, setQuery] = useState("");
@@ -167,7 +168,12 @@ function MessengerPage() {
   const [mobileView, setMobileView] = useState<"list" | "chat">(chat ? "chat" : "list");
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const getMeta = (id: string) => dialogMetaMap[id] ?? { archived: false, muted: false, blocked: false };
+
 
   // Respond to ?chat= search-param changes (e.g. "Написать" from another page)
   useEffect(() => {
