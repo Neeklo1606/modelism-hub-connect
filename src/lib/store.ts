@@ -104,6 +104,9 @@ export function createInitialState(): AppState {
   adStatus["a17"] = "archived";
   adStatus["a22"] = "moderation";
   adStatus["a11"] = "rejected";
+  if (mockAds[12]) adStatus[mockAds[12].id] = "draft";
+  if (mockAds[13]) adStatus[mockAds[13].id] = "unpublished";
+  if (mockAds[14]) adStatus[mockAds[14].id] = "deleted";
 
   return {
     users: toRecord(mockUsers),
