@@ -6,8 +6,9 @@ import {
   Paperclip, Phone, Search, Send, Users, X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { dialogs as initialDialogs, userById, me, formatRelativeTime } from "@/lib/mock";
-import type { Dialog, Message } from "@/lib/mock";
+import { userById, me, formatRelativeTime } from "@/lib/mock";
+import type { Message } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/messenger")({
@@ -150,8 +151,8 @@ function MessageBubble({
 }
 
 function MessengerPage() {
-  const [dlgs, setDlgs] = useState<Dialog[]>(initialDialogs);
-  const [activeId, setActiveId] = useState<string | null>(initialDialogs[0]?.id ?? null);
+  const dlgs = useStore(selectors.dialogsList);
+  const [activeId, setActiveId] = useState<string | null>(dlgs[0]?.id ?? null);
   const [query, setQuery] = useState("");
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -194,7 +195,7 @@ function MessengerPage() {
     setActiveId(id);
     setMobileView("chat");
     setReplyTo(null);
-    setDlgs((prev) => prev.map((d) => (d.id === id ? { ...d, unread: 0 } : d)));
+    actions.markRead(id);
   };
 
   const send = () => {
@@ -207,25 +208,11 @@ function MessengerPage() {
       status: "sent",
       replyTo: replyTo?.id,
     };
-    setDlgs((prev) =>
-      prev.map((d) =>
-        d.id === active.id
-          ? { ...d, messages: [...d.messages, m], lastMessage: m.text, time: m.time }
-          : d,
-      ),
-    );
+    actions.addMessage(active.id, m);
     setText("");
     setReplyTo(null);
-    setTimeout(() => {
-      setDlgs((prev) =>
-        prev.map((d) =>
-          d.id === active.id
-            ? { ...d, messages: d.messages.map((x) => (x.id === m.id ? { ...x, status: "delivered" } : x)) }
-            : d,
-        ),
-      );
-    }, 600);
   };
+
 
   return (
     <AppLayout rightColumn={false}>

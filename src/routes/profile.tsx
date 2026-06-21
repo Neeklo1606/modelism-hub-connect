@@ -8,6 +8,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { me, posts, ads, communities, userById } from "@/lib/mock";
 import type { User } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
@@ -18,7 +19,8 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  return <ProfileView user={me} isOwn />;
+  const currentUser = useStore(selectors.currentUser);
+  return <ProfileView user={currentUser} isOwn />;
 }
 
 type TabKey = "posts" | "ads" | "communities" | "about";
@@ -37,14 +39,17 @@ const ICON_MAP: Record<string, typeof Car> = {
 export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
   const [tab, setTab] = useState<TabKey>("posts");
   const [editOpen, setEditOpen] = useState(false);
-  const [isFriend, setIsFriend] = useState(!isOwn && me.friendIds?.includes(user.id));
+  const friendIds = useStore(selectors.friendsOf(me.id));
+  const [isFriend, setIsFriend] = useState(!isOwn && friendIds.includes(user.id));
   const [subscribed, setSubscribed] = useState(false);
   const [draft, setDraft] = useState<User>(user);
 
   const userPosts = useMemo(() => posts.filter((p) => p.authorId === user.id), [user.id]);
   const userAds = useMemo(() => ads.filter((a) => a.authorId === user.id), [user.id]);
-  const userCommunities = useMemo(() => communities.filter((c) => c.joined), []);
+  const userCommunities = useStore(selectors.userCommunities(user.id));
+  const friendsCountDerived = isOwn ? friendIds.length : (user.friendIds?.length ?? 0);
   const interestList = (user.interests || "").split(",").map((s) => s.trim()).filter(Boolean);
+
 
   return (
     <AppLayout rightColumn={false}>
@@ -137,7 +142,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
         <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
           <Counter label="Публикаций" value={userPosts.length} divider />
           <Counter label="Объявлений" value={userAds.length} divider />
-          <Counter label="Друзей" value={user.friendIds?.length ?? 0} divider />
+          <Counter label="Друзей" value={friendsCountDerived} divider />
           <Counter label="Сообществ" value={userCommunities.length} />
         </div>
 
@@ -229,7 +234,12 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
             draft={draft}
             setDraft={setDraft}
             onClose={() => setEditOpen(false)}
-            onSave={() => { setEditOpen(false); toast.success("Профиль обновлён"); }}
+            onSave={() => {
+              if (isOwn) actions.updateProfile(user.id, draft);
+              setEditOpen(false);
+              toast.success("Профиль обновлён");
+            }}
+
           />
         )}
       </AnimatePresence>

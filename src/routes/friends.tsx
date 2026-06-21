@@ -5,7 +5,8 @@ import {
   Search, MapPin, UserPlus, MessageSquare, Check, X, Clock,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { users, me, friendRequests as initialRequests, userById, formatRelativeTime } from "@/lib/mock";
+import { users, me, userById, formatRelativeTime } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/friends")({
@@ -23,8 +24,8 @@ const pulse = {
 function FriendsPage() {
   const [tab, setTab] = useState<Tab>("all");
   const [q, setQ] = useState("");
-  const [added, setAdded] = useState<Set<string>>(new Set(me.friendIds ?? []));
-  const [requests, setRequests] = useState(initialRequests);
+  const friendIds = useStore(selectors.friendsOf(me.id));
+  const requests = useStore(selectors.pendingRequests(me.id));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,15 +57,16 @@ function FriendsPage() {
     { key: "requests", label: "Заявки", count: requests.length },
   ];
 
-  const accept = (id: string, fromId: string) => {
-    setRequests((p) => p.filter((r) => r.id !== id));
-    setAdded((p) => new Set(p).add(fromId));
+  const accept = (id: string) => {
+    actions.acceptFriendRequest(id);
     toast.success("Заявка принята");
   };
   const decline = (id: string) => {
-    setRequests((p) => p.filter((r) => r.id !== id));
+    actions.declineFriendRequest(id);
     toast.success("Заявка отклонена");
   };
+  const added = new Set(friendIds);
+
 
   return (
     <AppLayout rightColumn={false}>
@@ -163,7 +165,7 @@ function FriendsPage() {
                             <Clock size={11} /> {formatRelativeTime(r.date)}
                           </div>
                           <div className="mt-[10px] flex gap-[8px]">
-                            <button onClick={() => accept(r.id, r.fromId)} className="inline-flex items-center gap-[4px] font-semibold" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "var(--accent)", color: "white", fontSize: 12 }}>
+                            <button onClick={() => accept(r.id)} className="inline-flex items-center gap-[4px] font-semibold" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "var(--accent)", color: "white", fontSize: 12 }}>
                               <Check size={12} /> Принять
                             </button>
                             <button onClick={() => decline(r.id)} className="inline-flex items-center gap-[4px] font-medium" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}>
@@ -196,11 +198,15 @@ function FriendsPage() {
                         <div className="mt-[10px] flex flex-wrap gap-[8px]">
                           <button
                             onClick={() => {
-                              const n = new Set(added);
-                              if (isAdded) n.delete(u.id); else n.add(u.id);
-                              setAdded(n);
-                              toast.success(isAdded ? "Удалён из друзей" : "Заявка отправлена");
+                              if (isAdded) {
+                                actions.removeFriend(me.id, u.id);
+                                toast.success("Удалён из друзей");
+                              } else {
+                                actions.sendFriendRequest(me.id, u.id);
+                                toast.success("Заявка отправлена");
+                              }
                             }}
+
                             className="inline-flex items-center gap-[4px] font-semibold"
                             style={{
                               height: 32, padding: "0 14px", borderRadius: 8, fontSize: 12,
