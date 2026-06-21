@@ -5,7 +5,8 @@ import {
   Search, MapPin, UserPlus, MessageSquare, Check, X, Clock,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { users, me, friendRequests as initialRequests, userById, formatRelativeTime } from "@/lib/mock";
+import { users, me, userById, formatRelativeTime } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/friends")({
