@@ -24,30 +24,30 @@ const TABS: { key: TabKey; label: string }[] = [
 
 interface DecoratedAd { ad: Ad; status: MyAdStatus }
 
-function classifyAd(ad: Ad, overrides: Record<string, MyAdStatus>): MyAdStatus {
-  if (overrides[ad.id]) return overrides[ad.id];
-  if (ad.moderation === "moderation") return "moderation";
-  if (ad.moderation === "rejected") return "rejected";
+function mapStatus(s: AdStatusKey): MyAdStatus | null {
+  if (s === "deleted") return null;
+  if (s === "archived") return "archived";
+  if (s === "moderation") return "moderation";
+  if (s === "rejected") return "rejected";
   return "active";
 }
 
 function MyAdsPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
-  const [overrides, setOverrides] = useState<Record<string, MyAdStatus>>({
-    // seed a couple of demo states for u1's ads
-    a10: "archived",
-    a17: "archived",
-    a22: "moderation",
-    a11: "rejected",
-  });
-  const [deleted, setDeleted] = useState<Set<string>>(new Set());
+  const allMyAds = useStore(selectors.myAds(CURRENT_USER_ID));
+  const adStatus = useStore((s) => s.adStatus);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const myAds = useMemo<DecoratedAd[]>(() => {
-    return ALL_ADS.filter((a) => a.authorId === CURRENT_USER_ID && !deleted.has(a.id))
-      .map((a) => ({ ad: a, status: classifyAd(a, overrides) }));
-  }, [overrides, deleted]);
+    const out: DecoratedAd[] = [];
+    for (const a of allMyAds) {
+      const mapped = mapStatus(adStatus[a.id] ?? "active");
+      if (!mapped) continue;
+      out.push({ ad: a, status: mapped });
+    }
+    return out;
+  }, [allMyAds, adStatus]);
 
   const counts = useMemo(() => ({
     active:   myAds.filter((x) => x.status === "active").length,
@@ -80,21 +80,14 @@ function MyAdsPage() {
   };
   const clearSelection = () => setSelected(new Set());
   const archiveSelected = () => {
-    setOverrides((o) => {
-      const next = { ...o };
-      selected.forEach((id) => { next[id] = "archived"; });
-      return next;
-    });
+    selected.forEach((id) => actions.archiveAd(id));
     clearSelection();
   };
   const deleteSelected = () => {
-    setDeleted((d) => {
-      const next = new Set(d);
-      selected.forEach((id) => next.add(id));
-      return next;
-    });
+    selected.forEach((id) => actions.deleteAd(id));
     clearSelection();
   };
+
 
   return (
     <AppLayout rightColumn={false}>
