@@ -339,6 +339,7 @@ export const actions = {
   likePost: (postId: ID, like: boolean) => dispatch({ type: "LIKE_POST", postId, like }),
   savePost: (postId: ID, save: boolean) => dispatch({ type: "SAVE_POST", postId, save }),
   addComment: (postId: ID, comment: Comment) => dispatch({ type: "ADD_COMMENT", postId, comment }),
+  setDialogMeta: (dialogId: ID, patch: Partial<DialogMeta>) => dispatch({ type: "SET_DIALOG_META", dialogId, patch }),
 };
 
 // Imperative helper: find an existing dialog with the given user, or create one.
