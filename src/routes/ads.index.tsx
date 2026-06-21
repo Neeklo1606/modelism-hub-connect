@@ -262,10 +262,11 @@ function MyAdsPage() {
                   status={status}
                   selected={selected.has(ad.id)}
                   onSelect={handleSelect}
-                  onArchive={(id) => setOverrides((o) => ({ ...o, [id]: "archived" }))}
-                  onPublish={(id) => setOverrides((o) => ({ ...o, [id]: "active" }))}
-                  onDelete={(id) => setDeleted((d) => new Set(d).add(id))}
+                  onArchive={(id) => actions.archiveAd(id)}
+                  onPublish={(id) => actions.setAdStatus(id, "active")}
+                  onDelete={(id) => actions.deleteAd(id)}
                 />
+
               ))
             )}
           </motion.div>
