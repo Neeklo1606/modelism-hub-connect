@@ -319,6 +319,26 @@ export const actions = {
   addComment: (postId: ID, comment: Comment) => dispatch({ type: "ADD_COMMENT", postId, comment }),
 };
 
+// Imperative helper: find an existing dialog with the given user, or create one.
+// Always returns the dialogId — never falls back to dialogs[0]. Bug #17.
+export function openOrCreateDialogWith(userId: ID): ID {
+  const existing = Object.values(state.dialogs).find((d) => d.userId === userId);
+  if (existing) return existing.id;
+  const id = `d_${userId}_${Date.now()}`;
+  const dialog: Dialog = {
+    id,
+    userId,
+    lastMessage: "",
+    time: new Date().toISOString(),
+    unread: 0,
+    messages: [],
+  };
+  state = { ...state, dialogs: { ...state.dialogs, [id]: dialog } };
+  emit();
+  return id;
+}
+
+
 export const selectors = {
   currentUser: (s: AppState): User => s.users[s.currentUserId],
   dialogsList: (s: AppState): Dialog[] => Object.values(s.dialogs),
