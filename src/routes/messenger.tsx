@@ -281,28 +281,64 @@ function MessengerPage() {
           className={`flex min-h-0 flex-col md:flex ${mobileView === "list" ? "flex" : "hidden"}`}
           style={{ background: "var(--background-elevated)", borderRight: "1px solid var(--border)" }}
         >
-          <div className="sticky top-0 z-10 px-[16px] py-[12px]" style={{ background: "var(--background-elevated)", borderBottom: "1px solid var(--border)" }}>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Поиск диалога"
-                className="w-full text-[14px] outline-none"
-                style={{
-                  height: 40,
-                  paddingLeft: 36,
-                  paddingRight: 12,
-                  background: "var(--background-surface)",
-                  borderRadius: 10,
-                  border: "1.5px solid transparent",
-                  color: "var(--foreground)",
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--background)"; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.background = "var(--background-surface)"; }}
-              />
+          <div className="sticky top-0 z-10 flex flex-col gap-[10px] px-[16px] py-[12px]" style={{ background: "var(--background-elevated)", borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-[8px]">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Поиск диалога"
+                  className="w-full text-[14px] outline-none"
+                  style={{
+                    height: 40,
+                    paddingLeft: 36,
+                    paddingRight: 12,
+                    background: "var(--background-surface)",
+                    borderRadius: 10,
+                    border: "1.5px solid transparent",
+                    color: "var(--foreground)",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--background)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.background = "var(--background-surface)"; }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                aria-label="Новый чат"
+                title="Новый чат"
+                className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px]"
+                style={{ background: "var(--accent)", color: "white" }}
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+            <div className="flex items-center gap-[6px]">
+              {([
+                { key: false, label: "Активные" },
+                { key: true, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
+              ] as const).map((t) => {
+                const active = showArchived === t.key;
+                return (
+                  <button
+                    key={String(t.key)}
+                    onClick={() => setShowArchived(t.key)}
+                    className="inline-flex items-center text-[12px] font-semibold transition-colors"
+                    style={{
+                      height: 28, padding: "0 12px", borderRadius: 999,
+                      background: active ? "var(--accent-soft)" : "transparent",
+                      color: active ? "var(--accent)" : "var(--foreground-50)",
+                      border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
+
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {loading ? (
