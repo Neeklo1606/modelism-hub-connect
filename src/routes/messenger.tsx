@@ -246,6 +246,10 @@ function MessengerPage() {
 
   const send = () => {
     if (!text.trim() || !active) return;
+    if (getMeta(active.id).blocked) {
+      toast.error("Пользователь заблокирован", { description: "Разблокируйте его, чтобы отправлять сообщения" });
+      return;
+    }
     const m: Message = {
       id: `nm${Date.now()}`,
       authorId: me.id,
@@ -258,6 +262,7 @@ function MessengerPage() {
     setText("");
     setReplyTo(null);
   };
+
 
 
   return (
