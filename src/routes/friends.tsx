@@ -27,6 +27,8 @@ function FriendsPage() {
   const friendIds = useStore(selectors.friendsOf(me.id));
   const requests = useStore(selectors.pendingRequests(me.id));
   const [loading, setLoading] = useState(true);
+  const navigateMessenger = useNavigate();
+
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 450);
