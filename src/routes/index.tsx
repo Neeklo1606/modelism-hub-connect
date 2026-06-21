@@ -17,7 +17,7 @@ import cover from "@/assets/cover-modelizm.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Лента — МоДелизМ Club" },
+      { title: "Лента — МоДелизМ Форум" },
       { name: "description", content: "Главная лента сообщества моделистов: новые проекты, фото, обсуждения." },
     ],
   }),
@@ -132,7 +132,7 @@ function FeedPage() {
           className="relative -mx-3 overflow-hidden border-y lg:mx-0 lg:rounded-[20px] lg:border"
           style={{ borderColor: "var(--border)" }}
         >
-          <img src={cover} alt="МоДелизМ Club" width={1920} height={640} className="h-[200px] w-full object-cover lg:h-[280px]" />
+          <img src={cover} alt="МоДелизМ Форум" width={1920} height={640} className="h-[200px] w-full object-cover lg:h-[280px]" />
           <div
             className="absolute inset-0"
             style={{
@@ -146,7 +146,7 @@ function FeedPage() {
               className="mt-[12px] text-[28px] font-bold tracking-tight sm:text-[44px]"
               style={{ fontFamily: "var(--font-display)", color: "#fff", letterSpacing: "-0.02em" }}
             >
-              МоДелизМ <span style={{ color: "var(--accent)" }}>Club</span>
+              МоДелизМ <span style={{ color: "var(--accent)" }}>Форум</span>
             </h1>
             <p className="mt-[8px] max-w-[480px] text-[13px] sm:text-[15px]" style={{ color: "rgba(255,255,255,0.80)" }}>
               Моделизм — это жизнь, остальное детали

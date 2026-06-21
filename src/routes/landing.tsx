@@ -9,9 +9,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export const Route = createFileRoute("/landing")({
   head: () => ({
     meta: [
-      { title: "МоДелизМ Club — сообщество моделистов России" },
+      { title: "МоДелизМ Форум — сообщество моделистов России" },
       { name: "description", content: "RC авто, самолёты, квадрокоптеры, корабли, электроника. Сообщество инженеров и энтузиастов в одном пространстве." },
-      { property: "og:title", content: "МоДелизМ Club — моделизм это жизнь" },
+      { property: "og:title", content: "МоДелизМ Форум — моделизм это жизнь" },
       { property: "og:description", content: "Платформа для моделистов: лента, чаты, объявления, сообщества." },
     ],
   }),
@@ -327,7 +327,7 @@ function TwoTracks() {
               letterSpacing: "-0.02em",
             }}
           >
-            Два пути в МоДЕЛИЗМ Club
+            Два пути в МоДЕЛИЗМ Форум
           </h2>
           <p
             className="mx-auto mt-[12px] text-[16px]"
@@ -577,7 +577,7 @@ function Footer() {
         <div>
           <Logo size={32} />
           <p className="mt-[16px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
-            МоДЕЛИЗМ Club © 2026
+            МоДЕЛИЗМ Форум © 2026
           </p>
         </div>
         <FooterCol

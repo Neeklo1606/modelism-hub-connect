@@ -4,7 +4,7 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { categories } from "@/lib/mock";
 
 export const Route = createFileRoute("/categories/")({
-  head: () => ({ meta: [{ title: "Категории — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Категории — МоДелизМ Форум" }] }),
   component: CategoriesPage,
 });
 

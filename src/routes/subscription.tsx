@@ -9,7 +9,7 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { subscriptionPlans, type SubscriptionPlan } from "@/lib/mock";
 
 export const Route = createFileRoute("/subscription")({
-  head: () => ({ meta: [{ title: "Подписка — МоДЕЛИЗМ Club" }] }),
+  head: () => ({ meta: [{ title: "Подписка — МоДЕЛИЗМ Форум" }] }),
   component: SubscriptionPage,
 });
 

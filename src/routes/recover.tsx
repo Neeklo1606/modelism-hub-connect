@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { AuthShell, inputStyle, primaryBtn } from "@/components/auth/AuthShell";
 
 export const Route = createFileRoute("/recover")({
-  head: () => ({ meta: [{ title: "Восстановление пароля — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Восстановление пароля — МоДелизМ Форум" }] }),
   component: RecoverPage,
 });
 

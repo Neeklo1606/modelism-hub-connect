@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { AuthShell, inputStyle, primaryBtn } from "@/components/auth/AuthShell";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Вход — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Вход — МоДелизМ Форум" }] }),
   component: LoginPage,
 });
 
@@ -24,7 +24,7 @@ function LoginPage() {
   return (
     <AuthShell
       title="Вход"
-      subtitle="С возвращением в МоДелизМ Club"
+      subtitle="С возвращением в МоДелизМ Форум"
       footer={
         <>
           Ещё нет аккаунта?{" "}

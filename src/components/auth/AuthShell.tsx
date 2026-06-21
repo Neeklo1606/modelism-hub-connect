@@ -39,7 +39,7 @@ export function AuthShell({ title, subtitle, children, footer }: Props) {
                 textTransform: "uppercase",
               }}
             >
-              МоДелизМ Club · v2.1
+              МоДелизМ Форум · v2.1
             </div>
             <h2
               style={{

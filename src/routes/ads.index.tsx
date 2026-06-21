@@ -8,7 +8,7 @@ import { useStore, actions, selectors, type AdStatusKey } from "@/lib/store";
 import { MyAdCard, type MyAdStatus } from "@/components/MyAdCard";
 
 export const Route = createFileRoute("/ads/")({
-  head: () => ({ meta: [{ title: "Мои объявления — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Мои объявления — МоДелизМ Форум" }] }),
   component: MyAdsPage,
 });
 

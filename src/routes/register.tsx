@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { AuthShell, inputStyle, primaryBtn } from "@/components/auth/AuthShell";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Регистрация — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Регистрация — МоДелизМ Форум" }] }),
   component: RegisterPage,
 });
 
