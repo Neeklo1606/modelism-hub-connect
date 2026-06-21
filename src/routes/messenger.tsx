@@ -2,19 +2,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare, MoreHorizontal,
-  Paperclip, Phone, Search, Send, Users, X,
+  ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
+  Paperclip, Search, Send, Users, X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
 import { useStore, actions, selectors } from "@/lib/store";
+import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/messenger")({
   head: () => ({ meta: [{ title: "Мессенджер — МоДелизМ Club" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    chat: typeof search.chat === "string" ? search.chat : undefined,
+  }),
   component: MessengerPage,
 });
+
 
 const pulse = {
   animate: { opacity: [0.4, 0.7, 0.4] },
