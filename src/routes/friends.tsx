@@ -198,11 +198,15 @@ function FriendsPage() {
                         <div className="mt-[10px] flex flex-wrap gap-[8px]">
                           <button
                             onClick={() => {
-                              const n = new Set(added);
-                              if (isAdded) n.delete(u.id); else n.add(u.id);
-                              setAdded(n);
-                              toast.success(isAdded ? "Удалён из друзей" : "Заявка отправлена");
+                              if (isAdded) {
+                                actions.removeFriend(me.id, u.id);
+                                toast.success("Удалён из друзей");
+                              } else {
+                                actions.sendFriendRequest(me.id, u.id);
+                                toast.success("Заявка отправлена");
+                              }
                             }}
+
                             className="inline-flex items-center gap-[4px] font-semibold"
                             style={{
                               height: 32, padding: "0 14px", borderRadius: 8, fontSize: 12,
