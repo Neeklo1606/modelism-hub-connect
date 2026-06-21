@@ -36,7 +36,7 @@ export function BottomNav() {
         }}
       >
         <ul className="grid grid-cols-5 items-center" style={{ height: 60 }}>
-          {LEFT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to} />)}
+          {LEFT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
           <li className="flex items-center justify-center">
             <button
               onClick={() => setOpen(true)}
