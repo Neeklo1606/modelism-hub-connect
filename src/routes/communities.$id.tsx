@@ -33,7 +33,8 @@ const TABS: { key: Tab; label: string; Icon: typeof FileText }[] = [
 function CommunityDetailPage() {
   const { id } = Route.useParams();
   const community = communities.find((c) => c.id === id);
-  const [joined, setJoined] = useState(!!community?.joined);
+  const currentUserId = useStore((s) => s.currentUserId);
+  const joined = useStore(selectors.isCommunityMember(currentUserId, id));
   const [tab, setTab] = useState<Tab>("posts");
   const [msgs, setMsgs] = useState<Message[]>(chatMessages);
   const [text, setText] = useState("");
