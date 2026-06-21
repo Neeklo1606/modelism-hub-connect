@@ -217,9 +217,18 @@ function FriendsPage() {
                           >
                             {isAdded ? <><Check size={12} />В друзьях</> : <><UserPlus size={12} />Добавить</>}
                           </button>
-                          <Link to="/messenger" className="inline-flex items-center gap-[4px] font-medium" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const dialogId = openOrCreateDialogWith(u.id);
+                              navigateMessenger({ to: "/messenger", search: { chat: dialogId } });
+                            }}
+                            className="inline-flex items-center gap-[4px] font-medium"
+                            style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}
+                          >
                             <MessageSquare size={12} /> Написать
-                          </Link>
+                          </button>
+
                         </div>
                       </div>
                     </article>
