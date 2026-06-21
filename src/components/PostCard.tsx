@@ -110,13 +110,8 @@ export function PostCard({ post, isSavedExternal, onToggleSave }: Props) {
             {post.date} · {post.category}
           </div>
         </div>
-        <button
-          className="grid h-[32px] w-[32px] place-items-center rounded-[8px] hover:bg-[var(--background-surface)]"
-          style={{ color: "var(--foreground-70)" }}
-          aria-label="Меню"
-        >
-          <MoreHorizontal className="h-[16px] w-[16px]" />
-        </button>
+        <PostActionMenu postId={post.id} saved={saved} title={post.title} text={post.text} />
+
       </header>
 
       <button
