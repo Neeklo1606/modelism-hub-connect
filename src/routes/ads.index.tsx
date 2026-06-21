@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Inbox, Eye, Heart, TrendingUp, MessageCircle, X } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ads as ALL_ADS, type Ad } from "@/lib/mock";
+import { type Ad } from "@/lib/mock";
+import { useStore, actions, selectors, type AdStatusKey } from "@/lib/store";
 import { MyAdCard, type MyAdStatus } from "@/components/MyAdCard";
 
 export const Route = createFileRoute("/ads/")({
