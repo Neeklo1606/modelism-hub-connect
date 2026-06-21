@@ -2,8 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Newspaper, MessageSquare, Plus, Megaphone, User } from "lucide-react";
 import { useState } from "react";
 import { CreateChooserModal } from "@/components/CreateChooserModal";
+import { getActiveSection } from "@/lib/routes";
 
-type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper };
+type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper; section: string };
+
 
 const LEFT: Item[] = [
   { to: "/", label: "Лента", icon: Newspaper },
