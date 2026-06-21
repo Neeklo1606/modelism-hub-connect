@@ -53,7 +53,7 @@ export function BottomNav() {
               <Plus size={22} strokeWidth={2.4} />
             </button>
           </li>
-          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={pathname === it.to || (it.to === "/profile" && pathname.startsWith("/profile"))} />)}
+          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
         </ul>
       </nav>
       <CreateChooserModal open={open} onOpenChange={setOpen} />
