@@ -19,7 +19,8 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  return <ProfileView user={me} isOwn />;
+  const currentUser = useStore(selectors.currentUser);
+  return <ProfileView user={currentUser} isOwn />;
 }
 
 type TabKey = "posts" | "ads" | "communities" | "about";
