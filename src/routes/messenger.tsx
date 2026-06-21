@@ -373,12 +373,17 @@ function MessengerPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-[8px]">
-                            <span className="truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>{u.name}</span>
+                            <span className="flex min-w-0 items-center gap-[6px] truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                              <span className="truncate">{u.name}</span>
+                              {getMeta(d.id).muted && <BellOff size={12} style={{ color: "var(--foreground-50)", flexShrink: 0 }} />}
+                              {getMeta(d.id).blocked && <Ban size={12} style={{ color: "var(--error)", flexShrink: 0 }} />}
+                              {getMeta(d.id).archived && <Archive size={12} style={{ color: "var(--foreground-50)", flexShrink: 0 }} />}
+                            </span>
                             <span className="shrink-0 font-mono text-[11px]" style={{ color: "var(--foreground-50)" }}>{formatRelativeTime(d.time)}</span>
                           </div>
                           <div className="truncate text-[13px]" style={{ color: "var(--foreground-50)" }}>{d.lastMessage}</div>
                         </div>
-                        {!!d.unread && (
+                        {!!d.unread && !getMeta(d.id).muted && (
                           <span
                             className="grid h-[20px] w-[20px] place-items-center rounded-full text-[11px] font-semibold"
                             style={{ background: "var(--accent)", color: "white" }}
@@ -386,6 +391,7 @@ function MessengerPage() {
                             {d.unread}
                           </span>
                         )}
+
                       </button>
                     </motion.li>
                   );
