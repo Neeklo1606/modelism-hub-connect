@@ -6,8 +6,9 @@ import {
   Paperclip, Phone, Search, Send, Users, X,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { dialogs as initialDialogs, userById, me, formatRelativeTime } from "@/lib/mock";
-import type { Dialog, Message } from "@/lib/mock";
+import { userById, me, formatRelativeTime } from "@/lib/mock";
+import type { Message } from "@/lib/mock";
+import { useStore, actions, selectors } from "@/lib/store";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/messenger")({
