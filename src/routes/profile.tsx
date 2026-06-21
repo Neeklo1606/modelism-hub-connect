@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -8,7 +8,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { me, posts, ads, communities, userById } from "@/lib/mock";
 import type { User } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
