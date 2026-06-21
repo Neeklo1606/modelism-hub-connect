@@ -2,7 +2,7 @@
 // State lives at module scope, so all mutations survive client-side navigation.
 // Components subscribe via useSyncExternalStore and re-render on every change.
 
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import {
   users as mockUsers,
   posts as mockPosts,
