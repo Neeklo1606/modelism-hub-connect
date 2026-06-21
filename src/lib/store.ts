@@ -292,12 +292,13 @@ function dispatch(a: Action): void {
 }
 
 export function useStore<T>(selector: (s: AppState) => T): T {
-  return useSyncExternalStore(
-    subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getSnapshot()),
-  );
+  // Subscribe to whole state (referentially stable — only changes on dispatch),
+  // then derive via useMemo. Avoids infinite loops from selectors that build
+  // new arrays/objects on every call.
+  const snap = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useMemo(() => selector(snap), [snap, selector]);
 }
+
 
 export const actions = {
   addMessage: (dialogId: ID, message: Message) => dispatch({ type: "ADD_MESSAGE", dialogId, message }),
