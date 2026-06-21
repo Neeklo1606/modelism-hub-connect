@@ -165,7 +165,7 @@ function FriendsPage() {
                             <Clock size={11} /> {formatRelativeTime(r.date)}
                           </div>
                           <div className="mt-[10px] flex gap-[8px]">
-                            <button onClick={() => accept(r.id, r.fromId)} className="inline-flex items-center gap-[4px] font-semibold" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "var(--accent)", color: "white", fontSize: 12 }}>
+                            <button onClick={() => accept(r.id)} className="inline-flex items-center gap-[4px] font-semibold" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "var(--accent)", color: "white", fontSize: 12 }}>
                               <Check size={12} /> Принять
                             </button>
                             <button onClick={() => decline(r.id)} className="inline-flex items-center gap-[4px] font-medium" style={{ height: 32, padding: "0 14px", borderRadius: 8, background: "transparent", color: "var(--foreground-70)", fontSize: 12, border: "1px solid var(--border)" }}>
