@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Bookmark, Eye, MoreHorizontal, Repeat2 } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Eye, Repeat2 } from "lucide-react";
 import type { Post, Comment } from "@/lib/mock";
 import { userById, me } from "@/lib/mock";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CommentSection } from "@/components/feed/CommentSection";
 import { RepostMenu } from "@/components/feed/RepostMenu";
+import { PostActionMenu } from "@/components/post/PostActionMenu";
 
 interface Props {
   post: Post;
