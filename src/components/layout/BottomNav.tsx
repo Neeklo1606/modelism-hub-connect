@@ -19,7 +19,9 @@ const RIGHT: Item[] = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const activeSection = getActiveSection(pathname);
   const [open, setOpen] = useState(false);
+
 
   return (
     <>
