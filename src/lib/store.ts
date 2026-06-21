@@ -377,4 +377,12 @@ export const selectors = {
       .filter((c): c is Community => Boolean(c)),
   myAds: (userId: ID) => (s: AppState): Ad[] =>
     Object.values(s.ads).filter((a) => a.authorId === userId),
+  isCommunityMember: (userId: ID, communityId: ID) => (s: AppState): boolean =>
+    (s.communityMemberships[userId] ?? []).includes(communityId),
+  recommendedCommunities: (userId: ID) => (s: AppState): Community[] => {
+    const mine = new Set(s.communityMemberships[userId] ?? []);
+    return Object.values(s.communities).filter((c) => !mine.has(c.id));
+  },
+  dialogMeta: (dialogId: ID) => (s: AppState): DialogMeta =>
+    s.dialogMeta[dialogId] ?? { archived: false, muted: false, blocked: false },
 };
