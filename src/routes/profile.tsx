@@ -117,13 +117,18 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                     <UserPlus size={14} /> В друзья
                   </button>
                 )}
-                <Link
-                  to="/messenger"
+                <button
+                  type="button"
+                  onClick={() => {
+                    const dialogId = openOrCreateDialogWith(user.id);
+                    navigateToMessenger({ to: "/messenger", search: { chat: dialogId } });
+                  }}
                   className="inline-flex flex-1 items-center justify-center gap-[6px] font-medium transition-colors duration-150 md:flex-none"
                   style={{ height: 40, padding: "0 16px", borderRadius: 10, border: "1px solid var(--border)", background: "transparent", color: "var(--foreground-70)", fontSize: 14 }}
                 >
                   <MessageSquare size={14} /> Написать
-                </Link>
+                </button>
+
                 <button
                   onClick={() => { setSubscribed((s) => !s); toast.success(subscribed ? "Вы отписались" : "Вы подписались"); }}
                   className="grid h-[40px] w-[40px] shrink-0 place-items-center transition-colors duration-150"
