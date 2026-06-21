@@ -32,7 +32,7 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
   const badge = STATUS_BADGE[status];
   const hero = ad.gallery?.[0] ?? ad.image;
   const [menuOpen, setMenuOpen] = useState(false);
-  const archived = status === "archived" || status === "rejected";
+  const archived = status !== "active" && status !== "moderation";
 
   return (
     <motion.div
