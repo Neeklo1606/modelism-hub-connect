@@ -39,7 +39,9 @@ const ICON_MAP: Record<string, typeof Car> = {
 export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
   const [tab, setTab] = useState<TabKey>("posts");
   const [editOpen, setEditOpen] = useState(false);
+  const navigateToMessenger = useNavigate();
   const friendIds = useStore(selectors.friendsOf(me.id));
+
   const [isFriend, setIsFriend] = useState(!isOwn && friendIds.includes(user.id));
   const [subscribed, setSubscribed] = useState(false);
   const [draft, setDraft] = useState<User>(user);
