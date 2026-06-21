@@ -3,14 +3,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
-  Paperclip, Search, Send, Users, X,
+  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
+import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/messenger")({
   head: () => ({ meta: [{ title: "Мессенджер — МоДелизМ Club" }] }),
