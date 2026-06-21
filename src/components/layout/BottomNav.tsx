@@ -8,13 +8,14 @@ type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon:
 
 
 const LEFT: Item[] = [
-  { to: "/", label: "Лента", icon: Newspaper },
-  { to: "/messenger", label: "Чаты", icon: MessageSquare },
+  { to: "/", label: "Лента", icon: Newspaper, section: "feed" },
+  { to: "/messenger", label: "Чаты", icon: MessageSquare, section: "messenger" },
 ];
 const RIGHT: Item[] = [
-  { to: "/ads", label: "Объявления", icon: Megaphone },
-  { to: "/profile", label: "Профиль", icon: User },
+  { to: "/ads", label: "Объявления", icon: Megaphone, section: "ads" },
+  { to: "/profile", label: "Профиль", icon: User, section: "profile" },
 ];
+
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
