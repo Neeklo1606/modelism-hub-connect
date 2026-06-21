@@ -142,7 +142,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
         <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
           <Counter label="Публикаций" value={userPosts.length} divider />
           <Counter label="Объявлений" value={userAds.length} divider />
-          <Counter label="Друзей" value={user.friendIds?.length ?? 0} divider />
+          <Counter label="Друзей" value={friendsCountDerived} divider />
           <Counter label="Сообществ" value={userCommunities.length} />
         </div>
 
