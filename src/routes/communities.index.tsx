@@ -11,7 +11,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/communities/")({
-  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Форум" }] }),
   component: CommunitiesPage,
 });
 

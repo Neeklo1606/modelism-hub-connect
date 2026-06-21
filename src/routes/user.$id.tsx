@@ -4,7 +4,7 @@ import { userById, users } from "@/lib/mock";
 import { ProfileView } from "./profile";
 
 export const Route = createFileRoute("/user/$id")({
-  head: ({ params }) => ({ meta: [{ title: `${userById(params.id)?.name ?? "Профиль"} — МоДелизМ Club` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${userById(params.id)?.name ?? "Профиль"} — МоДелизМ Форум` }] }),
   component: UserPage,
 });
 

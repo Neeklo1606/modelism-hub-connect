@@ -14,7 +14,7 @@ import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [{ title: "Профиль — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Профиль — МоДелизМ Форум" }] }),
   component: ProfilePage,
 });
 

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/ads/new")({
-  head: () => ({ meta: [{ title: "Новое объявление — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Новое объявление — МоДелизМ Форум" }] }),
   component: NewAdPage,
 });
 

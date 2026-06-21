@@ -10,7 +10,7 @@ import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/stor
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/friends")({
-  head: () => ({ meta: [{ title: "Друзья — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Друзья — МоДелизМ Форум" }] }),
   component: FriendsPage,
 });
 

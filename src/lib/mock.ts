@@ -1,4 +1,4 @@
-// Mock data for МоДелизМ Club prototype
+// Mock data for МоДелизМ Форум prototype
 export type ID = string;
 
 export interface User {
@@ -509,12 +509,12 @@ export interface PromoCode {
 export const subscriptionPlans: SubscriptionPlan[] = [
   { id: "test", name: "Тестовый доступ", price: 1, periodLabel: "1 день", features: ["Доступ ко всем разделам", "Чат в подкатегориях", "Просмотр объявлений", "1 размещение объявления"] },
   { id: "month", name: "Месяц", price: 100, periodLabel: "месяц", features: ["Всё из Тестового", "Безлимитные объявления", "Приоритет в ленте", "Поддержка 24/7"], accent: true },
-  { id: "half", name: "Полгода", price: 500, periodLabel: "полгода", savingsLabel: "Экономия 100₽", isPopular: true, features: ["Всё из «Месяц»", "Скидки в магазине 10%", "Бейдж «Club» в профиле", "Комиссия 0% на продажи"], accent: true },
-  { id: "year", name: "Год", price: 800, periodLabel: "год", savingsLabel: "Экономия 400₽", isBestValue: true, features: ["Всё из «Полгода»", "3 бесплатных объявления/мес", "Бейдж «Club Pro» в профиле", "Без рекламы на платформе", "Приоритетная поддержка"] },
+  { id: "half", name: "Полгода", price: 500, periodLabel: "полгода", savingsLabel: "Экономия 100₽", isPopular: true, features: ["Всё из «Месяц»", "Скидки в магазине 10%", "Бейдж «Форум» в профиле", "Комиссия 0% на продажи"], accent: true },
+  { id: "year", name: "Год", price: 800, periodLabel: "год", savingsLabel: "Экономия 400₽", isBestValue: true, features: ["Всё из «Полгода»", "3 бесплатных объявления/мес", "Бейдж «Форум Pro» в профиле", "Без рекламы на платформе", "Приоритетная поддержка"] },
 ];
 
 export const faqItems: FAQItem[] = [
-  { id: "f1", category: "general", question: "Что такое МоДЕЛИЗМ Club?", answer: "Это социальная платформа для моделистов, где можно общаться, делиться проектами, продавать и покупать запчасти и модели." },
+  { id: "f1", category: "general", question: "Что такое МоДЕЛИЗМ Форум?", answer: "Это социальная платформа для моделистов, где можно общаться, делиться проектами, продавать и покупать запчасти и модели." },
   { id: "f2", category: "general", question: "Как зарегистрироваться?", answer: "Нажмите «Регистрация» на главной, укажите имя, email и пароль. Подтвердите почту и заполните профиль." },
   { id: "f3", category: "general", question: "Нужна ли подписка?", answer: "Базовый доступ бесплатный. Для расширенных функций нужна подписка — от 1 ₽ за тестовый день." },
   { id: "f4", category: "ads", question: "Как разместить объявление?", answer: "Нажмите «Создать» → «Объявление», заполните форму (название, цена, фото), оплатите 20 ₽ и ждите модерации." },

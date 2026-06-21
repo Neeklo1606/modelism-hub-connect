@@ -8,7 +8,7 @@ import cover from "@/assets/cover-modelizm.jpg";
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "МоДелизМ Club — сообщество моделистов России" },
+      { title: "МоДелизМ Форум — сообщество моделистов России" },
       { name: "description", content: "Социальная платформа для RC-моделистов: лента, чаты по категориям, объявления и сообщества." },
     ],
   }),
@@ -173,13 +173,13 @@ function WelcomePage() {
               }}
             >
               <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--accent)" }} />
-              v2.1 · бета
+              v2.1 · бета-версия
             </div>
             <h1
               className="mt-[24px]"
               style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 64px)", lineHeight: 1.02, letterSpacing: "-0.03em", fontWeight: 800 }}
             >
-              МоДелизМ <span style={{ color: "var(--accent)" }}>Club</span>
+              МоДелизМ <span style={{ color: "var(--accent)" }}>Форум</span>
               <span style={{ display: "block", color: "var(--foreground-70)", fontWeight: 500, fontSize: "0.45em", marginTop: 14 }}>
                 Моделизм — это жизнь, остальное детали
               </span>
@@ -241,7 +241,7 @@ function WelcomePage() {
               />
               <div className="absolute bottom-0 left-0 right-0 p-[24px]">
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-xs)", color: "rgba(255,255,255,0.6)", letterSpacing: "0.08em" }}>
-                  LIVE FEED · 2 МИНУТЫ НАЗАД
+                  ЛЕНТА · 2 МИНУТЫ НАЗАД
                 </div>
                 <div style={{ color: "#fff", fontWeight: 600, fontSize: "var(--fs-body-lg)", marginTop: 6 }}>
                   Сборка Traxxas Slash 4×4 · обновлённая подвеска
@@ -343,8 +343,8 @@ function WelcomePage() {
 
       <footer style={{ borderTop: "1px solid var(--border)", padding: "32px var(--container-pad)", color: "var(--foreground-50)", fontSize: "var(--fs-xs)", fontFamily: "var(--font-mono)" }}>
         <div className="mx-auto flex items-center justify-between" style={{ maxWidth: "var(--container-max)" }}>
-          <span>© МоДелизМ Club · 2026</span>
-          <span>v2.1 · prototype</span>
+          <span>© МоДелизМ Форум · 2026</span>
+          <span>v2.1 · прототип</span>
         </div>
       </footer>
       </div>

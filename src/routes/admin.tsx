@@ -17,7 +17,7 @@ import {
 } from "@/lib/mock";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Club" }] }),
+  head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Форум" }] }),
   component: AdminPage,
 });
 
@@ -829,7 +829,7 @@ function CategoriesSection() {
 /* ============ NOTIFICATIONS ============ */
 function NotificationsSection() {
   const emailTpl = [
-    ["Приветствие", "Добро пожаловать в МоДЕЛИЗМ Club!", "01.06.2026"],
+    ["Приветствие", "Добро пожаловать в МоДЕЛИЗМ Форум!", "01.06.2026"],
     ["Подтверждение почты", "Подтвердите ваш email", "15.05.2026"],
     ["Сброс пароля", "Восстановление доступа", "10.05.2026"],
     ["Оповещение о модерации", "Ваш пост проверен", "05.06.2026"],
@@ -987,7 +987,7 @@ function SettingsSection() {
           Настройки платформы
         </h4>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {field("Название проекта", "МоДЕЛИЗМ Club")}
+          {field("Название проекта", "МоДЕЛИЗМ Форум")}
           {field("Домен", "modelizm-club.ru")}
           {field("Email поддержки", "support@modelizm-club.ru")}
           {field("Платёжный ключ ЮKassa (Shop ID)", "••••••••", "password")}

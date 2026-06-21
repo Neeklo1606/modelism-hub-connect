@@ -16,8 +16,8 @@ export const Route = createFileRoute("/ads/$id")({
     const ad = adById(params.id);
     return {
       meta: [
-        { title: ad ? `${ad.title} — МоДелизМ Club` : "Объявление — МоДелизМ Club" },
-        { name: "description", content: ad?.description?.slice(0, 160) ?? "Объявление на МоДелизМ Club" },
+        { title: ad ? `${ad.title} — МоДелизМ Форум` : "Объявление — МоДелизМ Форум" },
+        { name: "description", content: ad?.description?.slice(0, 160) ?? "Объявление на МоДелизМ Форум" },
       ],
     };
   },
