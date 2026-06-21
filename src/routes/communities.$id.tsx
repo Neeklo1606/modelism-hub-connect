@@ -134,8 +134,13 @@ function CommunityDetailPage() {
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
               onClick={() => {
-                setJoined((s) => !s);
-                toast.success(joined ? "Вы покинули сообщество" : `Вы вступили в «${community.name}»`);
+                if (joined) {
+                  actions.leaveCommunity(currentUserId, community.id);
+                  toast.success("Вы покинули сообщество", { description: `Вы больше не участник «${community.name}»` });
+                } else {
+                  actions.joinCommunity(currentUserId, community.id);
+                  toast.success(`Вы вступили в «${community.name}»`, { description: "Сообщество добавлено в ваш профиль" });
+                }
               }}
               className="font-semibold transition-colors duration-150"
               style={{
