@@ -3,16 +3,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { AdBanner } from "@/components/AdBanner";
 import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
 import { PostCard } from "@/components/PostCard";
-import { Logo } from "@/components/Logo";
+import { SponsoredPostCard } from "@/components/feed/SponsoredPostCard";
 import { PostCardSkeleton } from "@/components/feed/Skeleton";
 import { FeedFilterTabs, type FeedFilter } from "@/components/feed/FeedFilterTabs";
 import { EmptyFeedState } from "@/components/feed/EmptyFeedState";
-import { posts as mockPosts, me, categories } from "@/lib/mock";
-import type { Post } from "@/lib/mock";
-import cover from "@/assets/cover-modelizm.jpg";
+import { posts as mockPosts, banners, me, categories } from "@/lib/mock";
+import type { Post, Banner } from "@/lib/mock";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
