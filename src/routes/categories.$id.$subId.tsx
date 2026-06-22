@@ -36,6 +36,38 @@ function seedFrom(s: string): number {
 
 interface RoomMessage extends Message {
   replyToId?: string;
+  attachments?: string[];
+}
+
+/** Превращает URL в кликабельные ссылки. Безопасно для XSS — рендер через React. */
+function renderTextWithLinks(text: string): React.ReactNode {
+  const re = /\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const raw = m[0].replace(/[),.!?;:]+$/, "");
+    const trailing = m[0].slice(raw.length);
+    const href = raw.startsWith("http") ? raw : `https://${raw}`;
+    parts.push(
+      <a
+        key={`l-${i++}`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="underline decoration-dotted underline-offset-2 hover:opacity-90"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {raw}
+      </a>,
+    );
+    if (trailing) parts.push(trailing);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length ? parts : text;
 }
 
 function buildMessages(c: Category, subName: string): RoomMessage[] {
@@ -306,13 +338,19 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
   const [messages, setMessages] = useState<RoomMessage[]>(() => buildMessages(category, subName));
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<RoomMessage | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // reset when room changes
   useEffect(() => {
     setMessages(buildMessages(category, subName));
     setText("");
     setReplyTo(null);
+    setPendingAttachments((prev) => {
+      prev.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
   }, [category, subId, subName]);
 
   useEffect(() => {
@@ -320,9 +358,23 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
+  const onPickFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const urls = Array.from(files)
+      .filter((f) => f.type.startsWith("image/"))
+      .slice(0, 6)
+      .map((f) => URL.createObjectURL(f));
+    setPendingAttachments((prev) => [...prev, ...urls].slice(0, 6));
+  };
+
+  const removeAttachment = (url: string) => {
+    setPendingAttachments((prev) => prev.filter((u) => u !== url));
+    URL.revokeObjectURL(url);
+  };
+
   const send = () => {
     const v = text.trim();
-    if (!v) return;
+    if (!v && pendingAttachments.length === 0) return;
     setMessages((prev) => [
       ...prev,
       {
@@ -332,10 +384,12 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         text: v,
         status: "sent",
         replyToId: replyTo?.id,
+        attachments: pendingAttachments.length ? pendingAttachments : undefined,
       },
     ]);
     setText("");
     setReplyTo(null);
+    setPendingAttachments([]);
   };
 
   return (
@@ -382,7 +436,34 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                       <span className="line-clamp-1">{replied.text}</span>
                     </div>
                   )}
-                  {m.text}
+                  {m.attachments && m.attachments.length > 0 && (
+                    <div
+                      className={`mb-[6px] grid gap-[4px] ${m.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+                    >
+                      {m.attachments.map((src, idx) => (
+                        <a
+                          key={`${m.id}-att-${idx}`}
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block overflow-hidden rounded-[8px]"
+                          style={{ background: "var(--background)" }}
+                        >
+                          <img
+                            src={src}
+                            alt="Вложение"
+                            className="h-full max-h-[220px] w-full object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {m.text && (
+                    <div className="whitespace-pre-wrap break-words">
+                      {renderTextWithLinks(m.text)}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => setReplyTo(m)}
@@ -435,15 +516,55 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         </div>
       )}
 
+      {/* Attachment previews */}
+      {pendingAttachments.length > 0 && (
+        <div
+          className="flex gap-[8px] overflow-x-auto border-t px-[12px] py-[10px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ borderColor: "var(--border)", background: "var(--background-surface)" }}
+        >
+          {pendingAttachments.map((src) => (
+            <div
+              key={src}
+              className="relative h-[64px] w-[64px] shrink-0 overflow-hidden rounded-[10px] border"
+              style={{ borderColor: "var(--border)", background: "var(--background)" }}
+            >
+              <img src={src} alt="Превью" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeAttachment(src)}
+                aria-label="Удалить вложение"
+                className="absolute right-[2px] top-[2px] grid h-[18px] w-[18px] place-items-center rounded-full"
+                style={{ background: "rgba(0,0,0,0.6)", color: "#fff" }}
+              >
+                <X className="h-[10px] w-[10px]" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Composer */}
       <div
         className="flex items-end gap-[8px] border-t px-[12px] py-[10px]"
         style={{ borderColor: "var(--border)" }}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            onPickFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
         <button
           type="button"
-          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)]"
-          aria-label="Вложение"
+          onClick={() => fileInputRef.current?.click()}
+          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)] disabled:opacity-40"
+          aria-label="Прикрепить фото"
+          disabled={pendingAttachments.length >= 6}
         >
           <Paperclip className="h-[16px] w-[16px]" style={{ color: "var(--foreground-50)" }} />
         </button>
@@ -454,6 +575,15 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               send();
+            }
+          }}
+          onPaste={(e) => {
+            const imgs = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"));
+            if (imgs.length > 0) {
+              e.preventDefault();
+              const dt = new DataTransfer();
+              imgs.forEach((f) => dt.items.add(f));
+              onPickFiles(dt.files);
             }
           }}
           placeholder={`Написать в «${subName}»…`}
@@ -475,7 +605,7 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         <button
           type="button"
           onClick={send}
-          disabled={!text.trim()}
+          disabled={!text.trim() && pendingAttachments.length === 0}
           className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-opacity disabled:opacity-40"
           style={{ background: "var(--accent)", color: "#fff" }}
           aria-label="Отправить"
