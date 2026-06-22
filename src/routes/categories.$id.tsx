@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, MessageCircle, Tag, Users } from "lucide-react";
+import { ArrowLeft, ChevronRight, MessageCircle, Search, Tag, Users } from "lucide-react";
 import * as Icons from "lucide-react";
+import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { categoryById, ads } from "@/lib/mock";
 import type { Category } from "@/lib/mock";
@@ -43,6 +44,14 @@ const ROOM_PREVIEWS = [
 function CategoryRoomsPage() {
   const { id } = Route.useParams();
   const c = categoryById(id);
+  const [query, setQuery] = useState("");
+
+  const filteredSubs = useMemo(() => {
+    if (!c) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return c.subcategories;
+    return c.subcategories.filter((s) => s.name.toLowerCase().includes(q));
+  }, [c, query]);
 
   if (!c) {
     return (
@@ -94,6 +103,38 @@ function CategoryRoomsPage() {
           </div>
         </header>
 
+        {/* Search */}
+        <div
+          className="rounded-[14px] border px-[14px] py-[10px]"
+          style={{ background: "var(--background-elevated)", borderColor: "var(--border)" }}
+        >
+          <div
+            className="flex items-center gap-[10px] rounded-[10px] border px-[12px] py-[8px]"
+            style={{ background: "var(--background-surface)", borderColor: "var(--border)" }}
+          >
+            <Search className="h-[16px] w-[16px] shrink-0" style={{ color: "var(--foreground-50)" }} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Найти комнату…"
+              className="min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-[var(--foreground-50)]"
+              style={{ color: "var(--foreground)" }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="grid h-[22px] w-[22px] place-items-center rounded-full transition-colors"
+                style={{ background: "var(--background-elevated)", color: "var(--foreground-50)" }}
+                aria-label="Очистить"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Rooms */}
         <section
           className="overflow-hidden rounded-[14px] border"
@@ -107,12 +148,12 @@ function CategoryRoomsPage() {
               Комнаты по подкатегориям
             </h2>
             <span className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
-              {c.subcategories.length}
+              {filteredSubs.length}
             </span>
           </div>
 
           <ul>
-            {c.subcategories.map((s, i) => {
+            {filteredSubs.map((s, i) => {
               const online = onlineFor(c, s.id);
               const members = membersOf(c, s.id);
               const adsCount = ads.filter((a) => a.category === c.name && a.subcategory === s.name).length;
@@ -178,6 +219,11 @@ function CategoryRoomsPage() {
                 </li>
               );
             })}
+            {filteredSubs.length === 0 && (
+              <li className="px-[16px] py-[24px] text-center text-[13px]" style={{ color: "var(--foreground-50)" }}>
+                Ничего не найдено по запросу «{query}»
+              </li>
+            )}
           </ul>
         </section>
 
