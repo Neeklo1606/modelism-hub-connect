@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Users, Check, BadgeCheck, Heart, Eye, Clock, ShieldCheck, AlertTriangle, Radio, Newspaper, Star, Megaphone, Tag, Send } from "lucide-react";
+import { ArrowLeft, Users, Check, BadgeCheck, Heart, Eye, Clock, ShieldCheck, AlertTriangle, Radio, Newspaper, Star, Megaphone, Tag, Send, Calendar, MessageSquareOff, FileCheck2, Ban } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
   getChannel, useChannelPosts, useSubscriptions, toggleSubscribe, createChannelPost,
   formatCount, formatDate, kindLabel,
   POST_KIND_LABEL,
-  type ChannelPost, type PostStatus, type PostKind,
+  type Channel, type ChannelPost, type PostStatus, type PostKind,
 } from "@/lib/channels";
 import { toast } from "sonner";
 
@@ -40,16 +40,19 @@ export const Route = createFileRoute("/channel/$id")({
 });
 
 type PostFilter = "all" | "mine";
+type ChannelTab = "posts" | "about";
 
 function ChannelPage() {
   const { channel } = Route.useLoaderData();
   const subs = useSubscriptions();
   const subscribed = subs.has(channel.id);
   const posts = useChannelPosts(channel.id);
+  const [tab, setTab] = useState<ChannelTab>("posts");
 
   const visiblePublic = posts.filter((p: ChannelPost) => p.status === "published");
   const [showOwnerView, setShowOwnerView] = useState<boolean>(!!channel.isOwner);
   const list = channel.isOwner && showOwnerView ? posts : visiblePublic;
+
 
 
   const onToggle = () => {
@@ -156,46 +159,83 @@ function ChannelPage() {
           </div>
         </section>
 
-        {/* owner toggle */}
-        {channel.isOwner && (
-          <div
-            className="flex items-center justify-between gap-3 p-3"
-            style={{ background: "var(--background-surface)", borderRadius: 12 }}
-          >
-            <div className="min-w-0">
-              <div className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                Вид владельца
-              </div>
-              <div className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
-                Видны посты на модерации и отклонённые
-              </div>
-            </div>
-            <Segmented
-              value={showOwnerView ? "mine" : "all"}
-              onChange={(v) => setShowOwnerView(v === "mine")}
-            />
+        {/* tabs */}
+        <div
+          className="sticky top-[48px] z-10 -mx-3 flex items-center gap-1 px-3 py-2 lg:static lg:top-auto lg:mx-0 lg:px-0"
+          style={{ background: "color-mix(in oklab, var(--background) 92%, transparent)", backdropFilter: "saturate(180%) blur(8px)" }}
+        >
+          <div className="flex w-full items-center gap-1" style={{ background: "var(--background-surface)", borderRadius: 12, padding: 4 }}>
+            {([
+              ["posts", `Посты${visiblePublic.length ? ` · ${visiblePublic.length}` : ""}`],
+              ["about", "О канале"],
+            ] as const).map(([k, l]) => {
+              const active = tab === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => setTab(k)}
+                  className="flex-1 text-[13px] font-medium transition-all"
+                  style={{
+                    padding: "9px 14px",
+                    borderRadius: 9,
+                    background: active ? "var(--background)" : "transparent",
+                    color: active ? "var(--foreground)" : "var(--foreground-50)",
+                    fontWeight: active ? 600 : 500,
+                    boxShadow: active ? "var(--shadow-card)" : "none",
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {/* composer (owner only) */}
-        {channel.isOwner && <Composer channelId={channel.id} ownerName={channel.ownerName} />}
+        {tab === "posts" ? (
+          <>
+            {/* owner toggle */}
+            {channel.isOwner && (
+              <div
+                className="flex items-center justify-between gap-3 p-3"
+                style={{ background: "var(--background-surface)", borderRadius: 12 }}
+              >
+                <div className="min-w-0">
+                  <div className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    Вид владельца
+                  </div>
+                  <div className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
+                    Видны посты на модерации и отклонённые
+                  </div>
+                </div>
+                <Segmented
+                  value={showOwnerView ? "mine" : "all"}
+                  onChange={(v) => setShowOwnerView(v === "mine")}
+                />
+              </div>
+            )}
 
-        {/* posts */}
-        <h2 className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
-          Посты канала
-        </h2>
+            {/* composer (owner only) */}
+            {channel.isOwner && <Composer channelId={channel.id} ownerName={channel.ownerName} />}
 
-        {list.length === 0 ? (
-          <div className="grid place-items-center gap-2 py-12 text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
-            <div className="text-[14px]" style={{ color: "var(--foreground-50)" }}>В этом канале пока нет постов</div>
-          </div>
+            {list.length === 0 ? (
+              <div className="grid place-items-center gap-2 py-12 text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
+                <div className="text-[14px]" style={{ color: "var(--foreground-50)" }}>В этом канале пока нет постов</div>
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {list.map((p: ChannelPost) => (
+                  <PostItem key={p.id} post={p} isOwner={!!channel.isOwner} />
+                ))}
+              </ul>
+            )}
+          </>
         ) : (
-          <ul className="space-y-3">
-            {list.map((p: ChannelPost) => (
-              <PostItem key={p.id} post={p} isOwner={!!channel.isOwner} />
-            ))}
-          </ul>
+          <AboutPanel
+            channel={channel}
+            publishedCount={visiblePublic.length}
+          />
         )}
+
 
       </div>
     </AppLayout>
@@ -415,4 +455,117 @@ function Composer({ channelId, ownerName }: { channelId: string; ownerName: stri
     </section>
   );
 }
+
+function AboutPanel({ channel, publishedCount }: { channel: Channel; publishedCount: number }) {
+  const created = new Date(channel.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  const ownerInitial = channel.ownerName.slice(0, 1).toUpperCase();
+  const rules: { Icon: typeof FileCheck2; title: string; text: string }[] = [
+    { Icon: FileCheck2, title: "Премодерация", text: "Каждый пост проходит проверку модератором перед публикацией." },
+    { Icon: MessageSquareOff, title: "Без чата", text: "Подписчики не могут писать в ленту — это односторонний канал." },
+    { Icon: Ban, title: "Без спама и рекламы вне правил", text: "Сторонние ссылки и реклама без согласования отклоняются." },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* description */}
+      <section
+        className="p-4 sm:p-5"
+        style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 14 }}
+      >
+        <h3 className="font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+          Описание
+        </h3>
+        <p className="mt-2 whitespace-pre-wrap text-[14px] leading-relaxed" style={{ color: "var(--foreground-70)" }}>
+          {channel.description}
+          {"\n\n"}Здесь публикуются {kindLabel(channel.kind).toLowerCase()} материалы: новости, обзоры, анонсы и спецпредложения для подписчиков. Подпишитесь, чтобы получать новые посты в ленте.
+        </p>
+
+        {/* stats grid */}
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <Stat icon={Users} label="Подписчики" value={formatCount(channel.subscribers)} />
+          <Stat icon={FileCheck2} label="Постов" value={String(publishedCount)} />
+          <Stat icon={Calendar} label="С нами с" value={created.replace(/\s\d{4}.*/, "")} />
+        </div>
+      </section>
+
+      {/* owner card */}
+      <section
+        className="p-4"
+        style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 14 }}
+      >
+        <h3 className="font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+          Владелец
+        </h3>
+        <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+          <div
+            className="grid h-11 w-11 shrink-0 place-items-center font-display text-[16px] font-bold text-white"
+            style={{ background: channel.avatarColor, borderRadius: 12 }}
+          >
+            {ownerInitial}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="truncate text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                {channel.ownerName}
+              </span>
+              {channel.kind === "official" && <BadgeCheck size={14} style={{ color: "var(--accent)" }} />}
+            </div>
+            <div className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
+              {kindLabel(channel.kind)} · ведёт канал «{channel.name}»
+            </div>
+          </div>
+          <span
+            className="shrink-0 text-[11px] font-medium"
+            style={{ background: "var(--accent-soft)", color: "var(--accent)", padding: "4px 8px", borderRadius: 6 }}
+          >
+            Автор
+          </span>
+        </div>
+        <div className="mt-3 text-[12px]" style={{ color: "var(--foreground-50)" }}>
+          Канал создан {created}.
+        </div>
+      </section>
+
+      {/* rules */}
+      <section
+        className="p-4"
+        style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 14 }}
+      >
+        <h3 className="font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+          Правила публикаций
+        </h3>
+        <ul className="mt-3 space-y-2.5">
+          {rules.map(({ Icon, title, text }) => (
+            <li key={title} className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+              <div
+                className="grid h-8 w-8 shrink-0 place-items-center"
+                style={{ background: "var(--accent-soft)", color: "var(--accent)", borderRadius: 8 }}
+              >
+                <Icon size={14} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{title}</div>
+                <div className="text-[12px] leading-relaxed" style={{ color: "var(--foreground-70)" }}>{text}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
+  return (
+    <div
+      className="grid place-items-center gap-1 p-3 text-center"
+      style={{ background: "var(--background-surface)", borderRadius: 10 }}
+    >
+      <Icon size={14} style={{ color: "var(--foreground-50)" }} />
+      <div className="font-display text-[15px] font-bold leading-none" style={{ color: "var(--foreground)" }}>{value}</div>
+      <div className="text-[11px]" style={{ color: "var(--foreground-50)" }}>{label}</div>
+    </div>
+  );
+}
+
 
