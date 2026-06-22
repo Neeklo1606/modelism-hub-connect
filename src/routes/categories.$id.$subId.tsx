@@ -72,6 +72,59 @@ function renderTextWithLinks(text: string): React.ReactNode {
   return parts.length ? parts : text;
 }
 
+/** Подсвечивает совпадения query в строковых частях. Не трогает уже отрендеренные ссылки. */
+function highlightNodes(
+  nodes: React.ReactNode,
+  query: string,
+  activeKey?: string,
+  keyPrefix = "h",
+): React.ReactNode {
+  const q = query.trim();
+  if (!q) return nodes;
+  const lower = q.toLowerCase();
+  const wrap = (text: string, kp: string): React.ReactNode => {
+    const out: React.ReactNode[] = [];
+    let i = 0;
+    let from = 0;
+    const lc = text.toLowerCase();
+    while (true) {
+      const idx = lc.indexOf(lower, from);
+      if (idx === -1) {
+        if (from < text.length) out.push(text.slice(from));
+        break;
+      }
+      if (idx > from) out.push(text.slice(from, idx));
+      const matchKey = `${kp}-m-${i}`;
+      const isActive = activeKey === matchKey;
+      out.push(
+        <mark
+          key={matchKey}
+          data-match-key={matchKey}
+          className="rounded-[3px] px-[1px]"
+          style={{
+            background: isActive ? "#facc15" : "rgba(250,204,21,0.45)",
+            color: isActive ? "#111" : "inherit",
+            outline: isActive ? "1.5px solid #f59e0b" : "none",
+          }}
+        >
+          {text.slice(idx, idx + q.length)}
+        </mark>,
+      );
+      from = idx + q.length;
+      i++;
+    }
+    return out;
+  };
+  const list = Array.isArray(nodes) ? nodes : [nodes];
+  return list.map((n, i) =>
+    typeof n === "string" ? (
+      <span key={`${keyPrefix}-${i}`}>{wrap(n, `${keyPrefix}-${i}`)}</span>
+    ) : (
+      n
+    ),
+  );
+}
+
 function buildMessages(c: Category, subName: string): RoomMessage[] {
   const base = `Привет всем в чате «${subName}»! Кто сейчас в теме?`;
   const seed = seedFrom(c.id + subName);
