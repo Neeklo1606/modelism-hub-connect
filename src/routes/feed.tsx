@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { CreatePostTrigger } from "@/components/feed/CreatePostTrigger";
 import { CreatePostModal } from "@/components/feed/CreatePostModal";
 import { EventsHero } from "@/components/feed/EventsHero";
+import { FindYourPeopleSheet } from "@/components/feed/FindYourPeopleSheet";
 import { PostCard } from "@/components/PostCard";
 import { PostCardSkeleton } from "@/components/feed/Skeleton";
 import { FeedFilterTabs, type FeedFilter } from "@/components/feed/FeedFilterTabs";
@@ -128,6 +129,8 @@ function FeedPage() {
         <EventsHero />
 
         <CreatePostTrigger onOpen={() => setComposerOpen(true)} />
+
+        <FindYourPeopleSheet />
 
         <FeedFilterTabs value={filter} onChange={setFilter} />
 
