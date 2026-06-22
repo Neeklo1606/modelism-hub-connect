@@ -14,7 +14,7 @@ export function MobileHeader() {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <Link to="/" className="min-w-0 inline-flex items-center" aria-label="На главную">
+      <Link to="/feed" className="min-w-0 inline-flex items-center" aria-label="На главную">
         <Logo />
       </Link>
       <div className="flex shrink-0 items-center gap-[2px]">

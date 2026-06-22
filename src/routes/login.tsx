@@ -17,7 +17,7 @@ function LoginPage() {
     setLoading(true);
     setTimeout(() => {
       toast.success("Вход выполнен (демо)");
-      nav({ to: "/" });
+      nav({ to: "/feed" });
     }, 400);
   };
 
@@ -51,7 +51,7 @@ function LoginPage() {
         </button>
       </form>
       <Link
-        to="/"
+        to="/feed"
         className="mt-[16px] block text-center"
         style={{ fontSize: "var(--fs-xs)", color: "var(--foreground-50)" }}
       >

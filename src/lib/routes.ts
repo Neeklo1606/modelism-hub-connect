@@ -3,7 +3,7 @@
 
 export const ROUTES = {
   home: "/",
-  feed: "/",
+  feed: "/feed",
   communities: "/communities",
   community: (id: string) => `/communities/${id}` as const,
   ads: "/ads",
@@ -24,7 +24,7 @@ export const ROUTES = {
 
 // Maps sidebar section ids to URL prefixes that should highlight it.
 export const SIDEBAR_ROUTE_MAP: Record<string, string[]> = {
-  feed: ["/", "/categories"],
+  feed: ["/feed", "/categories"],
   communities: ["/communities"],
   ads: ["/ads"],
   messenger: ["/messenger"],
@@ -36,12 +36,10 @@ export const SIDEBAR_ROUTE_MAP: Record<string, string[]> = {
 };
 
 export function getActiveSection(pathname: string): string | null {
-  // Exact-match priority pass so "/" doesn't claim every URL.
   for (const [section, patterns] of Object.entries(SIDEBAR_ROUTE_MAP)) {
-    if (patterns.some((p) => p !== "/" && (pathname === p || pathname.startsWith(p + "/")))) {
+    if (patterns.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       return section;
     }
   }
-  if (pathname === "/") return "feed";
   return null;
 }
