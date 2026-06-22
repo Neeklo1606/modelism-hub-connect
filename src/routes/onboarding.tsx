@@ -32,7 +32,7 @@ function OnboardingPage() {
   const finish = () => {
     if (selected.length < 1) return toast.error("Выберите хотя бы одну категорию");
     toast.success("Готово! Лента подобрана под ваши интересы");
-    nav({ to: "/" });
+    nav({ to: "/feed" });
   };
 
   return (
@@ -44,7 +44,7 @@ function OnboardingPage() {
         <Logo />
         <div className="flex items-center gap-[12px]">
           <button
-            onClick={() => nav({ to: "/" })}
+            onClick={() => nav({ to: "/feed" })}
             style={{ color: "var(--foreground-70)", fontSize: "var(--fs-sm)", background: "transparent", border: "none", cursor: "pointer" }}
           >
             Пропустить

@@ -255,7 +255,7 @@ function WelcomePage() {
               </motion.div>
 
               <motion.div variants={fadeUp} className="mt-[32px]" style={{ fontSize: 13, color: "rgba(240,240,240,0.6)" }}>
-                <Link to="/" style={{ color: "rgba(240,240,240,0.7)", textDecoration: "underline" }}>
+                <Link to="/feed" style={{ color: "rgba(240,240,240,0.7)", textDecoration: "underline" }}>
                   Перейти к прототипу ленты
                 </Link>
               </motion.div>

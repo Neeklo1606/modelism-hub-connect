@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as FeedRouteImport } from './routes/feed'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AdsRouteImport } from './routes/ads'
@@ -88,6 +89,11 @@ const HelpRoute = HelpRouteImport.update({
 const FriendsRoute = FriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesRoute = CommunitiesRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/ads': typeof AdsRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
+  '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/ads': typeof AdsRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
+  '/feed': typeof FeedRoute
   '/friends': typeof FriendsRoute
   '/help': typeof HelpRoute
   '/landing': typeof LandingRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/ads'
     | '/categories'
     | '/communities'
+    | '/feed'
     | '/friends'
     | '/help'
     | '/landing'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/feed'
     | '/friends'
     | '/help'
     | '/landing'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/ads'
     | '/categories'
     | '/communities'
+    | '/feed'
     | '/friends'
     | '/help'
     | '/landing'
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   AdsRoute: typeof AdsRouteWithChildren
   CategoriesRoute: typeof CategoriesRouteWithChildren
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
+  FeedRoute: typeof FeedRoute
   FriendsRoute: typeof FriendsRoute
   HelpRoute: typeof HelpRoute
   LandingRoute: typeof LandingRoute
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/friends'
       fullPath: '/friends'
       preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities': {
@@ -581,6 +601,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdsRoute: AdsRouteWithChildren,
   CategoriesRoute: CategoriesRouteWithChildren,
   CommunitiesRoute: CommunitiesRouteWithChildren,
+  FeedRoute: FeedRoute,
   FriendsRoute: FriendsRoute,
   HelpRoute: HelpRoute,
   LandingRoute: LandingRoute,
@@ -597,13 +618,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
