@@ -4,6 +4,14 @@ import { useSyncExternalStore } from "react";
 
 export type ChannelKind = "official" | "brand" | "shop" | "author" | "expert";
 export type PostStatus = "published" | "moderation" | "rejected";
+export type PostKind = "news" | "review" | "announce" | "promo";
+
+export const POST_KIND_LABEL: Record<PostKind, string> = {
+  news: "Новость",
+  review: "Обзор",
+  announce: "Анонс",
+  promo: "Спецпредложение",
+};
 
 export interface ChannelPost {
   id: string;
@@ -14,6 +22,7 @@ export interface ChannelPost {
   status: PostStatus;
   likes: number;
   views: number;
+  kind?: PostKind;
 }
 
 export interface Channel {
@@ -250,11 +259,51 @@ export function getChannel(id: string): Channel | undefined {
   return channels.find((c) => c.id === id || c.slug === id);
 }
 
+// --- posts reactivity ---
+const postListeners = new Set<() => void>();
+let postsVersion = 0;
+function subscribePosts(l: () => void) {
+  postListeners.add(l);
+  return () => { postListeners.delete(l); };
+}
+function emitPosts() {
+  postsVersion++;
+  postListeners.forEach((l) => l());
+}
+
+export function useChannelPosts(channelId: string): ChannelPost[] {
+  useSyncExternalStore(subscribePosts, () => postsVersion, () => postsVersion);
+  return getChannelPosts(channelId);
+}
+
 export function getChannelPosts(channelId: string): ChannelPost[] {
   return posts
     .filter((p) => p.channelId === channelId)
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 }
+
+export function createChannelPost(input: {
+  channelId: string;
+  authorName: string;
+  text: string;
+  kind: PostKind;
+}): ChannelPost {
+  const post: ChannelPost = {
+    id: `p-${Date.now()}`,
+    channelId: input.channelId,
+    authorName: input.authorName,
+    createdAt: new Date().toISOString(),
+    text: input.text,
+    status: "moderation",
+    likes: 0,
+    views: 0,
+    kind: input.kind,
+  };
+  posts.unshift(post);
+  emitPosts();
+  return post;
+}
+
 
 export function formatCount(n: number) {
   if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k";
