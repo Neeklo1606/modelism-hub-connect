@@ -436,7 +436,34 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                       <span className="line-clamp-1">{replied.text}</span>
                     </div>
                   )}
-                  {m.text}
+                  {m.attachments && m.attachments.length > 0 && (
+                    <div
+                      className={`mb-[6px] grid gap-[4px] ${m.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+                    >
+                      {m.attachments.map((src, idx) => (
+                        <a
+                          key={`${m.id}-att-${idx}`}
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block overflow-hidden rounded-[8px]"
+                          style={{ background: "var(--background)" }}
+                        >
+                          <img
+                            src={src}
+                            alt="Вложение"
+                            className="h-full max-h-[220px] w-full object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {m.text && (
+                    <div className="whitespace-pre-wrap break-words">
+                      {renderTextWithLinks(m.text)}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => setReplyTo(m)}
