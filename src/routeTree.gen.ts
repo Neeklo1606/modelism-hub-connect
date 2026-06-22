@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RecoverRouteImport } from './routes/recover'
@@ -36,11 +35,6 @@ import { Route as AdsNewRouteImport } from './routes/ads.new'
 import { Route as AdsIdRouteImport } from './routes/ads.$id'
 import { Route as CategoriesIdSubIdRouteImport } from './routes/categories.$id.$subId'
 
-const WelcomeRoute = WelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SubscriptionRoute = SubscriptionRouteImport.update({
   id: '/subscription',
   path: '/subscription',
@@ -184,7 +178,6 @@ export interface FileRoutesByFullPath {
   '/recover': typeof RecoverRoute
   '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
-  '/welcome': typeof WelcomeRoute
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
@@ -209,7 +202,6 @@ export interface FileRoutesByTo {
   '/recover': typeof RecoverRoute
   '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
-  '/welcome': typeof WelcomeRoute
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
@@ -238,7 +230,6 @@ export interface FileRoutesById {
   '/recover': typeof RecoverRoute
   '/register': typeof RegisterRoute
   '/subscription': typeof SubscriptionRoute
-  '/welcome': typeof WelcomeRoute
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
@@ -268,7 +259,6 @@ export interface FileRouteTypes {
     | '/recover'
     | '/register'
     | '/subscription'
-    | '/welcome'
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
@@ -293,7 +283,6 @@ export interface FileRouteTypes {
     | '/recover'
     | '/register'
     | '/subscription'
-    | '/welcome'
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
@@ -321,7 +310,6 @@ export interface FileRouteTypes {
     | '/recover'
     | '/register'
     | '/subscription'
-    | '/welcome'
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
@@ -350,19 +338,11 @@ export interface RootRouteChildren {
   RecoverRoute: typeof RecoverRoute
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
-  WelcomeRoute: typeof WelcomeRoute
   UserIdRoute: typeof UserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/welcome': {
-      id: '/welcome'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof WelcomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/subscription': {
       id: '/subscription'
       path: '/subscription'
@@ -612,7 +592,6 @@ const rootRouteChildren: RootRouteChildren = {
   RecoverRoute: RecoverRoute,
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
-  WelcomeRoute: WelcomeRoute,
   UserIdRoute: UserIdRoute,
 }
 export const routeTree = rootRouteImport

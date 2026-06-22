@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play, Pause, Volume2, VolumeX, ArrowRight, UserPlus, LogIn, ChevronDown,
-  Newspaper, MessageSquare, Megaphone, Users2, Check, Plus,
+  Newspaper, MessageSquare, Megaphone, Users2, Compass, Check, Plus,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
@@ -470,14 +470,9 @@ function FeaturesSection() {
 
 const STEPS = [
   { n: "01", icon: UserPlus, title: "Регистрация", text: "Аккаунт за минуту — email или соцсети." },
-  { n: "02", icon: Compass2, title: "Выбор интересов", text: "Отметьте категории, которые вам близки." },
+  { n: "02", icon: Compass, title: "Выбор интересов", text: "Отметьте категории, которые вам близки." },
   { n: "03", icon: MessageSquare, title: "Общение и обмен", text: "Публикуйте, обсуждайте, покупайте, продавайте." },
 ];
-
-function Compass2(props: React.SVGProps<SVGSVGElement>) {
-  // local re-export to avoid duplicate import names
-  return <Users2 {...props} />;
-}
 
 function HowItWorksSection() {
   return (
