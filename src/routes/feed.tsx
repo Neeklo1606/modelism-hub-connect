@@ -130,6 +130,8 @@ function FeedPage() {
 
         <CreatePostTrigger onOpen={() => setComposerOpen(true)} />
 
+        <FindYourPeopleSheet />
+
         <FeedFilterTabs value={filter} onChange={setFilter} />
 
         {filter === "categories" && (
