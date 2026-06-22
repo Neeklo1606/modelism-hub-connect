@@ -304,9 +304,9 @@ export const ads: Ad[] = rawAds.map((r) => {
 export const adById = (id: ID) => ads.find((a) => a.id === id);
 
 export const banners: Banner[] = [
-  { id: "b1", title: "Магазин MODELIZM23", text: "Скидка 15% на все ДВС двигатели до конца месяца", cta: "Перейти", until: "до 30.06", color: "from-red-600 to-red-800" },
-  { id: "b2", title: "Новый завоз LiPo батарей", text: "Большой выбор аккумуляторов под любые задачи", cta: "Смотреть", until: "до 15.07", color: "from-slate-700 to-slate-900" },
-  { id: "b3", title: "Гонки RC в Краснодаре", text: "Регистрация открыта. Заявки до 20 июня", cta: "Записаться", until: "до 20.06", color: "from-red-700 to-slate-900" },
+  { id: "b1", title: "Гонки RC в Краснодаре", text: "Открыта регистрация на летний этап. Заявки принимаются до 20 июня — успейте занять место в гриде.", cta: "Записаться", until: "до 20.06", color: "from-red-700 to-slate-900", image: photo(901), kind: "event", pinned: true, priority: 10 },
+  { id: "b2", title: "Новый завоз LiPo батарей", text: "Большой выбор аккумуляторов под любые задачи — от 2S до 6S, проверенные бренды.", cta: "Смотреть", until: "до 15.07", color: "from-slate-700 to-slate-900", image: photo(902), kind: "news", priority: 5 },
+  { id: "b3", title: "Слёт авиамоделистов", text: "Открытое поле, демо-полёты и swap-meet запчастей. Приходите со своими моделями.", cta: "Подробнее", until: "до 12.07", color: "from-red-600 to-red-800", image: photo(903), kind: "event", priority: 3 },
 ];
 
 export const tariffs: Tariff[] = [
