@@ -256,15 +256,26 @@ function PostItem({ post, isOwner }: { post: ChannelPost; isOwner: boolean }) {
             {formatDate(post.createdAt)}
           </div>
         </div>
-        {(isOwner || post.status !== "published") && (
-          <span
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold"
-            style={{ background: s.bg, color: s.color, padding: "4px 8px", borderRadius: 6 }}
-          >
-            <s.Icon size={11} /> {s.label}
-          </span>
-        )}
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {post.kind && (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold"
+              style={{ background: "var(--background-surface)", color: "var(--foreground-70)", padding: "4px 8px", borderRadius: 6 }}
+            >
+              <KindIcon kind={post.kind} /> {POST_KIND_LABEL[post.kind]}
+            </span>
+          )}
+          {(isOwner || post.status !== "published") && (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold"
+              style={{ background: s.bg, color: s.color, padding: "4px 8px", borderRadius: 6 }}
+            >
+              <s.Icon size={11} /> {s.label}
+            </span>
+          )}
+        </div>
       </div>
+
       <p className="mt-2 whitespace-pre-wrap text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
         {post.text}
       </p>
