@@ -1,63 +1,43 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Newspaper, MessageSquare, Plus, Megaphone, User } from "lucide-react";
-import { useState } from "react";
-import { CreateChooserModal } from "@/components/CreateChooserModal";
+import { Newspaper, Users2, MessageSquare, Megaphone, User } from "lucide-react";
 import { getActiveSection } from "@/lib/routes";
 
-type Item = { to: "/feed" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper; section: string };
+type Item = {
+  to: "/feed" | "/communities" | "/messenger" | "/ads" | "/profile";
+  label: string;
+  icon: typeof Newspaper;
+  section: string;
+};
 
-
-const LEFT: Item[] = [
+const ITEMS: Item[] = [
   { to: "/feed", label: "Лента", icon: Newspaper, section: "feed" },
-  { to: "/messenger", label: "Чаты", icon: MessageSquare, section: "messenger" },
-];
-const RIGHT: Item[] = [
+  { to: "/communities", label: "Сообщества", icon: Users2, section: "communities" },
+  { to: "/messenger", label: "Сообщения", icon: MessageSquare, section: "messenger" },
   { to: "/ads", label: "Объявления", icon: Megaphone, section: "ads" },
   { to: "/profile", label: "Профиль", icon: User, section: "profile" },
 ];
 
-
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const activeSection = getActiveSection(pathname);
-  const [open, setOpen] = useState(false);
-
 
   return (
-    <>
-      <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
-        style={{
-          background: "color-mix(in oklab, var(--background) 94%, transparent)",
-          backdropFilter: "saturate(180%) blur(14px)",
-          WebkitBackdropFilter: "saturate(180%) blur(14px)",
-          borderTop: "1px solid var(--border)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
-      >
-        <ul className="grid grid-cols-5 items-center" style={{ height: 60 }}>
-          {LEFT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
-          <li className="flex items-center justify-center">
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Создать"
-              className="grid place-items-center transition-transform duration-150 active:scale-95"
-              style={{
-                width: 44, height: 44,
-                background: "var(--accent)",
-                color: "#fff",
-                borderRadius: 14,
-                boxShadow: "0 6px 16px -4px color-mix(in oklab, var(--accent) 55%, transparent)",
-              }}
-            >
-              <Plus size={22} strokeWidth={2.4} />
-            </button>
-          </li>
-          {RIGHT.map((it) => <NavTab key={it.to} item={it} active={activeSection === it.section} />)}
-        </ul>
-      </nav>
-      <CreateChooserModal open={open} onOpenChange={setOpen} />
-    </>
+    <nav
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40"
+      style={{
+        background: "color-mix(in oklab, var(--background) 94%, transparent)",
+        backdropFilter: "saturate(180%) blur(14px)",
+        WebkitBackdropFilter: "saturate(180%) blur(14px)",
+        borderTop: "1px solid var(--border)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
+      <ul className="grid grid-cols-5 items-center" style={{ height: 60 }}>
+        {ITEMS.map((it) => (
+          <NavTab key={it.to} item={it} active={activeSection === it.section} />
+        ))}
+      </ul>
+    </nav>
   );
 }
 
@@ -74,10 +54,7 @@ function NavTab({ item, active }: { item: Item; active: boolean }) {
         }}
       >
         <Icon size={22} strokeWidth={active ? 2.4 : 2} />
-        <span
-          className="font-medium"
-          style={{ fontSize: 10.5, letterSpacing: "0.01em", lineHeight: 1 }}
-        >
+        <span className="font-medium" style={{ fontSize: 10.5, letterSpacing: "0.01em", lineHeight: 1 }}>
           {item.label}
         </span>
       </Link>
