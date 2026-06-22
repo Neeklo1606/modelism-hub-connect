@@ -398,6 +398,8 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeMatch, setActiveMatch] = useState(0);
+  const [caseSensitive, setCaseSensitive] = useState(false);
+  const [exactMatch, setExactMatch] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -420,13 +422,25 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
   const trimmedQuery = query.trim();
   const matchIds = useMemo(() => {
     if (!trimmedQuery) return [] as string[];
-    const lc = trimmedQuery.toLowerCase();
-    return messages.filter((m) => m.text && m.text.toLowerCase().includes(lc)).map((m) => m.id);
-  }, [messages, trimmedQuery]);
+    return messages.filter((m) => {
+      if (!m.text) return false;
+      if (exactMatch) {
+        const msg = m.text.trim();
+        return caseSensitive ? msg === trimmedQuery : msg.toLowerCase() === trimmedQuery.toLowerCase();
+      }
+      return caseSensitive
+        ? m.text.includes(trimmedQuery)
+        : m.text.toLowerCase().includes(trimmedQuery.toLowerCase());
+    }).map((m) => m.id);
+  }, [messages, trimmedQuery, caseSensitive, exactMatch]);
 
   useEffect(() => {
     if (activeMatch >= matchIds.length) setActiveMatch(0);
   }, [matchIds.length, activeMatch]);
+
+  useEffect(() => {
+    setActiveMatch(0);
+  }, [caseSensitive, exactMatch]);
 
   useEffect(() => {
     if (!trimmedQuery) {
@@ -531,6 +545,32 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
               className="min-w-0 flex-1 bg-transparent text-[13px] outline-none"
               style={{ color: "var(--foreground)" }}
             />
+            <button
+              type="button"
+              onClick={() => setCaseSensitive((v) => !v)}
+              aria-pressed={caseSensitive}
+              className="shrink-0 rounded-[6px] px-[5px] py-[2px] text-[10px] font-bold transition-colors"
+              style={{
+                background: caseSensitive ? "var(--accent)" : "var(--background-elevated)",
+                color: caseSensitive ? "#fff" : "var(--foreground-50)",
+              }}
+              title="Учитывать регистр"
+            >
+              Aa
+            </button>
+            <button
+              type="button"
+              onClick={() => setExactMatch((v) => !v)}
+              aria-pressed={exactMatch}
+              className="shrink-0 rounded-[6px] px-[5px] py-[2px] text-[10px] font-bold transition-colors"
+              style={{
+                background: exactMatch ? "var(--accent)" : "var(--background-elevated)",
+                color: exactMatch ? "#fff" : "var(--foreground-50)",
+              }}
+              title="Точное совпадение"
+            >
+              =
+            </button>
             <span
               className="shrink-0 text-[11.5px] tabular-nums"
               style={{ color: "var(--foreground-50)" }}
@@ -615,7 +655,7 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                       }}
                     >
                       <span className="block text-[10.5px] font-medium">{userById(replied.authorId).name}</span>
-                      <span className="line-clamp-1">{highlightNodes(replied.text, trimmedQuery, undefined, `r-${m.id}`)}</span>
+                      <span className="line-clamp-1">{highlightNodes(replied.text, trimmedQuery, undefined, `r-${m.id}`, caseSensitive)}</span>
                     </div>
                   )}
                   {m.attachments && m.attachments.length > 0 && (
@@ -648,6 +688,7 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                         trimmedQuery,
                         isActive ? "h-0-m-0" : undefined,
                         isActive ? "h" : `t-${m.id}`,
+                        caseSensitive,
                       )}
                     </div>
                   )}
