@@ -614,7 +614,7 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                       }}
                     >
                       <span className="block text-[10.5px] font-medium">{userById(replied.authorId).name}</span>
-                      <span className="line-clamp-1">{replied.text}</span>
+                      <span className="line-clamp-1">{highlightNodes(replied.text, trimmedQuery, undefined, `r-${m.id}`)}</span>
                     </div>
                   )}
                   {m.attachments && m.attachments.length > 0 && (
