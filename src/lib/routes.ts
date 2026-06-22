@@ -28,6 +28,7 @@ export const ROUTES = {
 export const SIDEBAR_ROUTE_MAP: Record<string, string[]> = {
   feed: ["/feed", "/categories"],
   communities: ["/communities"],
+  channels: ["/channels", "/channel"],
   ads: ["/ads"],
   messenger: ["/messenger"],
   profile: ["/profile", "/user"],
