@@ -1,93 +1,583 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  MessageCircle,
+  Paperclip,
+  Reply,
+  Send,
+  Smile,
+  Tag,
+  Users,
+  X,
+} from "lucide-react";
+import * as Icons from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { categoryById, chatMessages as initial, userById, me, ads } from "@/lib/mock";
-import type { Message } from "@/lib/mock";
-import { Pin, Paperclip, Send } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
-import { EmptyState } from "@/components/EmptyState";
+import { categoryById, ads, users, me, userById } from "@/lib/mock";
+import type { Category, Message, User } from "@/lib/mock";
+
+type Tab = "chat" | "ads" | "members";
 
 export const Route = createFileRoute("/categories/$id/$subId")({
-  component: SubcategoryPage,
+  head: ({ params }) => {
+    const c = categoryById(params.id);
+    const sub = c?.subcategories.find((s) => s.id === params.subId);
+    const title = c && sub ? `${sub.name} · ${c.name}` : "Подкатегория";
+    return { meta: [{ title: `${title} — МоДелизМ Форум` }] };
+  },
+  component: SubcategoryRoomPage,
 });
 
-function SubcategoryPage() {
+function seedFrom(s: string): number {
+  return s.split("").reduce((a, ch) => a + ch.charCodeAt(0), 0);
+}
+
+interface RoomMessage extends Message {
+  replyToId?: string;
+}
+
+function buildMessages(c: Category, subName: string): RoomMessage[] {
+  const base = `Привет всем в чате «${subName}»! Кто сейчас в теме?`;
+  const seed = seedFrom(c.id + subName);
+  const pool = users.slice(0, 5);
+  const pick = (i: number) => pool[(seed + i) % pool.length];
+
+  return [
+    {
+      id: "m1",
+      authorId: pick(0).id,
+      time: "10:42",
+      text: base,
+      status: "read",
+    },
+    {
+      id: "m2",
+      authorId: pick(1).id,
+      time: "10:45",
+      text: `Привет! Я по ${subName.toLowerCase()} давно. Что обсуждаем сегодня?`,
+      status: "read",
+      replyToId: "m1",
+    },
+    {
+      id: "m3",
+      authorId: pick(2).id,
+      time: "11:02",
+      text: "Кто-нибудь пробовал новые настройки подвески после последнего обновления?",
+      status: "read",
+    },
+    {
+      id: "m4",
+      authorId: pick(3).id,
+      time: "11:10",
+      text: "Да, поставил мягче спереди — стало лучше на буграх. Скину фото вечером.",
+      status: "read",
+      replyToId: "m3",
+    },
+    {
+      id: "m5",
+      authorId: pick(0).id,
+      time: "11:18",
+      text: "Кстати, у нас в выходные встреча клуба. Подтянитесь, кто рядом.",
+      status: "read",
+    },
+    {
+      id: "m6",
+      authorId: pick(4).id,
+      time: "11:24",
+      text: "Подскажите по моторам под этот класс — что брать в бюджете?",
+      status: "read",
+    },
+  ];
+}
+
+function buildMembers(c: Category, subId: string): Array<User & { role?: string; isOnline: boolean }> {
+  const seed = seedFrom(c.id + subId);
+  return users.map((u, i) => ({
+    ...u,
+    isOnline: ((seed + i) % 3) !== 0,
+    role: i === 0 ? "Модератор" : i === 1 ? "Эксперт" : undefined,
+  }));
+}
+
+function SubcategoryRoomPage() {
   const { id, subId } = Route.useParams();
   const c = categoryById(id);
   const sub = c?.subcategories.find((s) => s.id === subId);
-  const [tab, setTab] = useState<"chat" | "ads">("chat");
-  const [messages, setMessages] = useState<Message[]>(initial);
-  const [text, setText] = useState("");
 
-  if (!c || !sub) return <AppLayout rightColumn={false}><p>Не найдено</p></AppLayout>;
+  const [tab, setTab] = useState<Tab>("chat");
+  const [subSheetOpen, setSubSheetOpen] = useState(false);
 
-  const send = () => {
-    if (!text.trim()) return;
-    setMessages([...messages, { id: `nm${Date.now()}`, authorId: me.id, time: "сейчас", text }]);
-    setText("");
-  };
+  if (!c || !sub) {
+    return (
+      <AppLayout rightColumn={false}>
+        <p className="text-sm" style={{ color: "var(--foreground-50)" }}>
+          Подкатегория не найдена.
+        </p>
+      </AppLayout>
+    );
+  }
 
-  const subAds = ads.filter((a) => a.category === c.name).slice(0, 4);
+  const Icon =
+    (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[c.icon] ??
+    Icons.Hash;
+
+  const subAds = useMemo(
+    () => ads.filter((a) => a.category === c.name && a.subcategory === sub.name),
+    [c.name, sub.name],
+  );
+  const members = useMemo(() => buildMembers(c, sub.id), [c, sub.id]);
+  const onlineCount = members.filter((m) => m.isOnline).length;
 
   return (
     <AppLayout rightColumn={false}>
-      <div className="space-y-4">
-        <nav className="text-xs text-muted-foreground">
-          <Link to="/categories" className="hover:text-primary">Категории</Link> / <Link to="/categories/$id" params={{ id: c.id }} className="hover:text-primary">{c.name}</Link> / {sub.name}
-        </nav>
-        <header>
-          <h1 className="font-display text-2xl font-bold">{sub.name}</h1>
-          <p className="text-sm text-muted-foreground">{c.name}</p>
+      <div
+        className="flex h-[calc(100vh-160px)] flex-col overflow-hidden rounded-[14px] border lg:h-[calc(100vh-96px)]"
+        style={{ background: "var(--background-elevated)", borderColor: "var(--border)" }}
+      >
+        {/* Room header */}
+        <header
+          className="flex items-center gap-[10px] border-b px-[14px] py-[10px]"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <Link
+            to="/categories/$id"
+            params={{ id: c.id }}
+            aria-label="Назад к категории"
+            className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)]"
+          >
+            <ArrowLeft className="h-[16px] w-[16px]" style={{ color: "var(--foreground-70)" }} />
+          </Link>
+          <span
+            className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px]"
+            style={{ background: "var(--background-surface)", color: "var(--accent)" }}
+          >
+            <Icon className="h-[18px] w-[18px]" />
+          </span>
+          <button
+            type="button"
+            onClick={() => setSubSheetOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-[6px] text-left transition-opacity hover:opacity-80"
+          >
+            <div className="min-w-0">
+              <div className="flex items-center gap-[6px]">
+                <span
+                  className="truncate text-[15px] font-semibold"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  {sub.name}
+                </span>
+                <ChevronDown className="h-[14px] w-[14px] shrink-0" style={{ color: "var(--foreground-50)" }} />
+              </div>
+              <p className="truncate text-[11.5px]" style={{ color: "var(--foreground-50)" }}>
+                {c.name} · <span style={{ color: "#22c55e" }}>●</span> {onlineCount} онлайн
+              </p>
+            </div>
+          </button>
         </header>
 
-        <div className="grid grid-cols-2 rounded-lg bg-muted p-1">
-          <button onClick={() => setTab("chat")} className={`rounded-md py-1.5 text-sm font-medium ${tab === "chat" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Чат</button>
-          <button onClick={() => setTab("ads")} className={`rounded-md py-1.5 text-sm font-medium ${tab === "ads" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Объявления</button>
+        {/* Tabs */}
+        <div
+          className="flex shrink-0 border-b"
+          style={{ borderColor: "var(--border)" }}
+          role="tablist"
+        >
+          <TabBtn label="Чат" icon={<MessageCircle className="h-[14px] w-[14px]" />} active={tab === "chat"} onClick={() => setTab("chat")} />
+          <TabBtn label="Объявления" icon={<Tag className="h-[14px] w-[14px]" />} active={tab === "ads"} onClick={() => setTab("ads")} badge={subAds.length || undefined} />
+          <TabBtn label="Участники" icon={<Users className="h-[14px] w-[14px]" />} active={tab === "members"} onClick={() => setTab("members")} badge={members.length} />
         </div>
 
-        {tab === "chat" ? (
-          <div className="rounded-xl border bg-card">
-            <div className="flex items-start gap-2 border-b bg-accent/40 p-3 text-xs">
-              <Pin className="h-4 w-4 shrink-0 text-primary" />
-              <p><b>Правила чата:</b> уважение к участникам, без рекламы вне темы, по делу. Объявления — во вкладке «Объявления».</p>
+        {/* Tab content */}
+        <div className="min-h-0 flex-1">
+          {tab === "chat" && <ChatTab category={c} subId={sub.id} subName={sub.name} />}
+          {tab === "ads" && <AdsTab ads={subAds} subName={sub.name} />}
+          {tab === "members" && <MembersTab members={members} />}
+        </div>
+      </div>
+
+      {/* Subcategory switcher sheet */}
+      {subSheetOpen && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            aria-label="Закрыть"
+            onClick={() => setSubSheetOpen(false)}
+            className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-hidden rounded-t-[18px] border-t"
+            style={{ background: "var(--background-elevated)", borderColor: "var(--border)" }}
+          >
+            <div className="flex items-center justify-between px-[16px] py-[14px] border-b" style={{ borderColor: "var(--border)" }}>
+              <div>
+                <h3 className="text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  Комнаты «{c.name}»
+                </h3>
+                <p className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
+                  Выберите подкатегорию
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSubSheetOpen(false)}
+                aria-label="Закрыть"
+                className="grid h-[32px] w-[32px] place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)]"
+              >
+                <X className="h-[16px] w-[16px]" style={{ color: "var(--foreground-70)" }} />
+              </button>
             </div>
-            <div className="max-h-[420px] space-y-3 overflow-y-auto p-4">
-              {messages.length === 0 ? <EmptyState title="Пока пусто" description="Будьте первым, кто напишет в чат" /> : messages.map((m) => {
-                const u = userById(m.authorId);
-                const isMe = m.authorId === me.id;
+            <ul className="max-h-[calc(80vh-72px)] overflow-y-auto p-[8px]">
+              {c.subcategories.map((s) => {
+                const active = s.id === sub.id;
                 return (
-                  <div key={m.id} className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
-                    <img src={u.avatar} alt="" className="h-8 w-8 shrink-0 rounded-full" />
-                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                      <div className="mb-0.5 flex items-center gap-2 text-[10px] opacity-75">
-                        <span className="font-medium">{u.name}</span><span>{m.time}</span>
-                      </div>
-                      {m.text}
-                    </div>
-                  </div>
+                  <li key={s.id}>
+                    <Link
+                      to="/categories/$id/$subId"
+                      params={{ id: c.id, subId: s.id }}
+                      onClick={() => setSubSheetOpen(false)}
+                      className="flex items-center gap-[10px] rounded-[10px] px-[12px] py-[10px] transition-colors hover:bg-[var(--background-surface)]"
+                      style={{
+                        background: active ? "var(--background-surface)" : "transparent",
+                        color: active ? "var(--accent)" : "var(--foreground)",
+                      }}
+                    >
+                      <span className="grid h-[28px] w-[28px] place-items-center rounded-[8px] text-[12px] font-semibold"
+                        style={{ background: "var(--background)", color: active ? "var(--accent)" : "var(--foreground-70)" }}>#</span>
+                      <span className="flex-1 text-[14px] font-medium">{s.name}</span>
+                      {active && <span className="text-[11px]" style={{ color: "var(--accent)" }}>Сейчас здесь</span>}
+                    </Link>
+                  </li>
                 );
               })}
+            </ul>
+          </div>
+        </div>
+      )}
+    </AppLayout>
+  );
+}
+
+function TabBtn({
+  label,
+  icon,
+  active,
+  onClick,
+  badge,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  badge?: number;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className="flex flex-1 items-center justify-center gap-[6px] py-[11px] text-[13px] font-medium transition-colors"
+      style={{
+        color: active ? "var(--accent)" : "var(--foreground-70)",
+        borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+      }}
+    >
+      <span style={{ color: active ? "var(--accent)" : "var(--foreground-50)" }}>{icon}</span>
+      {label}
+      {typeof badge === "number" && (
+        <span
+          className="ml-[2px] inline-flex min-w-[18px] items-center justify-center rounded-[999px] px-[6px] py-[1px] text-[10.5px]"
+          style={{
+            background: active ? "var(--accent)" : "var(--background-surface)",
+            color: active ? "#fff" : "var(--foreground-70)",
+          }}
+        >
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+/* --------------------------- CHAT TAB --------------------------- */
+
+function ChatTab({ category, subId, subName }: { category: Category; subId: string; subName: string }) {
+  const [messages, setMessages] = useState<RoomMessage[]>(() => buildMessages(category, subName));
+  const [text, setText] = useState("");
+  const [replyTo, setReplyTo] = useState<RoomMessage | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // reset when room changes
+  useEffect(() => {
+    setMessages(buildMessages(category, subName));
+    setText("");
+    setReplyTo(null);
+  }, [category, subId, subName]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
+
+  const send = () => {
+    const v = text.trim();
+    if (!v) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `local-${Date.now()}`,
+        authorId: me.id,
+        time: new Date().toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit" }),
+        text: v,
+        status: "sent",
+        replyToId: replyTo?.id,
+      },
+    ]);
+    setText("");
+    setReplyTo(null);
+  };
+
+  return (
+    <div className="flex h-full flex-col">
+      <div ref={scrollRef} className="flex-1 space-y-[10px] overflow-y-auto px-[14px] py-[14px]">
+        {messages.map((m) => {
+          const u = userById(m.authorId);
+          const mine = m.authorId === me.id;
+          const replied = m.replyToId ? messages.find((x) => x.id === m.replyToId) : undefined;
+          return (
+            <div key={m.id} className={`flex gap-[10px] ${mine ? "flex-row-reverse" : ""}`}>
+              <img src={u.avatar} alt={u.name} className="h-[32px] w-[32px] shrink-0 rounded-full" />
+              <div className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
+                <div className="mb-[2px] flex items-center gap-[6px] text-[11px]" style={{ color: "var(--foreground-50)" }}>
+                  {!mine && (
+                    <Link
+                      to="/user/$id"
+                      params={{ id: u.id }}
+                      className="font-medium hover:underline"
+                      style={{ color: "var(--foreground-70)" }}
+                    >
+                      {u.name}
+                    </Link>
+                  )}
+                  <span>{m.time}</span>
+                </div>
+                <div
+                  className="group relative rounded-[12px] px-[12px] py-[8px] text-[14px] leading-[1.4]"
+                  style={{
+                    background: mine ? "var(--accent)" : "var(--background-surface)",
+                    color: mine ? "#fff" : "var(--foreground)",
+                  }}
+                >
+                  {replied && (
+                    <div
+                      className="mb-[6px] rounded-[8px] border-l-[3px] px-[8px] py-[4px] text-[12px]"
+                      style={{
+                        borderColor: mine ? "rgba(255,255,255,0.5)" : "var(--accent)",
+                        background: mine ? "rgba(255,255,255,0.12)" : "var(--background)",
+                        color: mine ? "rgba(255,255,255,0.85)" : "var(--foreground-70)",
+                      }}
+                    >
+                      <span className="block text-[10.5px] font-medium">{userById(replied.authorId).name}</span>
+                      <span className="line-clamp-1">{replied.text}</span>
+                    </div>
+                  )}
+                  {m.text}
+                  <button
+                    type="button"
+                    onClick={() => setReplyTo(m)}
+                    aria-label="Ответить"
+                    className={`absolute -top-[8px] ${mine ? "left-[6px]" : "right-[6px]"} hidden h-[22px] w-[22px] place-items-center rounded-full border bg-[var(--background-elevated)] group-hover:grid`}
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    <Reply className="h-[12px] w-[12px]" style={{ color: "var(--foreground-70)" }} />
+                  </button>
+                </div>
+                {!mine && (
+                  <Link
+                    to="/messenger"
+                    search={{ chat: u.id }}
+                    className="mt-[2px] text-[10.5px] hover:underline"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    Написать в личку
+                  </Link>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 border-t p-2">
-              <button className="grid h-9 w-9 place-items-center rounded-lg hover:bg-muted"><Paperclip className="h-4 w-4" /></button>
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Написать сообщение..."
-                className="flex-1 rounded-lg bg-muted px-3 py-2 text-sm outline-none focus:bg-background focus:ring-1 focus:ring-primary"
-              />
-              <button onClick={send} className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground hover:opacity-90"><Send className="h-4 w-4" /></button>
+          );
+        })}
+      </div>
+
+      {/* Reply preview */}
+      {replyTo && (
+        <div
+          className="flex items-center gap-[8px] border-t px-[12px] py-[8px]"
+          style={{ borderColor: "var(--border)", background: "var(--background-surface)" }}
+        >
+          <Reply className="h-[14px] w-[14px] shrink-0" style={{ color: "var(--accent)" }} />
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-medium" style={{ color: "var(--accent)" }}>
+              Ответ: {userById(replyTo.authorId).name}
+            </div>
+            <div className="truncate text-[12px]" style={{ color: "var(--foreground-70)" }}>
+              {replyTo.text}
             </div>
           </div>
-        ) : (
-          subAds.length ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {subAds.map((a) => <AdCard key={a.id} ad={a} />)}
-            </div>
-          ) : <EmptyState title="Нет объявлений" description="В этой подкатегории пока нет объявлений" />
-        )}
+          <button
+            type="button"
+            onClick={() => setReplyTo(null)}
+            aria-label="Отменить ответ"
+            className="grid h-[26px] w-[26px] place-items-center rounded-[8px] hover:bg-[var(--background-elevated)]"
+          >
+            <X className="h-[14px] w-[14px]" style={{ color: "var(--foreground-70)" }} />
+          </button>
+        </div>
+      )}
+
+      {/* Composer */}
+      <div
+        className="flex items-end gap-[8px] border-t px-[12px] py-[10px]"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <button
+          type="button"
+          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)]"
+          aria-label="Вложение"
+        >
+          <Paperclip className="h-[16px] w-[16px]" style={{ color: "var(--foreground-50)" }} />
+        </button>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+          placeholder={`Написать в «${subName}»…`}
+          rows={1}
+          className="min-h-[36px] max-h-[120px] flex-1 resize-none rounded-[10px] border px-[12px] py-[8px] text-[14px] outline-none focus:border-[var(--accent)]"
+          style={{
+            background: "var(--background-surface)",
+            borderColor: "var(--border)",
+            color: "var(--foreground)",
+          }}
+        />
+        <button
+          type="button"
+          className="hidden h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)] sm:grid"
+          aria-label="Эмодзи"
+        >
+          <Smile className="h-[16px] w-[16px]" style={{ color: "var(--foreground-50)" }} />
+        </button>
+        <button
+          type="button"
+          onClick={send}
+          disabled={!text.trim()}
+          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-opacity disabled:opacity-40"
+          style={{ background: "var(--accent)", color: "#fff" }}
+          aria-label="Отправить"
+        >
+          <Send className="h-[16px] w-[16px]" />
+        </button>
       </div>
-    </AppLayout>
+    </div>
+  );
+}
+
+/* --------------------------- ADS TAB --------------------------- */
+
+function AdsTab({ ads: subAds, subName }: { ads: typeof ads; subName: string }) {
+  if (subAds.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-[8px] px-[24px] py-[40px] text-center">
+        <Tag className="h-[28px] w-[28px]" style={{ color: "var(--foreground-30)" }} />
+        <h3 className="text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+          В «{subName}» пока нет объявлений
+        </h3>
+        <p className="text-[12.5px]" style={{ color: "var(--foreground-50)" }}>
+          Это локальная доска именно этой подкатегории. Будьте первым.
+        </p>
+        <Link
+          to="/ads/new"
+          className="mt-[6px] inline-flex items-center rounded-[10px] px-[14px] py-[8px] text-[13px] font-semibold"
+          style={{ background: "var(--accent)", color: "#fff" }}
+        >
+          Подать объявление
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full overflow-y-auto px-[14px] py-[14px]">
+      <div className="grid grid-cols-1 gap-[12px] sm:grid-cols-2">
+        {subAds.map((a) => (
+          <AdCard key={a.id} ad={a} compact />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------- MEMBERS TAB --------------------------- */
+
+function MembersTab({ members }: { members: Array<User & { role?: string; isOnline: boolean }> }) {
+  const sorted = [...members].sort((a, b) => Number(b.isOnline) - Number(a.isOnline));
+  return (
+    <div className="h-full overflow-y-auto px-[10px] py-[10px]">
+      <ul className="space-y-[2px]">
+        {sorted.map((u) => (
+          <li
+            key={u.id}
+            className="flex items-center gap-[12px] rounded-[12px] px-[10px] py-[8px] transition-colors hover:bg-[var(--background-surface)]"
+          >
+            <div className="relative shrink-0">
+              <img src={u.avatar} alt={u.name} className="h-[40px] w-[40px] rounded-full" />
+              <span
+                className="absolute -bottom-[1px] -right-[1px] h-[11px] w-[11px] rounded-full border-[2px]"
+                style={{
+                  background: u.isOnline ? "#22c55e" : "var(--foreground-30)",
+                  borderColor: "var(--background-elevated)",
+                }}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-[6px]">
+                <Link
+                  to="/user/$id"
+                  params={{ id: u.id }}
+                  className="truncate text-[14px] font-medium hover:underline"
+                  style={{ color: "var(--foreground)" }}
+                >
+                  {u.name}
+                </Link>
+                {u.role && (
+                  <span
+                    className="shrink-0 rounded-[6px] px-[6px] py-[1px] text-[10.5px] font-medium"
+                    style={{ background: "var(--background-surface)", color: "var(--accent)" }}
+                  >
+                    {u.role}
+                  </span>
+                )}
+              </div>
+              <p className="truncate text-[11.5px]" style={{ color: "var(--foreground-50)" }}>
+                {u.isOnline ? "онлайн" : "не в сети"} · {u.city}
+              </p>
+            </div>
+            <Link
+              to="/messenger"
+              search={{ chat: u.id }}
+              className="shrink-0 rounded-[8px] px-[10px] py-[6px] text-[12px] font-medium transition-colors"
+              style={{ background: "var(--accent)", color: "#fff" }}
+            >
+              Написать
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
