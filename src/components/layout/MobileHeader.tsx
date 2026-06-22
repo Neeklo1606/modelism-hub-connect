@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Radio } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -18,6 +18,14 @@ export function MobileHeader() {
         <Logo />
       </Link>
       <div className="flex shrink-0 items-center gap-[2px]">
+        <Link
+          to="/channels"
+          aria-label="Каналы"
+          className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors duration-150"
+          style={{ color: "var(--foreground-70)" }}
+        >
+          <Radio size={18} />
+        </Link>
         <IconBtn aria-label="Поиск"><Search size={18} /></IconBtn>
         <IconBtn aria-label="Уведомления">
           <span className="relative inline-flex">

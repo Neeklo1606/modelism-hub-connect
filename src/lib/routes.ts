@@ -20,12 +20,15 @@ export const ROUTES = {
   subscription: "/subscription",
   help: "/help",
   admin: "/admin",
+  channels: "/channels",
+  channel: (id: string) => `/channel/${id}` as const,
 } as const;
 
 // Maps sidebar section ids to URL prefixes that should highlight it.
 export const SIDEBAR_ROUTE_MAP: Record<string, string[]> = {
   feed: ["/feed", "/categories"],
   communities: ["/communities"],
+  channels: ["/channels", "/channel"],
   ads: ["/ads"],
   messenger: ["/messenger"],
   profile: ["/profile", "/user"],

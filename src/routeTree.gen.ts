@@ -26,10 +26,12 @@ import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunitiesIndexRouteImport } from './routes/communities.index'
+import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as AdsIndexRouteImport } from './routes/ads.index'
 import { Route as UserIdRouteImport } from './routes/user.$id'
 import { Route as CommunitiesIdRouteImport } from './routes/communities.$id'
+import { Route as ChannelIdRouteImport } from './routes/channel.$id'
 import { Route as CategoriesIdRouteImport } from './routes/categories.$id'
 import { Route as AdsNewRouteImport } from './routes/ads.new'
 import { Route as AdsIdRouteImport } from './routes/ads.$id'
@@ -120,6 +122,11 @@ const CommunitiesIndexRoute = CommunitiesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CommunitiesRoute,
 } as any)
+const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
+  id: '/channels/',
+  path: '/channels/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -139,6 +146,11 @@ const CommunitiesIdRoute = CommunitiesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => CommunitiesRoute,
+} as any)
+const ChannelIdRoute = ChannelIdRouteImport.update({
+  id: '/channel/$id',
+  path: '/channel/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesIdRoute = CategoriesIdRouteImport.update({
   id: '/$id',
@@ -181,10 +193,12 @@ export interface FileRoutesByFullPath {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/user/$id': typeof UserIdRoute
   '/ads/': typeof AdsIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -205,10 +219,12 @@ export interface FileRoutesByTo {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/user/$id': typeof UserIdRoute
   '/ads': typeof AdsIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/channels': typeof ChannelsIndexRoute
   '/communities': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -233,10 +249,12 @@ export interface FileRoutesById {
   '/ads/$id': typeof AdsIdRoute
   '/ads/new': typeof AdsNewRoute
   '/categories/$id': typeof CategoriesIdRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
   '/communities/$id': typeof CommunitiesIdRoute
   '/user/$id': typeof UserIdRoute
   '/ads/': typeof AdsIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -262,10 +280,12 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/channel/$id'
     | '/communities/$id'
     | '/user/$id'
     | '/ads/'
     | '/categories/'
+    | '/channels/'
     | '/communities/'
     | '/categories/$id/$subId'
   fileRoutesByTo: FileRoutesByTo
@@ -286,10 +306,12 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/channel/$id'
     | '/communities/$id'
     | '/user/$id'
     | '/ads'
     | '/categories'
+    | '/channels'
     | '/communities'
     | '/categories/$id/$subId'
   id:
@@ -313,10 +335,12 @@ export interface FileRouteTypes {
     | '/ads/$id'
     | '/ads/new'
     | '/categories/$id'
+    | '/channel/$id'
     | '/communities/$id'
     | '/user/$id'
     | '/ads/'
     | '/categories/'
+    | '/channels/'
     | '/communities/'
     | '/categories/$id/$subId'
   fileRoutesById: FileRoutesById
@@ -338,7 +362,9 @@ export interface RootRouteChildren {
   RecoverRoute: typeof RecoverRoute
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
+  ChannelIdRoute: typeof ChannelIdRoute
   UserIdRoute: typeof UserIdRoute
+  ChannelsIndexRoute: typeof ChannelsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -462,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesIndexRouteImport
       parentRoute: typeof CommunitiesRoute
     }
+    '/channels/': {
+      id: '/channels/'
+      path: '/channels'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof ChannelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/': {
       id: '/categories/'
       path: '/'
@@ -489,6 +522,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/communities/$id'
       preLoaderRoute: typeof CommunitiesIdRouteImport
       parentRoute: typeof CommunitiesRoute
+    }
+    '/channel/$id': {
+      id: '/channel/$id'
+      path: '/channel/$id'
+      fullPath: '/channel/$id'
+      preLoaderRoute: typeof ChannelIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/categories/$id': {
       id: '/categories/$id'
@@ -592,7 +632,9 @@ const rootRouteChildren: RootRouteChildren = {
   RecoverRoute: RecoverRoute,
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
+  ChannelIdRoute: ChannelIdRoute,
   UserIdRoute: UserIdRoute,
+  ChannelsIndexRoute: ChannelsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
