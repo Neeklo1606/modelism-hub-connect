@@ -45,11 +45,12 @@ function ChannelPage() {
   const { channel } = Route.useLoaderData();
   const subs = useSubscriptions();
   const subscribed = subs.has(channel.id);
-  const posts = getChannelPosts(channel.id);
+  const posts = useChannelPosts(channel.id);
 
-  const visiblePublic = posts.filter((p) => p.status === "published");
+  const visiblePublic = posts.filter((p: ChannelPost) => p.status === "published");
   const [showOwnerView, setShowOwnerView] = useState<boolean>(!!channel.isOwner);
   const list = channel.isOwner && showOwnerView ? posts : visiblePublic;
+
 
   const onToggle = () => {
     toggleSubscribe(channel.id);
