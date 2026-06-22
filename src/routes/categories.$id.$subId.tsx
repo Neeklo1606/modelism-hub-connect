@@ -394,8 +394,13 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<RoomMessage | null>(null);
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [activeMatch, setActiveMatch] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const msgRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // reset when room changes
   useEffect(() => {
@@ -406,12 +411,39 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
       prev.forEach((u) => URL.revokeObjectURL(u));
       return [];
     });
+    setQuery("");
+    setSearchOpen(false);
+    setActiveMatch(0);
   }, [category, subId, subName]);
 
+  const trimmedQuery = query.trim();
+  const matchIds = useMemo(() => {
+    if (!trimmedQuery) return [] as string[];
+    const lc = trimmedQuery.toLowerCase();
+    return messages.filter((m) => m.text && m.text.toLowerCase().includes(lc)).map((m) => m.id);
+  }, [messages, trimmedQuery]);
+
   useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+    if (activeMatch >= matchIds.length) setActiveMatch(0);
+  }, [matchIds.length, activeMatch]);
+
+  useEffect(() => {
+    if (!trimmedQuery) {
+      const el = scrollRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
+  }, [messages.length, trimmedQuery]);
+
+  useEffect(() => {
+    if (!trimmedQuery || matchIds.length === 0) return;
+    const id = matchIds[activeMatch];
+    const node = msgRefs.current.get(id);
+    if (node) node.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [activeMatch, matchIds, trimmedQuery]);
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   const onPickFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -447,15 +479,108 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
     setPendingAttachments([]);
   };
 
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setQuery("");
+    setActiveMatch(0);
+  };
+  const stepMatch = (dir: 1 | -1) => {
+    if (matchIds.length === 0) return;
+    setActiveMatch((i) => (i + dir + matchIds.length) % matchIds.length);
+  };
+
+  const activeMsgId = matchIds[activeMatch];
+
   return (
     <div className="flex h-full flex-col">
+      {/* Search toolbar */}
+      <div
+        className="flex items-center gap-[8px] border-b px-[12px] py-[8px]"
+        style={{ borderColor: "var(--border)", background: "var(--background-surface)" }}
+      >
+        {!searchOpen ? (
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="ml-auto inline-flex items-center gap-[6px] rounded-[8px] px-[10px] py-[6px] text-[12.5px] font-medium transition-colors hover:bg-[var(--background-elevated)]"
+            style={{ color: "var(--foreground-70)" }}
+          >
+            <Search className="h-[14px] w-[14px]" />
+            Поиск по чату
+          </button>
+        ) : (
+          <>
+            <Search className="h-[14px] w-[14px] shrink-0" style={{ color: "var(--foreground-50)" }} />
+            <input
+              ref={searchInputRef}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveMatch(0);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  stepMatch(e.shiftKey ? -1 : 1);
+                } else if (e.key === "Escape") {
+                  closeSearch();
+                }
+              }}
+              placeholder="Найти в сообщениях…"
+              className="min-w-0 flex-1 bg-transparent text-[13px] outline-none"
+              style={{ color: "var(--foreground)" }}
+            />
+            <span
+              className="shrink-0 text-[11.5px] tabular-nums"
+              style={{ color: "var(--foreground-50)" }}
+            >
+              {trimmedQuery ? (matchIds.length ? `${activeMatch + 1}/${matchIds.length}` : "0/0") : ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => stepMatch(-1)}
+              disabled={matchIds.length === 0}
+              aria-label="Предыдущее совпадение"
+              className="grid h-[26px] w-[26px] place-items-center rounded-[8px] transition-colors hover:bg-[var(--background-elevated)] disabled:opacity-40"
+            >
+              <ChevronUp className="h-[14px] w-[14px]" style={{ color: "var(--foreground-70)" }} />
+            </button>
+            <button
+              type="button"
+              onClick={() => stepMatch(1)}
+              disabled={matchIds.length === 0}
+              aria-label="Следующее совпадение"
+              className="grid h-[26px] w-[26px] place-items-center rounded-[8px] transition-colors hover:bg-[var(--background-elevated)] disabled:opacity-40"
+            >
+              <ChevronDown className="h-[14px] w-[14px]" style={{ color: "var(--foreground-70)" }} />
+            </button>
+            <button
+              type="button"
+              onClick={closeSearch}
+              aria-label="Закрыть поиск"
+              className="grid h-[26px] w-[26px] place-items-center rounded-[8px] transition-colors hover:bg-[var(--background-elevated)]"
+            >
+              <X className="h-[14px] w-[14px]" style={{ color: "var(--foreground-70)" }} />
+            </button>
+          </>
+        )}
+      </div>
+
       <div ref={scrollRef} className="flex-1 space-y-[10px] overflow-y-auto px-[14px] py-[14px]">
         {messages.map((m) => {
           const u = userById(m.authorId);
           const mine = m.authorId === me.id;
           const replied = m.replyToId ? messages.find((x) => x.id === m.replyToId) : undefined;
+          const isActive = trimmedQuery && m.id === activeMsgId;
           return (
-            <div key={m.id} className={`flex gap-[10px] ${mine ? "flex-row-reverse" : ""}`}>
+            <div
+              key={m.id}
+              ref={(el) => {
+                if (el) msgRefs.current.set(m.id, el);
+                else msgRefs.current.delete(m.id);
+              }}
+              className={`flex gap-[10px] ${mine ? "flex-row-reverse" : ""}`}
+            >
               <img src={u.avatar} alt={u.name} className="h-[32px] w-[32px] shrink-0 rounded-full" />
               <div className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
                 <div className="mb-[2px] flex items-center gap-[6px] text-[11px]" style={{ color: "var(--foreground-50)" }}>
@@ -472,10 +597,11 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                   <span>{m.time}</span>
                 </div>
                 <div
-                  className="group relative rounded-[12px] px-[12px] py-[8px] text-[14px] leading-[1.4]"
+                  className="group relative rounded-[12px] px-[12px] py-[8px] text-[14px] leading-[1.4] transition-shadow"
                   style={{
                     background: mine ? "var(--accent)" : "var(--background-surface)",
                     color: mine ? "#fff" : "var(--foreground)",
+                    boxShadow: isActive ? "0 0 0 2px #f59e0b" : "none",
                   }}
                 >
                   {replied && (
