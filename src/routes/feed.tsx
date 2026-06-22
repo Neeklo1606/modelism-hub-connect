@@ -119,39 +119,30 @@ function FeedPage() {
     setMobileOpen(false);
   };
 
+  // Interleave sponsored posts into the feed every AD_EVERY items.
+  // Honors "не чаще каждого третьего" (AD_EVERY >= 4 → ad shows up
+  // after at least 3 organic posts) and rotates banners in round-robin.
+  const AD_EVERY = 4;
+  type FeedItem =
+    | { kind: "post"; post: Post }
+    | { kind: "ad"; banner: Banner; key: string };
+
   const slice = filtered.slice(0, visible);
+  const feedItems: FeedItem[] = [];
+  let adIndex = 0;
+  for (let i = 0; i < slice.length; i++) {
+    feedItems.push({ kind: "post", post: slice[i] });
+    const oneIndexed = i + 1;
+    if (banners.length > 0 && oneIndexed % AD_EVERY === 0) {
+      const banner = banners[adIndex % banners.length];
+      feedItems.push({ kind: "ad", banner, key: `ad-${oneIndexed}-${banner.id}` });
+      adIndex++;
+    }
+  }
 
   return (
     <AppLayout>
       <div className="space-y-[16px]">
-        <section
-          className="relative -mx-3 overflow-hidden border-y lg:mx-0 lg:rounded-[20px] lg:border"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <img src={cover} alt="МоДелизМ Форум" width={1920} height={640} className="h-[200px] w-full object-cover lg:h-[280px]" />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.85) 100%)",
-            }}
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-[16px] text-center">
-            <Logo size={56} showText={false} />
-            <h1
-              className="mt-[12px] text-[28px] font-bold tracking-tight sm:text-[44px]"
-              style={{ fontFamily: "var(--font-display)", color: "#fff", letterSpacing: "-0.02em" }}
-            >
-              МоДелизМ <span style={{ color: "var(--accent)" }}>Форум</span>
-            </h1>
-            <p className="mt-[8px] max-w-[480px] text-[13px] sm:text-[15px]" style={{ color: "rgba(255,255,255,0.80)" }}>
-              Моделизм — это жизнь, остальное детали
-            </p>
-          </div>
-        </section>
-
-        <AdBanner />
-
         <div className="hidden lg:block">
           <CreatePostForm onCreate={addPost} />
         </div>
@@ -220,14 +211,18 @@ function FeedPage() {
               />
             )
           ) : (
-            slice.map((p) => (
-              <PostCard
-                key={p.id}
-                post={p}
-                isSavedExternal={savedIds.has(p.id)}
-                onToggleSave={toggleSave}
-              />
-            ))
+            feedItems.map((item) =>
+              item.kind === "post" ? (
+                <PostCard
+                  key={item.post.id}
+                  post={item.post}
+                  isSavedExternal={savedIds.has(item.post.id)}
+                  onToggleSave={toggleSave}
+                />
+              ) : (
+                <SponsoredPostCard key={item.key} banner={item.banner} />
+              ),
+            )
           )}
 
           {!initialLoading && visible < filtered.length && (
