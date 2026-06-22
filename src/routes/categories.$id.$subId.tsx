@@ -36,6 +36,38 @@ function seedFrom(s: string): number {
 
 interface RoomMessage extends Message {
   replyToId?: string;
+  attachments?: string[];
+}
+
+/** Превращает URL в кликабельные ссылки. Безопасно для XSS — рендер через React. */
+function renderTextWithLinks(text: string): React.ReactNode {
+  const re = /\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const raw = m[0].replace(/[),.!?;:]+$/, "");
+    const trailing = m[0].slice(raw.length);
+    const href = raw.startsWith("http") ? raw : `https://${raw}`;
+    parts.push(
+      <a
+        key={`l-${i++}`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="underline decoration-dotted underline-offset-2 hover:opacity-90"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {raw}
+      </a>,
+    );
+    if (trailing) parts.push(trailing);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length ? parts : text;
 }
 
 function buildMessages(c: Category, subName: string): RoomMessage[] {
