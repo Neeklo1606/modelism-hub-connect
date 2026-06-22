@@ -186,10 +186,6 @@ function CategoryRoomsPage() {
           направление, чтобы не смешиваться с другими темами.
         </p>
 
-        <div className="hidden">
-          {/* Keep users referenced to avoid unused-import warnings if tree-shaken */}
-          {users.length}
-        </div>
       </div>
     </AppLayout>
   );
