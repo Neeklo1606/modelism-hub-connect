@@ -3,9 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChevronDown,
+  ChevronUp,
   MessageCircle,
   Paperclip,
   Reply,
+  Search,
   Send,
   Smile,
   Tag,
