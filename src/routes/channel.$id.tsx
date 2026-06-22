@@ -40,16 +40,19 @@ export const Route = createFileRoute("/channel/$id")({
 });
 
 type PostFilter = "all" | "mine";
+type ChannelTab = "posts" | "about";
 
 function ChannelPage() {
   const { channel } = Route.useLoaderData();
   const subs = useSubscriptions();
   const subscribed = subs.has(channel.id);
   const posts = useChannelPosts(channel.id);
+  const [tab, setTab] = useState<ChannelTab>("posts");
 
   const visiblePublic = posts.filter((p: ChannelPost) => p.status === "published");
   const [showOwnerView, setShowOwnerView] = useState<boolean>(!!channel.isOwner);
   const list = channel.isOwner && showOwnerView ? posts : visiblePublic;
+
 
 
   const onToggle = () => {
