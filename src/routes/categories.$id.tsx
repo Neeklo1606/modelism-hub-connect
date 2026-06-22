@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, MessageCircle, Tag, Users } from "lucide-react";
+import { ArrowLeft, ChevronRight, MessageCircle, Search, Tag, Users } from "lucide-react";
 import * as Icons from "lucide-react";
+import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { categoryById, ads } from "@/lib/mock";
 import type { Category } from "@/lib/mock";
