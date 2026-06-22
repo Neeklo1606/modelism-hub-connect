@@ -44,6 +44,14 @@ const ROOM_PREVIEWS = [
 function CategoryRoomsPage() {
   const { id } = Route.useParams();
   const c = categoryById(id);
+  const [query, setQuery] = useState("");
+
+  const filteredSubs = useMemo(() => {
+    if (!c) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return c.subcategories;
+    return c.subcategories.filter((s) => s.name.toLowerCase().includes(q));
+  }, [c, query]);
 
   if (!c) {
     return (
