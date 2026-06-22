@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { categories, communities, ads } from "@/lib/mock";
-import { listChannels } from "@/lib/channels";
+import { getAllChannels, type Channel } from "@/lib/channels";
 import { ExternalLink, CheckCircle2, Map as MapIcon } from "lucide-react";
 
 export const Route = createFileRoute("/diag")({
@@ -15,7 +15,7 @@ interface Group {
 }
 
 function DiagPage() {
-  const channels = listChannels();
+  const channels: Channel[] = getAllChannels();
 
   const groups: Group[] = [
     {
@@ -119,9 +119,8 @@ function DiagPage() {
               {g.links.map((l, i) => (
                 <li key={i}>
                   <Link
-                    // @ts-expect-error dynamic route
-                    to={l.to}
-                    params={l.params}
+                    to={l.to as never}
+                    params={l.params as never}
                     className="flex items-center justify-between gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--background-surface)]"
                   >
                     <span className="truncate">{l.label}</span>

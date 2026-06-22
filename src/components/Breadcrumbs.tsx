@@ -29,9 +29,8 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
             <ChevronRight className="h-3.5 w-3.5 opacity-60" />
             {item.to && !last ? (
               <Link
-                // @ts-expect-error dynamic route string
-                to={item.to}
-                params={item.params}
+                to={item.to as never}
+                params={item.params as never}
                 className="rounded-md px-1.5 py-0.5 hover:bg-[var(--background-surface)] hover:text-[var(--foreground-70)]"
               >
                 {item.label}
