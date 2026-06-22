@@ -206,14 +206,18 @@ function CommunitiesPage() {
                     className="flex flex-col gap-[14px] p-[20px]"
                     style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 16 }}
                   >
-                    <div className="flex items-start gap-[14px]">
+                    <Link
+                      to="/communities/$id"
+                      params={{ id: g.id }}
+                      className="flex items-start gap-[14px] rounded-lg -m-2 p-2 transition-colors hover:bg-[var(--background-surface)]"
+                    >
                       <div className="grid h-[56px] w-[56px] shrink-0 place-items-center" style={{ background: "var(--accent-soft)", borderRadius: 10 }}>
                         <Icon size={28} style={{ color: "var(--accent)" }} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <Link to="/communities/$id" params={{ id: g.id }} className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
+                        <div className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
                           {g.name}
-                        </Link>
+                        </div>
                         <p className="mt-[6px] text-[14px]" style={{ color: "var(--foreground-70)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                           {g.description}
                         </p>
@@ -226,7 +230,7 @@ function CommunitiesPage() {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}

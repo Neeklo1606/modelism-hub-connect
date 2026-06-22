@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, MessageCircle, Search, Tag, Users } from "luci
 import * as Icons from "lucide-react";
 import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { categoryById, ads } from "@/lib/mock";
 import type { Category } from "@/lib/mock";
 
@@ -70,6 +71,7 @@ function CategoryRoomsPage() {
   return (
     <AppLayout rightColumn={false}>
       <div className="space-y-[14px]">
+        <Breadcrumbs items={[{ label: "Категории", to: "/categories" }, { label: c.name }]} />
         {/* Header */}
         <header
           className="rounded-[14px] border p-[16px]"
