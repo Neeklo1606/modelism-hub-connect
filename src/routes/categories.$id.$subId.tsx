@@ -78,17 +78,18 @@ function highlightNodes(
   query: string,
   activeKey?: string,
   keyPrefix = "h",
+  caseSensitive = false,
 ): React.ReactNode {
   const q = query.trim();
   if (!q) return nodes;
-  const lower = q.toLowerCase();
   const wrap = (text: string, kp: string): React.ReactNode => {
     const out: React.ReactNode[] = [];
     let i = 0;
     let from = 0;
-    const lc = text.toLowerCase();
+    const src = caseSensitive ? text : text.toLowerCase();
+    const needle = caseSensitive ? q : q.toLowerCase();
     while (true) {
-      const idx = lc.indexOf(lower, from);
+      const idx = src.indexOf(needle, from);
       if (idx === -1) {
         if (from < text.length) out.push(text.slice(from));
         break;
