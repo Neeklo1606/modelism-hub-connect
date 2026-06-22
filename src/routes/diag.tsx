@@ -60,7 +60,7 @@ function DiagPage() {
     {
       title: `Каналы (${channels.length})`,
       links: channels.map((ch) => ({
-        label: `📡 ${ch.title}`,
+        label: `📡 ${ch.name}`,
         to: "/channel/$id",
         params: { id: ch.id },
       })),
