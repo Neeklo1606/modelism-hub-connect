@@ -159,46 +159,83 @@ function ChannelPage() {
           </div>
         </section>
 
-        {/* owner toggle */}
-        {channel.isOwner && (
-          <div
-            className="flex items-center justify-between gap-3 p-3"
-            style={{ background: "var(--background-surface)", borderRadius: 12 }}
-          >
-            <div className="min-w-0">
-              <div className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                Вид владельца
-              </div>
-              <div className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
-                Видны посты на модерации и отклонённые
-              </div>
-            </div>
-            <Segmented
-              value={showOwnerView ? "mine" : "all"}
-              onChange={(v) => setShowOwnerView(v === "mine")}
-            />
+        {/* tabs */}
+        <div
+          className="sticky top-[48px] z-10 -mx-3 flex items-center gap-1 px-3 py-2 lg:static lg:top-auto lg:mx-0 lg:px-0"
+          style={{ background: "color-mix(in oklab, var(--background) 92%, transparent)", backdropFilter: "saturate(180%) blur(8px)" }}
+        >
+          <div className="flex w-full items-center gap-1" style={{ background: "var(--background-surface)", borderRadius: 12, padding: 4 }}>
+            {([
+              ["posts", `Посты${visiblePublic.length ? ` · ${visiblePublic.length}` : ""}`],
+              ["about", "О канале"],
+            ] as const).map(([k, l]) => {
+              const active = tab === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => setTab(k)}
+                  className="flex-1 text-[13px] font-medium transition-all"
+                  style={{
+                    padding: "9px 14px",
+                    borderRadius: 9,
+                    background: active ? "var(--background)" : "transparent",
+                    color: active ? "var(--foreground)" : "var(--foreground-50)",
+                    fontWeight: active ? 600 : 500,
+                    boxShadow: active ? "var(--shadow-card)" : "none",
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {/* composer (owner only) */}
-        {channel.isOwner && <Composer channelId={channel.id} ownerName={channel.ownerName} />}
+        {tab === "posts" ? (
+          <>
+            {/* owner toggle */}
+            {channel.isOwner && (
+              <div
+                className="flex items-center justify-between gap-3 p-3"
+                style={{ background: "var(--background-surface)", borderRadius: 12 }}
+              >
+                <div className="min-w-0">
+                  <div className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    Вид владельца
+                  </div>
+                  <div className="text-[12px]" style={{ color: "var(--foreground-50)" }}>
+                    Видны посты на модерации и отклонённые
+                  </div>
+                </div>
+                <Segmented
+                  value={showOwnerView ? "mine" : "all"}
+                  onChange={(v) => setShowOwnerView(v === "mine")}
+                />
+              </div>
+            )}
 
-        {/* posts */}
-        <h2 className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
-          Посты канала
-        </h2>
+            {/* composer (owner only) */}
+            {channel.isOwner && <Composer channelId={channel.id} ownerName={channel.ownerName} />}
 
-        {list.length === 0 ? (
-          <div className="grid place-items-center gap-2 py-12 text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
-            <div className="text-[14px]" style={{ color: "var(--foreground-50)" }}>В этом канале пока нет постов</div>
-          </div>
+            {list.length === 0 ? (
+              <div className="grid place-items-center gap-2 py-12 text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
+                <div className="text-[14px]" style={{ color: "var(--foreground-50)" }}>В этом канале пока нет постов</div>
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {list.map((p: ChannelPost) => (
+                  <PostItem key={p.id} post={p} isOwner={!!channel.isOwner} />
+                ))}
+              </ul>
+            )}
+          </>
         ) : (
-          <ul className="space-y-3">
-            {list.map((p: ChannelPost) => (
-              <PostItem key={p.id} post={p} isOwner={!!channel.isOwner} />
-            ))}
-          </ul>
+          <AboutPanel
+            channel={channel}
+            publishedCount={visiblePublic.length}
+          />
         )}
+
 
       </div>
     </AppLayout>
