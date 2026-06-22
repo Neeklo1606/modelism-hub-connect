@@ -121,6 +121,10 @@ export interface Banner {
   cta: string;
   until: string;
   color: string;
+  image?: string;
+  kind?: "event" | "news" | "promo";
+  pinned?: boolean;
+  priority?: number;
 }
 
 export interface Tariff {
