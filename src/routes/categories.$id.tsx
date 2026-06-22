@@ -219,6 +219,11 @@ function CategoryRoomsPage() {
                 </li>
               );
             })}
+            {filteredSubs.length === 0 && (
+              <li className="px-[16px] py-[24px] text-center text-[13px]" style={{ color: "var(--foreground-50)" }}>
+                Ничего не найдено по запросу «{query}»
+              </li>
+            )}
           </ul>
         </section>
 
