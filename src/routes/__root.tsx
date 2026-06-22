@@ -20,8 +20,24 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 font-display text-xl font-semibold">Страница не найдена</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Возможно, она была перемещена или удалена.</p>
-        <a href="/" className="mt-6 inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">На главную</a>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Возможно, она была перемещена или удалена. Проверьте URL или вернитесь на главную.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <a href="/feed" className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
+            На главную
+          </a>
+          <button
+            type="button"
+            onClick={() => { if (typeof window !== "undefined") window.history.back(); }}
+            className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
+          >
+            Назад
+          </button>
+          <a href="/diag" className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted">
+            Карта роутов
+          </a>
+        </div>
       </div>
     </div>
   );
