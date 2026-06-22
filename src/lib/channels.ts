@@ -4,6 +4,14 @@ import { useSyncExternalStore } from "react";
 
 export type ChannelKind = "official" | "brand" | "shop" | "author" | "expert";
 export type PostStatus = "published" | "moderation" | "rejected";
+export type PostKind = "news" | "review" | "announce" | "promo";
+
+export const POST_KIND_LABEL: Record<PostKind, string> = {
+  news: "Новость",
+  review: "Обзор",
+  announce: "Анонс",
+  promo: "Спецпредложение",
+};
 
 export interface ChannelPost {
   id: string;
@@ -14,6 +22,7 @@ export interface ChannelPost {
   status: PostStatus;
   likes: number;
   views: number;
+  kind?: PostKind;
 }
 
 export interface Channel {
