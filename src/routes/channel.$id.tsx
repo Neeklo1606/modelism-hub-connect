@@ -177,6 +177,9 @@ function ChannelPage() {
           </div>
         )}
 
+        {/* composer (owner only) */}
+        {channel.isOwner && <Composer channelId={channel.id} ownerName={channel.ownerName} />}
+
         {/* posts */}
         <h2 className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
           Посты канала
@@ -188,11 +191,12 @@ function ChannelPage() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {list.map((p) => (
+            {list.map((p: ChannelPost) => (
               <PostItem key={p.id} post={p} isOwner={!!channel.isOwner} />
             ))}
           </ul>
         )}
+
       </div>
     </AppLayout>
   );
