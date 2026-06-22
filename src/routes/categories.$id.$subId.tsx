@@ -516,15 +516,55 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         </div>
       )}
 
+      {/* Attachment previews */}
+      {pendingAttachments.length > 0 && (
+        <div
+          className="flex gap-[8px] overflow-x-auto border-t px-[12px] py-[10px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ borderColor: "var(--border)", background: "var(--background-surface)" }}
+        >
+          {pendingAttachments.map((src) => (
+            <div
+              key={src}
+              className="relative h-[64px] w-[64px] shrink-0 overflow-hidden rounded-[10px] border"
+              style={{ borderColor: "var(--border)", background: "var(--background)" }}
+            >
+              <img src={src} alt="Превью" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeAttachment(src)}
+                aria-label="Удалить вложение"
+                className="absolute right-[2px] top-[2px] grid h-[18px] w-[18px] place-items-center rounded-full"
+                style={{ background: "rgba(0,0,0,0.6)", color: "#fff" }}
+              >
+                <X className="h-[10px] w-[10px]" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Composer */}
       <div
         className="flex items-end gap-[8px] border-t px-[12px] py-[10px]"
         style={{ borderColor: "var(--border)" }}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            onPickFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
         <button
           type="button"
-          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)]"
-          aria-label="Вложение"
+          onClick={() => fileInputRef.current?.click()}
+          className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-[var(--background-surface)] disabled:opacity-40"
+          aria-label="Прикрепить фото"
+          disabled={pendingAttachments.length >= 6}
         >
           <Paperclip className="h-[16px] w-[16px]" style={{ color: "var(--foreground-50)" }} />
         </button>
@@ -535,6 +575,15 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               send();
+            }
+          }}
+          onPaste={(e) => {
+            const imgs = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"));
+            if (imgs.length > 0) {
+              e.preventDefault();
+              const dt = new DataTransfer();
+              imgs.forEach((f) => dt.items.add(f));
+              onPickFiles(dt.files);
             }
           }}
           placeholder={`Написать в «${subName}»…`}
@@ -556,7 +605,7 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         <button
           type="button"
           onClick={send}
-          disabled={!text.trim()}
+          disabled={!text.trim() && pendingAttachments.length === 0}
           className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] transition-opacity disabled:opacity-40"
           style={{ background: "var(--accent)", color: "#fff" }}
           aria-label="Отправить"
