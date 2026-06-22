@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Newspaper, Users2, MessageSquare, Megaphone, UserPlus, User, ShoppingBag, HelpCircle, Crown, ExternalLink } from "lucide-react";
+import { Newspaper, Users2, Radio, MessageSquare, Megaphone, UserPlus, User, ShoppingBag, HelpCircle, Crown, ExternalLink } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ROUTES, getActiveSection } from "@/lib/routes";
 
 interface Item {
-  to: "/feed" | "/communities" | "/messenger" | "/ads" | "/friends" | "/profile" | "/subscription" | "/help";
+  to: "/feed" | "/communities" | "/channels" | "/messenger" | "/ads" | "/friends" | "/profile" | "/subscription" | "/help";
   label: string;
   icon: typeof Newspaper;
   section: string;
@@ -14,6 +14,7 @@ interface Item {
 const items: Item[] = [
   { to: ROUTES.feed,         label: "Лента",        icon: Newspaper,    section: "feed" },
   { to: ROUTES.communities,  label: "Сообщества",   icon: Users2,       section: "communities" },
+  { to: ROUTES.channels,     label: "Каналы",       icon: Radio,        section: "channels" },
   { to: ROUTES.messenger,    label: "Мессенджер",   icon: MessageSquare, section: "messenger" },
   { to: ROUTES.ads,          label: "Объявления",   icon: Megaphone,    section: "ads" },
   { to: ROUTES.friends,      label: "Друзья",       icon: UserPlus,     section: "friends" },
