@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { categoryById, ads } from "@/lib/mock";
 import type { Category } from "@/lib/mock";
 
-export const Route = createFileRoute("/categories/$id")({
+export const Route = createFileRoute("/categories/$id/")({
   head: ({ params }) => {
     const c = categoryById(params.id);
     const title = c ? `${c.name} — комнаты` : "Категория";
