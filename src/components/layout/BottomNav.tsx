@@ -4,11 +4,11 @@ import { useState } from "react";
 import { CreateChooserModal } from "@/components/CreateChooserModal";
 import { getActiveSection } from "@/lib/routes";
 
-type Item = { to: "/" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper; section: string };
+type Item = { to: "/feed" | "/messenger" | "/ads" | "/profile"; label: string; icon: typeof Newspaper; section: string };
 
 
 const LEFT: Item[] = [
-  { to: "/", label: "Лента", icon: Newspaper, section: "feed" },
+  { to: "/feed", label: "Лента", icon: Newspaper, section: "feed" },
   { to: "/messenger", label: "Чаты", icon: MessageSquare, section: "messenger" },
 ];
 const RIGHT: Item[] = [

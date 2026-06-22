@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ROUTES, getActiveSection } from "@/lib/routes";
 
 interface Item {
-  to: "/" | "/communities" | "/messenger" | "/ads" | "/friends" | "/profile" | "/subscription" | "/help";
+  to: "/feed" | "/communities" | "/messenger" | "/ads" | "/friends" | "/profile" | "/subscription" | "/help";
   label: string;
   icon: typeof Newspaper;
   section: string;
@@ -29,7 +29,7 @@ export function Sidebar() {
     <aside className="hidden lg:block w-60 shrink-0">
       <div className="sticky top-4 space-y-1">
         <div className="flex items-center justify-between px-3 py-3">
-          <Link to={ROUTES.home}><Logo /></Link>
+          <Link to={ROUTES.feed}><Logo /></Link>
           <ThemeToggle />
         </div>
         <nav className="space-y-0.5">
