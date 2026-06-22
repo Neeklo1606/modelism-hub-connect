@@ -645,8 +645,8 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                       {highlightNodes(
                         renderTextWithLinks(m.text),
                         trimmedQuery,
-                        isActive ? `h-0-m-0` : undefined,
-                        `t-${m.id}`,
+                        isActive ? "h-0-m-0" : undefined,
+                        isActive ? "h" : `t-${m.id}`,
                       )}
                     </div>
                   )}
