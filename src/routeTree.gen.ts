@@ -26,6 +26,7 @@ import { Route as AdsRouteImport } from './routes/ads'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunitiesIndexRouteImport } from './routes/communities.index'
+import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as AdsIndexRouteImport } from './routes/ads.index'
 import { Route as UserIdRouteImport } from './routes/user.$id'
@@ -120,6 +121,11 @@ const CommunitiesIndexRoute = CommunitiesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CommunitiesRoute,
 } as any)
+const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
+  id: '/channels/',
+  path: '/channels/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/user/$id': typeof UserIdRoute
   '/ads/': typeof AdsIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/user/$id': typeof UserIdRoute
   '/ads': typeof AdsIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/channels': typeof ChannelsIndexRoute
   '/communities': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/user/$id': typeof UserIdRoute
   '/ads/': typeof AdsIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/categories/$id/$subId': typeof CategoriesIdSubIdRoute
 }
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/ads/'
     | '/categories/'
+    | '/channels/'
     | '/communities/'
     | '/categories/$id/$subId'
   fileRoutesByTo: FileRoutesByTo
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/ads'
     | '/categories'
+    | '/channels'
     | '/communities'
     | '/categories/$id/$subId'
   id:
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/ads/'
     | '/categories/'
+    | '/channels/'
     | '/communities/'
     | '/categories/$id/$subId'
   fileRoutesById: FileRoutesById
@@ -339,6 +351,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SubscriptionRoute: typeof SubscriptionRoute
   UserIdRoute: typeof UserIdRoute
+  ChannelsIndexRoute: typeof ChannelsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -461,6 +474,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/communities/'
       preLoaderRoute: typeof CommunitiesIndexRouteImport
       parentRoute: typeof CommunitiesRoute
+    }
+    '/channels/': {
+      id: '/channels/'
+      path: '/channels'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof ChannelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/categories/': {
       id: '/categories/'
@@ -593,6 +613,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SubscriptionRoute: SubscriptionRoute,
   UserIdRoute: UserIdRoute,
+  ChannelsIndexRoute: ChannelsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
