@@ -67,7 +67,7 @@ export function AuthShell({ title, subtitle, children, footer }: Props) {
       {/* RIGHT — form */}
       <div className="relative flex flex-col">
         <div className="flex items-center justify-between px-[24px] py-[20px] lg:hidden">
-          <Link to="/welcome"><Logo /></Link>
+          <Link to="/"><Logo /></Link>
           <ThemeToggle />
         </div>
         <div className="hidden justify-end p-[24px] lg:flex">
