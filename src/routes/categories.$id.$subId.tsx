@@ -17,6 +17,7 @@ import {
 import * as Icons from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdCard } from "@/components/AdCard";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { categoryById, ads, users, me, userById } from "@/lib/mock";
 import type { Category, Message, User } from "@/lib/mock";
 
@@ -220,8 +221,17 @@ function SubcategoryRoomPage() {
 
   return (
     <AppLayout rightColumn={false}>
+      <div className="mb-[10px]">
+        <Breadcrumbs
+          items={[
+            { label: "Категории", to: "/categories" },
+            { label: c.name, to: "/categories/$id", params: { id: c.id } },
+            { label: sub.name },
+          ]}
+        />
+      </div>
       <div
-        className="flex h-[calc(100vh-160px)] flex-col overflow-hidden rounded-[14px] border lg:h-[calc(100vh-96px)]"
+        className="flex h-[calc(100vh-200px)] flex-col overflow-hidden rounded-[14px] border lg:h-[calc(100vh-136px)]"
         style={{ background: "var(--background-elevated)", borderColor: "var(--border)" }}
       >
         {/* Room header */}
