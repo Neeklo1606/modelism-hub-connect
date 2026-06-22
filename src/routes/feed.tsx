@@ -1,16 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { X, Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
+import { Loader2, Newspaper, UserPlus, Compass, Bookmark } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CreatePostForm, type CreatePostPayload } from "@/components/CreatePostForm";
+import { CreatePostTrigger } from "@/components/feed/CreatePostTrigger";
+import { CreatePostModal } from "@/components/feed/CreatePostModal";
+import { EventsHero } from "@/components/feed/EventsHero";
 import { PostCard } from "@/components/PostCard";
-import { SponsoredPostCard } from "@/components/feed/SponsoredPostCard";
 import { PostCardSkeleton } from "@/components/feed/Skeleton";
 import { FeedFilterTabs, type FeedFilter } from "@/components/feed/FeedFilterTabs";
 import { EmptyFeedState } from "@/components/feed/EmptyFeedState";
-import { posts as mockPosts, banners, me, categories } from "@/lib/mock";
-import type { Post, Banner } from "@/lib/mock";
+import type { CreatePostPayload } from "@/components/CreatePostForm";
+import { posts as mockPosts, me, categories } from "@/lib/mock";
+import type { Post } from "@/lib/mock";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
@@ -33,12 +35,12 @@ function FeedPage() {
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (composer === "open") {
-      setMobileOpen(true);
+      setComposerOpen(true);
       navigate({ to: "/feed", search: {}, replace: true });
     }
   }, [composer, navigate]);
@@ -116,36 +118,16 @@ function FeedPage() {
       },
       ...posts,
     ]);
-    setMobileOpen(false);
   };
 
-  // Interleave sponsored posts into the feed every AD_EVERY items.
-  // Honors "не чаще каждого третьего" (AD_EVERY >= 4 → ad shows up
-  // after at least 3 organic posts) and rotates banners in round-robin.
-  const AD_EVERY = 4;
-  type FeedItem =
-    | { kind: "post"; post: Post }
-    | { kind: "ad"; banner: Banner; key: string };
-
   const slice = filtered.slice(0, visible);
-  const feedItems: FeedItem[] = [];
-  let adIndex = 0;
-  for (let i = 0; i < slice.length; i++) {
-    feedItems.push({ kind: "post", post: slice[i] });
-    const oneIndexed = i + 1;
-    if (banners.length > 0 && oneIndexed % AD_EVERY === 0) {
-      const banner = banners[adIndex % banners.length];
-      feedItems.push({ kind: "ad", banner, key: `ad-${oneIndexed}-${banner.id}` });
-      adIndex++;
-    }
-  }
 
   return (
     <AppLayout>
       <div className="space-y-[16px]">
-        <div className="hidden lg:block">
-          <CreatePostForm onCreate={addPost} />
-        </div>
+        <EventsHero />
+
+        <CreatePostTrigger onOpen={() => setComposerOpen(true)} />
 
         <FeedFilterTabs value={filter} onChange={setFilter} />
 
@@ -211,18 +193,14 @@ function FeedPage() {
               />
             )
           ) : (
-            feedItems.map((item) =>
-              item.kind === "post" ? (
-                <PostCard
-                  key={item.post.id}
-                  post={item.post}
-                  isSavedExternal={savedIds.has(item.post.id)}
-                  onToggleSave={toggleSave}
-                />
-              ) : (
-                <SponsoredPostCard key={item.key} banner={item.banner} />
-              ),
-            )
+            slice.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                isSavedExternal={savedIds.has(post.id)}
+                onToggleSave={toggleSave}
+              />
+            ))
           )}
 
           {!initialLoading && visible < filtered.length && (
@@ -247,42 +225,7 @@ function FeedPage() {
         </div>
       </div>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end lg:hidden"
-          style={{ background: "rgba(0,0,0,0.55)" }}
-          onClick={() => setMobileOpen(false)}
-        >
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="max-h-[90vh] w-full overflow-y-auto rounded-t-[20px]"
-            style={{ background: "var(--background-elevated)" }}
-          >
-            <div
-              className="flex items-center justify-between border-b px-[16px] py-[14px]"
-              style={{ borderColor: "var(--border)" }}
-            >
-              <h3
-                className="text-[16px] font-semibold"
-                style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}
-              >
-                Новая публикация
-              </h3>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="rounded-[8px] p-[6px] hover:bg-[var(--background-surface)]"
-                style={{ color: "var(--foreground-70)" }}
-              >
-                <X className="h-[20px] w-[20px]" />
-              </button>
-            </div>
-            <CreatePostForm onCreate={addPost} compact />
-          </motion.div>
-        </div>
-      )}
+      <CreatePostModal open={composerOpen} onClose={() => setComposerOpen(false)} onCreate={addPost} />
     </AppLayout>
   );
 }
