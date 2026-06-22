@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Users, Check, BadgeCheck, Heart, Eye, Clock, ShieldCheck, AlertTriangle, Radio, Newspaper, Star, Megaphone, Tag, Send } from "lucide-react";
+import { ArrowLeft, Users, Check, BadgeCheck, Heart, Eye, Clock, ShieldCheck, AlertTriangle, Radio, Newspaper, Star, Megaphone, Tag, Send, Calendar, MessageSquareOff, FileCheck2, Ban } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
   getChannel, useChannelPosts, useSubscriptions, toggleSubscribe, createChannelPost,
   formatCount, formatDate, kindLabel,
   POST_KIND_LABEL,
-  type ChannelPost, type PostStatus, type PostKind,
+  type Channel, type ChannelPost, type PostStatus, type PostKind,
 } from "@/lib/channels";
 import { toast } from "sonner";
 
