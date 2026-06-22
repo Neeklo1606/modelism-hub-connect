@@ -20,6 +20,8 @@ export const ROUTES = {
   subscription: "/subscription",
   help: "/help",
   admin: "/admin",
+  channels: "/channels",
+  channel: (id: string) => `/channel/${id}` as const,
 } as const;
 
 // Maps sidebar section ids to URL prefixes that should highlight it.
