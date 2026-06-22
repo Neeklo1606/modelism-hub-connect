@@ -642,7 +642,12 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
                   )}
                   {m.text && (
                     <div className="whitespace-pre-wrap break-words">
-                      {renderTextWithLinks(m.text)}
+                      {highlightNodes(
+                        renderTextWithLinks(m.text),
+                        trimmedQuery,
+                        isActive ? `h-0-m-0` : undefined,
+                        `t-${m.id}`,
+                      )}
                     </div>
                   )}
                   <button
