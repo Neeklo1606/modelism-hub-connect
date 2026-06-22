@@ -288,3 +288,131 @@ function PostItem({ post, isOwner }: { post: ChannelPost; isOwner: boolean }) {
     </li>
   );
 }
+
+const POST_KIND_ICON: Record<PostKind, typeof Newspaper> = {
+  news: Newspaper,
+  review: Star,
+  announce: Megaphone,
+  promo: Tag,
+};
+
+function KindIcon({ kind }: { kind: PostKind }) {
+  const Icon = POST_KIND_ICON[kind];
+  return <Icon size={11} />;
+}
+
+function Composer({ channelId, ownerName }: { channelId: string; ownerName: string }) {
+  const [kind, setKind] = useState<PostKind>("news");
+  const [text, setText] = useState("");
+  const [justSent, setJustSent] = useState<null | { id: string }>(null);
+  const MAX = 800;
+  const canSend = text.trim().length >= 4 && text.length <= MAX;
+
+  const submit = () => {
+    if (!canSend) return;
+    const post = createChannelPost({ channelId, authorName: ownerName, text: text.trim(), kind });
+    setText("");
+    setJustSent({ id: post.id });
+    toast.success("Пост отправлен на проверку модератору");
+    window.setTimeout(() => setJustSent(null), 6000);
+  };
+
+  return (
+    <section
+      className="p-4"
+      style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 14 }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>
+          Новый пост
+        </h3>
+        <span
+          className="inline-flex items-center gap-1 text-[11px] font-semibold"
+          style={{ background: "rgba(245,158,11,0.14)", color: "rgb(217,119,6)", padding: "4px 8px", borderRadius: 6 }}
+        >
+          <ShieldCheck size={11} /> Уйдёт на модерацию
+        </span>
+      </div>
+
+      {/* type picker */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {(Object.keys(POST_KIND_LABEL) as PostKind[]).map((k) => {
+          const active = kind === k;
+          const Icon = POST_KIND_ICON[k];
+          return (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setKind(k)}
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold transition-colors"
+              style={{
+                padding: "7px 11px",
+                borderRadius: 9,
+                background: active ? "var(--accent-soft)" : "var(--background-surface)",
+                color: active ? "var(--accent)" : "var(--foreground-70)",
+                border: active ? "1px solid color-mix(in oklab, var(--accent) 35%, transparent)" : "1px solid transparent",
+              }}
+            >
+              <Icon size={12} /> {POST_KIND_LABEL[k]}
+            </button>
+          );
+        })}
+      </div>
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value.slice(0, MAX))}
+        rows={4}
+        placeholder={`Текст ${POST_KIND_LABEL[kind].toLowerCase()}а для подписчиков…`}
+        className="mt-3 w-full resize-y text-[14px] outline-none"
+        style={{
+          minHeight: 96,
+          padding: "10px 12px",
+          background: "var(--background-surface)",
+          borderRadius: 10,
+          border: "1.5px solid transparent",
+          color: "var(--foreground)",
+        }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
+      />
+
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <span className="text-[11px]" style={{ color: text.length > MAX - 80 ? "rgb(217,119,6)" : "var(--foreground-50)" }}>
+          {text.length} / {MAX}
+        </span>
+        <button
+          onClick={submit}
+          disabled={!canSend}
+          className="inline-flex h-10 items-center gap-1.5 px-4 text-[13px] font-semibold transition-opacity"
+          style={{
+            borderRadius: 10,
+            background: "var(--accent)",
+            color: "white",
+            opacity: canSend ? 1 : 0.5,
+            cursor: canSend ? "pointer" : "not-allowed",
+          }}
+        >
+          <Send size={14} /> Отправить на проверку
+        </button>
+      </div>
+
+      {justSent && (
+        <div
+          className="mt-3 flex items-start gap-2 p-3 text-[12px]"
+          style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(245,158,11,0.35)", borderRadius: 10, color: "rgb(146,64,14)" }}
+        >
+          <Clock size={14} className="mt-0.5 shrink-0" />
+          <div>
+            <div className="font-semibold">Пост на проверке</div>
+            <div style={{ color: "rgb(180,83,9)" }}>
+              Модератор проверит публикацию обычно в течение нескольких часов. До этого пост виден только вам в «Виде владельца».
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
