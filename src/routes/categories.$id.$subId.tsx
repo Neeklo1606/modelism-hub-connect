@@ -338,13 +338,19 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
   const [messages, setMessages] = useState<RoomMessage[]>(() => buildMessages(category, subName));
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<RoomMessage | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // reset when room changes
   useEffect(() => {
     setMessages(buildMessages(category, subName));
     setText("");
     setReplyTo(null);
+    setPendingAttachments((prev) => {
+      prev.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
   }, [category, subId, subName]);
 
   useEffect(() => {
@@ -352,9 +358,23 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
+  const onPickFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const urls = Array.from(files)
+      .filter((f) => f.type.startsWith("image/"))
+      .slice(0, 6)
+      .map((f) => URL.createObjectURL(f));
+    setPendingAttachments((prev) => [...prev, ...urls].slice(0, 6));
+  };
+
+  const removeAttachment = (url: string) => {
+    setPendingAttachments((prev) => prev.filter((u) => u !== url));
+    URL.revokeObjectURL(url);
+  };
+
   const send = () => {
     const v = text.trim();
-    if (!v) return;
+    if (!v && pendingAttachments.length === 0) return;
     setMessages((prev) => [
       ...prev,
       {
@@ -364,10 +384,12 @@ function ChatTab({ category, subId, subName }: { category: Category; subId: stri
         text: v,
         status: "sent",
         replyToId: replyTo?.id,
+        attachments: pendingAttachments.length ? pendingAttachments : undefined,
       },
     ]);
     setText("");
     setReplyTo(null);
+    setPendingAttachments([]);
   };
 
   return (
