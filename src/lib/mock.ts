@@ -147,6 +147,12 @@ export interface Tariff {
   popular?: boolean;
 }
 
+export interface VoiceMessage {
+  duration: number; // seconds
+  waveform: number[]; // normalized 0..1 bar heights
+  transcript: string;
+}
+
 export interface Message {
   id: ID;
   authorId: ID;
@@ -155,6 +161,29 @@ export interface Message {
   status?: "sent" | "delivered" | "read";
   replyTo?: ID;
   image?: string;
+  voice?: VoiceMessage;
+}
+
+export const VOICE_TRANSCRIPTS: string[] = [
+  "Сегодня протестировал новую серву на автомодели, ход стал намного точнее. Думаю, на следующих заездах буду пробовать более агрессивные настройки развала.",
+  "Аккумулятор после зимы держит заряд хуже, думаю заменить на новый комплект. Старые липольки уже подвздулись, рисковать не хочется.",
+  "На квадрокоптере пришлось заново калибровать контроллер, после этого полёт стал стабильнее. Гироскоп немного уплывал, но прошивка свежая помогла.",
+  "Для масштаба 1:10 лучше поставить другие шины, на асфальте будет меньше срыва. Сликовые в самый раз для гладкого покрытия.",
+  "Перепаял регулятор хода, теперь не греется даже на максималке. Радиатор поставил побольше, термопасту обновил.",
+  "По FPV-очкам всё настроил, картинка чёткая, задержки почти нет. Антенны клеверные дают стабильный сигнал на дистанции.",
+  "Разобрал редуктор, шестерни в порядке, просто смазка высохла. Залил свежую, собрал — работает как новый.",
+];
+
+export function makeMockWaveform(seed: number): number[] {
+  const bars = 32;
+  const out: number[] = [];
+  let s = seed;
+  for (let i = 0; i < bars; i++) {
+    s = (s * 9301 + 49297) % 233280;
+    const n = s / 233280;
+    out.push(0.25 + n * 0.75);
+  }
+  return out;
 }
 
 export interface Dialog {
