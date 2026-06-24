@@ -12,6 +12,7 @@ import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/stor
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
+import { InvitedFriendsSection } from "@/components/referral/InvitedFriendsSection";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Профиль — МоДелизМ Форум" }] }),
@@ -23,14 +24,16 @@ function ProfilePage() {
   return <ProfileView user={currentUser} isOwn />;
 }
 
-type TabKey = "posts" | "ads" | "communities" | "about";
+type TabKey = "posts" | "ads" | "communities" | "invited" | "about";
 
-const TABS: { key: TabKey; label: string; Icon: typeof FileText }[] = [
+const TABS_BASE: { key: TabKey; label: string; Icon: typeof FileText; ownOnly?: boolean }[] = [
   { key: "posts", label: "Публикации", Icon: FileText },
   { key: "ads", label: "Объявления", Icon: Tag },
   { key: "communities", label: "Сообщества", Icon: Users },
+  { key: "invited", label: "Приглашённые", Icon: UserPlus, ownOnly: true },
   { key: "about", label: "О себе", Icon: UserIcon },
 ];
+
 
 const ICON_MAP: Record<string, typeof Car> = {
   Car, Plane, Ship, Send: SendIcon, Code2, Wrench, Cpu, BatteryCharging,
@@ -154,7 +157,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
         </div>
 
         {/* Tabs */}
-        <Tabs tab={tab} setTab={setTab} />
+        <Tabs tab={tab} setTab={setTab} isOwn={isOwn} />
 
         {/* Tab content */}
         <div className="px-[16px] py-[24px] md:px-[32px]">
@@ -208,6 +211,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                   </div>
                 )
               )}
+              {tab === "invited" && isOwn && <InvitedFriendsSection />}
               {tab === "about" && (
                 <div className="max-w-[600px]">
                   {user.bio ? (
@@ -263,9 +267,10 @@ function Counter({ label, value, divider }: { label: string; value: number; divi
   );
 }
 
-function Tabs({ tab, setTab }: { tab: TabKey; setTab: (k: TabKey) => void }) {
+function Tabs({ tab, setTab, isOwn }: { tab: TabKey; setTab: (k: TabKey) => void; isOwn: boolean }) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [indicator, setIndicator] = useState({ x: 0, w: 0 });
+  const tabs = TABS_BASE.filter((t) => isOwn || !t.ownOnly);
 
   useEffect(() => {
     const el = refs.current[tab];
@@ -278,7 +283,7 @@ function Tabs({ tab, setTab }: { tab: TabKey; setTab: (k: TabKey) => void }) {
       style={{ background: "var(--background)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--border)" }}
     >
       <div className="relative flex">
-        {TABS.map(({ key, label, Icon }) => {
+        {tabs.map(({ key, label, Icon }) => {
           const active = tab === key;
           return (
             <button

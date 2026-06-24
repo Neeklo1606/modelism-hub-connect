@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check, Gift, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { InviteBlock } from "@/components/referral/InviteBlock";
 
 export const Route = createFileRoute("/subscription")({
   head: () => ({ meta: [{ title: "Подписка — МоДЕЛИЗМ Форум" }] }),
@@ -257,7 +258,10 @@ function SubscriptionPage() {
             ))}
           </div>
         </section>
+
+        <InviteBlock />
       </div>
+
     </AppLayout>
   );
 }
