@@ -40,13 +40,13 @@ export function ChatHeaderActions({ partnerId, partnerName, dialogId, onSearch }
   }, [open]);
 
   useEffect(() => {
-    if (!callOpen) return;
+    if (!confirmOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCallOpen(false);
+      if (e.key === "Escape") setConfirmOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [callOpen]);
+  }, [confirmOpen]);
 
   const close = () => setOpen(false);
 
