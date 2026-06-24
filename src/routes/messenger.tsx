@@ -646,3 +646,75 @@ function EmptyDialogs() {
     </div>
   );
 }
+
+function ChannelsList({ query }: { query: string }) {
+  const subs = useSubscriptions();
+  const all = getAllChannels();
+  const q = query.trim().toLowerCase();
+  const list = (q
+    ? all.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q))
+    : all
+  ).slice().sort((a, b) => {
+    const sa = subs.has(a.id) ? 1 : 0;
+    const sb = subs.has(b.id) ? 1 : 0;
+    if (sa !== sb) return sb - sa;
+    return b.subscribers - a.subscribers;
+  });
+
+  if (list.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center px-[24px] py-[60px] text-center">
+        <div className="grid h-[80px] w-[80px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-30)" }}>
+          <Radio size={32} />
+        </div>
+        <div className="mt-[12px] font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>Каналы не найдены</div>
+      </div>
+    );
+  }
+
+  return (
+    <ul>
+      {list.map((c) => {
+        const subscribed = subs.has(c.id);
+        return (
+          <li key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
+            <Link
+              to="/channel/$id"
+              params={{ id: c.id }}
+              className="flex w-full items-center gap-[12px] px-[16px] py-[12px] text-left transition-colors duration-150"
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--background-surface-hover)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <div
+                className="grid h-[48px] w-[48px] shrink-0 place-items-center font-display text-[18px] font-bold text-white"
+                style={{ background: c.avatarColor, borderRadius: 12 }}
+              >
+                {c.name.slice(0, 1)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-[6px]">
+                  <span className="truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    {c.name}
+                  </span>
+                  {c.kind === "official" && <BadgeCheck size={12} style={{ color: "var(--accent)", flexShrink: 0 }} />}
+                </div>
+                <div className="mt-[2px] flex items-center gap-[8px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
+                  <span className="inline-flex items-center gap-[4px]"><Users size={11} /> {formatCount(c.subscribers)}</span>
+                  <span className="truncate">{c.description}</span>
+                </div>
+              </div>
+              {subscribed && (
+                <span
+                  className="shrink-0 inline-flex items-center gap-[4px] text-[11px] font-semibold"
+                  style={{ background: "var(--accent-soft)", color: "var(--accent)", padding: "3px 8px", borderRadius: 999 }}
+                >
+                  <Check size={11} /> Подписан
+                </span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
