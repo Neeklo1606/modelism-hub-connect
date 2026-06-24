@@ -39,8 +39,24 @@ const ICON_MAP: Record<string, typeof Car> = {
   Car, Plane, Ship, Send: SendIcon, Code2, Wrench, Cpu, BatteryCharging,
 };
 
+type AdStatus = "active" | "moderation" | "rejected" | "archived";
+const AD_STATUS_FILTERS: { key: AdStatus | "all"; label: string }[] = [
+  { key: "all", label: "Все" },
+  { key: "active", label: "Активные" },
+  { key: "moderation", label: "На модерации" },
+  { key: "rejected", label: "Отклонённые" },
+  { key: "archived", label: "Архив" },
+];
+const AD_STATUS_STYLE: Record<AdStatus, { label: string; bg: string; color: string }> = {
+  active: { label: "Активно", bg: "var(--success-soft)", color: "var(--success)" },
+  moderation: { label: "На модерации", bg: "var(--warning-soft)", color: "var(--warning)" },
+  rejected: { label: "Отклонено", bg: "var(--error-soft)", color: "var(--error)" },
+  archived: { label: "В архиве", bg: "var(--background-surface)", color: "var(--foreground-50)" },
+};
+
 export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
   const [tab, setTab] = useState<TabKey>("posts");
+  const [adFilter, setAdFilter] = useState<AdStatus | "all">("all");
   const [editOpen, setEditOpen] = useState(false);
   const navigateToMessenger = useNavigate();
   const friendIds = useStore(selectors.friendsOf(me.id));
@@ -51,6 +67,14 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
 
   const userPosts = useMemo(() => posts.filter((p) => p.authorId === user.id), [user.id]);
   const userAds = useMemo(() => ads.filter((a) => a.authorId === user.id), [user.id]);
+  const userAdsWithStatus = useMemo(() => {
+    const statuses: AdStatus[] = ["active", "active", "moderation", "active", "rejected", "archived", "active"];
+    return userAds.map((a, i) => ({ ad: a, status: statuses[i % statuses.length] }));
+  }, [userAds]);
+  const filteredUserAds = useMemo(
+    () => (adFilter === "all" ? userAdsWithStatus : userAdsWithStatus.filter((x) => x.status === adFilter)),
+    [userAdsWithStatus, adFilter],
+  );
   const userCommunities = useStore(selectors.userCommunities(user.id));
   const friendsCountDerived = isOwn ? friendIds.length : (user.friendIds?.length ?? 0);
   const interestList = (user.interests || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -193,12 +217,81 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
               {tab === "ads" && (
                 userAds.length === 0 ? (
                   <EmptyTab text="Нет объявлений">
-                    <Link to="/ads/new" className="mt-[16px] inline-flex items-center gap-[6px] font-semibold" style={{ height: 40, padding: "0 20px", borderRadius: 10, background: "var(--accent)", color: "white", fontSize: 14 }}>
-                      <Plus size={14} /> Создать объявление
-                    </Link>
+                    {isOwn && (
+                      <Link to="/ads/new" className="mt-[16px] inline-flex items-center gap-[6px] font-semibold" style={{ height: 40, padding: "0 20px", borderRadius: 10, background: "var(--accent)", color: "white", fontSize: 14 }}>
+                        <Plus size={14} /> Создать объявление
+                      </Link>
+                    )}
                   </EmptyTab>
                 ) : (
-                  <div className="grid gap-[16px] sm:grid-cols-2 lg:grid-cols-3">{userAds.map((a) => <AdCard key={a.id} ad={a} />)}</div>
+                  <div className="space-y-[16px]">
+                    {isOwn && (
+                      <div className="-mx-1 flex gap-[6px] overflow-x-auto px-[4px] pb-[2px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        {AD_STATUS_FILTERS.map((f) => {
+                          const count = f.key === "all" ? userAdsWithStatus.length : userAdsWithStatus.filter((x) => x.status === f.key).length;
+                          const active = adFilter === f.key;
+                          return (
+                            <button
+                              key={f.key}
+                              onClick={() => setAdFilter(f.key)}
+                              className="shrink-0 inline-flex items-center gap-[6px] text-[13px] transition-colors"
+                              style={{
+                                height: 32,
+                                padding: "0 14px",
+                                borderRadius: 999,
+                                background: active ? "var(--accent)" : "var(--background-surface)",
+                                color: active ? "#fff" : "var(--foreground-70)",
+                                fontWeight: active ? 600 : 500,
+                                border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                              }}
+                            >
+                              {f.label}
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: "1px 7px",
+                                  borderRadius: 999,
+                                  background: active ? "rgba(255,255,255,0.22)" : "var(--background)",
+                                  color: active ? "#fff" : "var(--foreground-50)",
+                                }}
+                              >
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {filteredUserAds.length === 0 ? (
+                      <EmptyTab text="Нет объявлений с этим статусом" />
+                    ) : (
+                      <div className="grid gap-[16px] sm:grid-cols-2 lg:grid-cols-3">
+                        {filteredUserAds.map(({ ad, status }) => {
+                          const badge = AD_STATUS_STYLE[status];
+                          const cardState: "default" | "moderation" | "rejected" =
+                            status === "moderation" ? "moderation" : status === "rejected" ? "rejected" : "default";
+                          return (
+                            <div key={ad.id} className="relative" style={{ opacity: status === "archived" ? 0.65 : 1 }}>
+                              <AdCard ad={ad} state={cardState} />
+                              <span
+                                className="absolute right-[12px] top-[12px] z-[2] inline-flex items-center text-[11px] font-semibold"
+                                style={{
+                                  background: badge.bg,
+                                  color: badge.color,
+                                  padding: "4px 10px",
+                                  borderRadius: 999,
+                                  backdropFilter: "blur(6px)",
+                                }}
+                              >
+                                {badge.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )
               )}
               {tab === "communities" && (
