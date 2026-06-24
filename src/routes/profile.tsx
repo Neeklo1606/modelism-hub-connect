@@ -157,7 +157,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
         </div>
 
         {/* Tabs */}
-        <Tabs tab={tab} setTab={setTab} />
+        <Tabs tab={tab} setTab={setTab} isOwn={isOwn} />
 
         {/* Tab content */}
         <div className="px-[16px] py-[24px] md:px-[32px]">
