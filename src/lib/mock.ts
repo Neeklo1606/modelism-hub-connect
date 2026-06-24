@@ -14,6 +14,7 @@ export interface User {
   joinedDate?: string;
   friendIds?: ID[];
   online?: boolean;
+  isAdmin?: boolean;
 }
 
 export interface FriendRequest {
@@ -101,17 +102,27 @@ export interface Category {
   subcategories: { id: ID; name: string }[];
 }
 
+export interface CommunityContacts {
+  website?: string;
+  phone?: string;
+  telegram?: string;
+}
+
 export interface Community {
   id: ID;
   name: string;
   description: string;
+  fullDescription?: string;
   members: number;
   category: string;
   joined?: boolean;
   coverImage?: string;
+  avatarImage?: string;
   avatarIcon?: string;
   adminId?: ID;
   postIds?: ID[];
+  contacts?: CommunityContacts;
+  allowSubmitPost?: boolean;
 }
 
 export interface Banner {
