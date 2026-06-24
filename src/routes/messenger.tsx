@@ -354,8 +354,19 @@ function MessengerPage() {
 
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            {loading ? (
+            {listTab === "calls" ? (
+              <CallsList
+                onOpenChat={(did) => {
+                  setListTab("chats");
+                  setShowArchived(false);
+                  setActiveId(did);
+                  setMobileView("chat");
+                  actions.markRead(did);
+                }}
+              />
+            ) : loading ? (
               <DialogListSkeleton />
+
             ) : filtered.length === 0 ? (
               <EmptyDialogs />
             ) : (
