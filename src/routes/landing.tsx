@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FirstHundredBanner } from "@/components/FirstHundredBanner";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
@@ -59,6 +60,7 @@ function LandingPage() {
     >
       <TopNav />
       <Hero />
+      <FirstHundredBanner />
       <TwoTracks />
       <CategoriesPreview />
       <CommunityProof />

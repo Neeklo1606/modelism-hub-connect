@@ -13,8 +13,9 @@ import { StatusBadge } from "@/components/StatusBadge";
 import {
   adminStats, adminActions, adminUsers, promoCodes as initialPromos,
   ads, posts, categories, tariffs, banners,
-  type AdminUser,
+  type AdminUser, type PromoCode,
 } from "@/lib/mock";
+import { Search, Filter, Calendar, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Форум" }] }),
@@ -658,8 +659,7 @@ function ModerationCard({ title, author, category, onApprove, onReject }: { titl
 function MonetizationSection() {
   const [editedTariffs, setEditedTariffs] = useState(tariffs);
   const [promos, setPromos] = useState(initialPromos);
-  const [newCode, setNewCode] = useState("");
-  const [newDisc, setNewDisc] = useState(10);
+
 
   return (
     <div>
@@ -697,36 +697,8 @@ function MonetizationSection() {
       </div>
 
       {/* Promocodes */}
-      <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
-        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Промокоды</h4>
-        <div className="flex flex-wrap" style={{ gap: "8px", marginTop: "8px" }}>
-          <input value={newCode} onChange={(e) => setNewCode(e.target.value.toUpperCase())} placeholder="Код" className="outline-none" style={{ ...inputStyle, flex: 1, minWidth: "120px" }} />
-          <input type="number" value={newDisc} onChange={(e) => setNewDisc(+e.target.value)} placeholder="Скидка %" className="outline-none" style={{ ...inputStyle, width: "120px" }} />
-          <button
-            onClick={() => {
-              if (!newCode.trim()) return toast.error("Введите код");
-              setPromos((p) => [...p, { id: String(Date.now()), code: newCode, discount: newDisc, usedCount: 0 }]);
-              setNewCode("");
-              toast.success("Промокод создан");
-            }}
-            style={{ ...primaryBtn }}
-          >
-            <Plus size={14} style={{ display: "inline", marginRight: "4px" }} />Создать
-          </button>
-        </div>
-        <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-          {promos.map((p) => (
-            <div key={p.id} className="flex items-center justify-between" style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
-              <div className="flex items-center gap-[12px]">
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", fontWeight: 600, color: "var(--foreground)" }}>{p.code}</span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--accent)" }}>{p.discount}%</span>
-                <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>{p.usedCount} исп.</span>
-              </div>
-              <IconBtn danger onClick={() => { setPromos((q) => q.filter((x) => x.id !== p.id)); toast.success("Промокод удалён"); }}><Trash2 size={14} /></IconBtn>
-            </div>
-          ))}
-        </div>
-      </div>
+      <PromoCodesBlock promos={promos} setPromos={setPromos} />
+
 
       {/* Banners */}
       <div style={{ ...card, padding: "20px" }}>
@@ -1009,6 +981,155 @@ function SettingsSection() {
         >
           Сохранить
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============ PROMO CODES BLOCK ============ */
+function PromoCodesBlock({ promos, setPromos }: { promos: PromoCode[]; setPromos: React.Dispatch<React.SetStateAction<PromoCode[]>> }) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
+  const [form, setForm] = useState({ code: "", discount: 10, expiresAt: "", limit: 100 });
+
+  const today = new Date().toISOString().slice(0, 10);
+  const enriched = promos.map((p) => ({
+    ...p,
+    status: (p.status ?? (p.expiresAt >= today ? "active" : "expired")) as "active" | "expired",
+  }));
+
+  const filtered = enriched.filter((p) => {
+    if (filter !== "all" && p.status !== filter) return false;
+    if (q && !p.code.toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+
+  const create = () => {
+    if (!form.code.trim()) return toast.error("Введите название");
+    if (!form.expiresAt) return toast.error("Укажите срок действия");
+    if (form.discount < 1 || form.discount > 100) return toast.error("Скидка от 1 до 100%");
+    if (form.limit < 1) return toast.error("Лимит должен быть больше 0");
+    const status: "active" | "expired" = form.expiresAt >= today ? "active" : "expired";
+    setPromos((p) => [
+      ...p,
+      { id: String(Date.now()), code: form.code.toUpperCase(), discount: form.discount, usedCount: 0, limit: form.limit, expiresAt: form.expiresAt, status },
+    ]);
+    setForm({ code: "", discount: 10, expiresAt: "", limit: 100 });
+    setOpen(false);
+    toast.success("Промокод создан");
+  };
+
+  return (
+    <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
+      <div className="flex items-center justify-between flex-wrap gap-[12px]">
+        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Промокоды</h4>
+        <button onClick={() => setOpen((v) => !v)} style={primaryBtn}>
+          <Plus size={14} style={{ display: "inline", marginRight: "4px" }} />Создать промокод
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div style={{ marginTop: "12px", padding: "16px", background: "var(--background-surface)", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
+              <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "10px" }}>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 500 }}>Название</span>
+                  <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="SUMMER2026" className="outline-none" style={inputStyle} />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 500 }}>Скидка, %</span>
+                  <input type="number" min={1} max={100} value={form.discount} onChange={(e) => setForm({ ...form, discount: +e.target.value })} className="outline-none" style={inputStyle} />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 500 }}>Срок действия</span>
+                  <input type="date" required value={form.expiresAt} min={today} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className="outline-none" style={inputStyle} />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 500 }}>Лимит использований</span>
+                  <input type="number" min={1} value={form.limit} onChange={(e) => setForm({ ...form, limit: +e.target.value })} className="outline-none" style={inputStyle} />
+                </label>
+              </div>
+              <div className="flex gap-[8px]" style={{ marginTop: "12px" }}>
+                <button onClick={create} style={primaryBtn}>Создать</button>
+                <button onClick={() => setOpen(false)} style={{ ...primaryBtn, background: "transparent", color: "var(--foreground-70)", border: "1px solid var(--border)" }}>Отмена</button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Search + filter */}
+      <div className="flex flex-wrap items-center" style={{ gap: "8px", marginTop: "12px" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: "180px" }}>
+          <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--foreground-50)" }} />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск по коду…" className="w-full outline-none" style={{ ...inputStyle, paddingLeft: "34px" }} />
+        </div>
+        <div className="flex" style={{ gap: "4px", background: "var(--background-surface)", padding: "3px", borderRadius: "var(--r-pill)" }}>
+          {(["all", "active", "expired"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              style={{
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: 600,
+                borderRadius: "var(--r-pill)",
+                background: filter === f ? "var(--background)" : "transparent",
+                color: filter === f ? "var(--accent)" : "var(--foreground-70)",
+              }}
+            >
+              {f === "all" ? "Все" : f === "active" ? "Активные" : "Истекшие"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div style={{ marginTop: "12px", overflowX: "auto" }}>
+        <table className="w-full" style={{ fontSize: "13px", minWidth: "600px" }}>
+          <thead>
+            <tr style={{ background: "var(--background-surface)" }}>
+              {["Код", "Скидка", "Использовано", "Срок", "Статус", ""].map((h) => (
+                <th key={h} style={{ textAlign: "left", padding: "8px 12px", fontSize: "11px", fontWeight: 600, color: "var(--foreground-50)", textTransform: "uppercase" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p) => (
+              <tr key={p.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--foreground)" }}>{p.code}</td>
+                <td style={{ padding: "10px 12px", fontWeight: 600, color: "var(--accent)" }}>{p.discount}%</td>
+                <td style={{ padding: "10px 12px", color: "var(--foreground-70)" }}>{p.usedCount} / {p.limit}</td>
+                <td style={{ padding: "10px 12px", color: "var(--foreground-70)" }}>{p.expiresAt}</td>
+                <td style={{ padding: "10px 12px" }}>
+                  <span style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    padding: "3px 8px",
+                    borderRadius: 999,
+                    background: p.status === "active" ? "var(--success-soft, rgba(34,197,94,0.12))" : "var(--background-surface)",
+                    color: p.status === "active" ? "var(--success, #16a34a)" : "var(--foreground-50)",
+                  }}>
+                    {p.status === "active" ? "Активен" : "Истёк"}
+                  </span>
+                </td>
+                <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                  <IconBtn danger onClick={() => { setPromos((q) => q.filter((x) => x.id !== p.id)); toast.success("Промокод удалён"); }}><Trash2 size={14} /></IconBtn>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} style={{ padding: "24px", textAlign: "center", color: "var(--foreground-50)" }}>Ничего не найдено</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
