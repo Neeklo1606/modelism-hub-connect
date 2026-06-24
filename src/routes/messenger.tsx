@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
-  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff,
+  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff, Radio, BadgeCheck,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime, VOICE_TRANSCRIPTS, makeMockWaveform } from "@/lib/mock";
@@ -14,6 +14,7 @@ import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
 import { VoiceBubble } from "@/components/messenger/VoiceBubble";
 import { VoiceRecorder } from "@/components/messenger/VoiceRecorder";
 import { CallsList } from "@/components/calls/CallsList";
+import { getAllChannels, useSubscriptions, formatCount } from "@/lib/channels";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -173,7 +174,7 @@ function MessengerPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
-  const [listTab, setListTab] = useState<"chats" | "calls">("chats");
+  const [listTab, setListTab] = useState<"chats" | "channels" | "calls">("chats");
   const [createOpen, setCreateOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -345,14 +346,16 @@ function MessengerPage() {
                 <Plus size={18} />
               </button>
             </div>
-            <div className="flex items-center gap-[6px]">
+            <div className="flex items-center gap-[6px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {([
                 { key: "chats-active" as const, label: "Активные" },
+                { key: "channels" as const, label: "Каналы" },
                 { key: "chats-archive" as const, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
                 { key: "calls" as const, label: "Звонки" },
               ]).map((t) => {
                 const isActive =
                   (t.key === "calls" && listTab === "calls") ||
+                  (t.key === "channels" && listTab === "channels") ||
                   (t.key === "chats-active" && listTab === "chats" && !showArchived) ||
                   (t.key === "chats-archive" && listTab === "chats" && showArchived);
                 return (
@@ -360,12 +363,13 @@ function MessengerPage() {
                     key={t.key}
                     onClick={() => {
                       if (t.key === "calls") setListTab("calls");
+                      else if (t.key === "channels") setListTab("channels");
                       else {
                         setListTab("chats");
                         setShowArchived(t.key === "chats-archive");
                       }
                     }}
-                    className="inline-flex items-center text-[12px] font-semibold transition-colors"
+                    className="inline-flex shrink-0 items-center text-[12px] font-semibold transition-colors"
                     style={{
                       height: 28, padding: "0 12px", borderRadius: 999,
                       background: isActive ? "var(--accent-soft)" : "transparent",
@@ -393,8 +397,11 @@ function MessengerPage() {
                   actions.markRead(did);
                 }}
               />
+            ) : listTab === "channels" ? (
+              <ChannelsList query={query} />
             ) : loading ? (
               <DialogListSkeleton />
+
 
             ) : filtered.length === 0 ? (
               <EmptyDialogs />
