@@ -628,7 +628,7 @@ export const adminUsers: AdminUser[] = [
 ];
 
 export const promoCodes: PromoCode[] = [
-  { id: "pr1", code: "START2026", discount: 20, usedCount: 34 },
-  { id: "pr2", code: "MODELIZM", discount: 15, usedCount: 128 },
-  { id: "pr3", code: "HALFPRICE", discount: 50, usedCount: 5 },
+  { id: "pr1", code: "START2026", discount: 20, usedCount: 34, limit: 100, expiresAt: "2026-12-31", status: "active" },
+  { id: "pr2", code: "MODELIZM", discount: 15, usedCount: 128, limit: 500, expiresAt: "2026-09-30", status: "active" },
+  { id: "pr3", code: "HALFPRICE", discount: 50, usedCount: 5, limit: 20, expiresAt: "2026-03-01", status: "expired" },
 ];
