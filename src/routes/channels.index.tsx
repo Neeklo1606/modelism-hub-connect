@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/channels/")({
   head: () => ({
     meta: [
-      { title: "Каналы — МоДелизМ Club" },
+      { title: "Каналы — МоДелизМ Форум" },
       { name: "description", content: "Подпишитесь на каналы брендов, магазинов, авторов и экспертов: новости, обзоры и спецпредложения." },
     ],
   }),

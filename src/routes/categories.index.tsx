@@ -14,7 +14,13 @@ function CategoriesPage() {
       <div className="space-y-4">
         <header>
           <h1 className="font-display text-2xl font-bold">Категории</h1>
-          <p className="text-sm text-muted-foreground">Выберите интересующее вас направление</p>
+          <p
+            className="mt-[2px] font-display text-[15px] font-semibold"
+            style={{ color: "var(--accent)" }}
+          >
+            Найди своих
+          </p>
+          <p className="mt-[4px] text-sm text-muted-foreground">Выберите интересующее вас направление</p>
         </header>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((c) => <CategoryCard key={c.id} c={c} />)}

@@ -56,15 +56,15 @@ const channels: Channel[] = [
   {
     id: "ch-modelizm",
     slug: "modelizm",
-    name: "МоДелизМ Club",
-    description: "Официальный канал клуба: анонсы, события, новости комьюнити.",
+    name: "МоДелизМ Форум",
+    description: "Официальный канал форума: анонсы, события, новости комьюнити.",
     category: "Сообщество",
     kind: "official",
     avatarColor: "#2563eb",
     bannerColor: "linear-gradient(135deg,#1e3a8a,#2563eb)",
     subscribers: 12480,
     createdAt: "2024-01-15",
-    ownerName: "МоДелизМ Club",
+    ownerName: "МоДелизМ Форум",
   },
   {
     id: "ch-tamiya",
@@ -149,12 +149,12 @@ const channels: Channel[] = [
 
 const posts: ChannelPost[] = [
   {
-    id: "p1", channelId: "ch-modelizm", authorName: "МоДелизМ Club",
+    id: "p1", channelId: "ch-modelizm", authorName: "МоДелизМ Форум",
     createdAt: "2026-06-21T10:00:00Z", status: "published", likes: 312, views: 4820,
-    text: "Открыта регистрация на летнюю выставку моделистов 2026. Подробности и билеты — на сайте клуба.",
+    text: "Открыта регистрация на летнюю выставку моделистов 2026. Подробности и билеты — на сайте форума.",
   },
   {
-    id: "p2", channelId: "ch-modelizm", authorName: "МоДелизМ Club",
+    id: "p2", channelId: "ch-modelizm", authorName: "МоДелизМ Форум",
     createdAt: "2026-06-18T14:30:00Z", status: "published", likes: 198, views: 2940,
     text: "Новый сезон встреч в регионах. Смотрите расписание и добавляйте свой город.",
   },

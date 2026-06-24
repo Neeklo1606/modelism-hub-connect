@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft, Check, CheckCheck, CornerUpLeft, MessageSquare,
-  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff,
+  Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff, Radio, BadgeCheck,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { userById, me, formatRelativeTime, VOICE_TRANSCRIPTS, makeMockWaveform } from "@/lib/mock";
@@ -14,6 +14,7 @@ import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
 import { VoiceBubble } from "@/components/messenger/VoiceBubble";
 import { VoiceRecorder } from "@/components/messenger/VoiceRecorder";
 import { CallsList } from "@/components/calls/CallsList";
+import { getAllChannels, useSubscriptions, formatCount } from "@/lib/channels";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -173,7 +174,7 @@ function MessengerPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
-  const [listTab, setListTab] = useState<"chats" | "calls">("chats");
+  const [listTab, setListTab] = useState<"chats" | "channels" | "calls">("chats");
   const [createOpen, setCreateOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -345,14 +346,16 @@ function MessengerPage() {
                 <Plus size={18} />
               </button>
             </div>
-            <div className="flex items-center gap-[6px]">
+            <div className="flex items-center gap-[6px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {([
                 { key: "chats-active" as const, label: "Активные" },
+                { key: "channels" as const, label: "Каналы" },
                 { key: "chats-archive" as const, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
                 { key: "calls" as const, label: "Звонки" },
               ]).map((t) => {
                 const isActive =
                   (t.key === "calls" && listTab === "calls") ||
+                  (t.key === "channels" && listTab === "channels") ||
                   (t.key === "chats-active" && listTab === "chats" && !showArchived) ||
                   (t.key === "chats-archive" && listTab === "chats" && showArchived);
                 return (
@@ -360,12 +363,13 @@ function MessengerPage() {
                     key={t.key}
                     onClick={() => {
                       if (t.key === "calls") setListTab("calls");
+                      else if (t.key === "channels") setListTab("channels");
                       else {
                         setListTab("chats");
                         setShowArchived(t.key === "chats-archive");
                       }
                     }}
-                    className="inline-flex items-center text-[12px] font-semibold transition-colors"
+                    className="inline-flex shrink-0 items-center text-[12px] font-semibold transition-colors"
                     style={{
                       height: 28, padding: "0 12px", borderRadius: 999,
                       background: isActive ? "var(--accent-soft)" : "transparent",
@@ -393,8 +397,11 @@ function MessengerPage() {
                   actions.markRead(did);
                 }}
               />
+            ) : listTab === "channels" ? (
+              <ChannelsList query={query} />
             ) : loading ? (
               <DialogListSkeleton />
+
 
             ) : filtered.length === 0 ? (
               <EmptyDialogs />
@@ -637,5 +644,77 @@ function EmptyDialogs() {
         Найти друзей
       </Link>
     </div>
+  );
+}
+
+function ChannelsList({ query }: { query: string }) {
+  const subs = useSubscriptions();
+  const all = getAllChannels();
+  const q = query.trim().toLowerCase();
+  const list = (q
+    ? all.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q))
+    : all
+  ).slice().sort((a, b) => {
+    const sa = subs.has(a.id) ? 1 : 0;
+    const sb = subs.has(b.id) ? 1 : 0;
+    if (sa !== sb) return sb - sa;
+    return b.subscribers - a.subscribers;
+  });
+
+  if (list.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center px-[24px] py-[60px] text-center">
+        <div className="grid h-[80px] w-[80px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-30)" }}>
+          <Radio size={32} />
+        </div>
+        <div className="mt-[12px] font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>Каналы не найдены</div>
+      </div>
+    );
+  }
+
+  return (
+    <ul>
+      {list.map((c) => {
+        const subscribed = subs.has(c.id);
+        return (
+          <li key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
+            <Link
+              to="/channel/$id"
+              params={{ id: c.id }}
+              className="flex w-full items-center gap-[12px] px-[16px] py-[12px] text-left transition-colors duration-150"
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--background-surface-hover)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <div
+                className="grid h-[48px] w-[48px] shrink-0 place-items-center font-display text-[18px] font-bold text-white"
+                style={{ background: c.avatarColor, borderRadius: 12 }}
+              >
+                {c.name.slice(0, 1)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-[6px]">
+                  <span className="truncate font-display text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    {c.name}
+                  </span>
+                  {c.kind === "official" && <BadgeCheck size={12} style={{ color: "var(--accent)", flexShrink: 0 }} />}
+                </div>
+                <div className="mt-[2px] flex items-center gap-[8px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
+                  <span className="inline-flex items-center gap-[4px]"><Users size={11} /> {formatCount(c.subscribers)}</span>
+                  <span className="truncate">{c.description}</span>
+                </div>
+              </div>
+              {subscribed && (
+                <span
+                  className="shrink-0 inline-flex items-center gap-[4px] text-[11px] font-semibold"
+                  style={{ background: "var(--accent-soft)", color: "var(--accent)", padding: "3px 8px", borderRadius: 999 }}
+                >
+                  <Check size={11} /> Подписан
+                </span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

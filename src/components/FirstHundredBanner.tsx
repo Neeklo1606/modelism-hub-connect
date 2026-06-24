@@ -48,7 +48,7 @@ export function FirstHundredBanner() {
                 textTransform: "uppercase",
               }}
             >
-              <Sparkles size={12} /> Запуск МоДелизМ Club
+              <Sparkles size={12} /> Запуск МоДелизМ Форум
             </span>
             <span
               className="inline-flex items-center"

@@ -12,8 +12,9 @@ import { PostCardSkeleton } from "@/components/feed/Skeleton";
 import { FeedFilterTabs, type FeedFilter } from "@/components/feed/FeedFilterTabs";
 import { EmptyFeedState } from "@/components/feed/EmptyFeedState";
 import type { CreatePostPayload } from "@/components/CreatePostForm";
-import { posts as mockPosts, me, categories } from "@/lib/mock";
+import { posts as mockPosts, me, categories, banners } from "@/lib/mock";
 import type { Post } from "@/lib/mock";
+import { SponsoredPostCard } from "@/components/feed/SponsoredPostCard";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
@@ -196,14 +197,22 @@ function FeedPage() {
               />
             )
           ) : (
-            slice.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                isSavedExternal={savedIds.has(post.id)}
-                onToggleSave={toggleSave}
-              />
-            ))
+            slice.flatMap((post, idx) => {
+              const nodes: React.ReactNode[] = [
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  isSavedExternal={savedIds.has(post.id)}
+                  onToggleSave={toggleSave}
+                />,
+              ];
+              // Каждые 4 поста — нативный рекламный пост
+              if ((idx + 1) % 4 === 0 && banners.length > 0) {
+                const banner = banners[Math.floor(idx / 4) % banners.length];
+                nodes.push(<SponsoredPostCard key={`ad-${idx}-${banner.id}`} banner={banner} />);
+              }
+              return nodes;
+            })
           )}
 
           {!initialLoading && visible < filtered.length && (
