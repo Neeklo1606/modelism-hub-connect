@@ -11,6 +11,7 @@ import type { Message } from "@/lib/mock";
 import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
 import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
+import { CallsList } from "@/components/calls/CallsList";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
