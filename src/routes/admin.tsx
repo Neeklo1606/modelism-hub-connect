@@ -697,36 +697,8 @@ function MonetizationSection() {
       </div>
 
       {/* Promocodes */}
-      <div style={{ ...card, padding: "20px", marginBottom: "16px" }}>
-        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Промокоды</h4>
-        <div className="flex flex-wrap" style={{ gap: "8px", marginTop: "8px" }}>
-          <input value={newCode} onChange={(e) => setNewCode(e.target.value.toUpperCase())} placeholder="Код" className="outline-none" style={{ ...inputStyle, flex: 1, minWidth: "120px" }} />
-          <input type="number" value={newDisc} onChange={(e) => setNewDisc(+e.target.value)} placeholder="Скидка %" className="outline-none" style={{ ...inputStyle, width: "120px" }} />
-          <button
-            onClick={() => {
-              if (!newCode.trim()) return toast.error("Введите код");
-              setPromos((p) => [...p, { id: String(Date.now()), code: newCode, discount: newDisc, usedCount: 0 }]);
-              setNewCode("");
-              toast.success("Промокод создан");
-            }}
-            style={{ ...primaryBtn }}
-          >
-            <Plus size={14} style={{ display: "inline", marginRight: "4px" }} />Создать
-          </button>
-        </div>
-        <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-          {promos.map((p) => (
-            <div key={p.id} className="flex items-center justify-between" style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
-              <div className="flex items-center gap-[12px]">
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", fontWeight: 600, color: "var(--foreground)" }}>{p.code}</span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--accent)" }}>{p.discount}%</span>
-                <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>{p.usedCount} исп.</span>
-              </div>
-              <IconBtn danger onClick={() => { setPromos((q) => q.filter((x) => x.id !== p.id)); toast.success("Промокод удалён"); }}><Trash2 size={14} /></IconBtn>
-            </div>
-          ))}
-        </div>
-      </div>
+      <PromoCodesBlock promos={promos} setPromos={setPromos} />
+
 
       {/* Banners */}
       <div style={{ ...card, padding: "20px" }}>
