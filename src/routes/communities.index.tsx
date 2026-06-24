@@ -10,7 +10,7 @@ import type { Community } from "@/lib/mock";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export const Route = createFileRoute("/communities/")({
-  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Club" }] }),
+  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Форум" }] }),
   component: CommunitiesPage,
 });
 

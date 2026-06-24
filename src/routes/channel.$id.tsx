@@ -20,7 +20,7 @@ export const Route = createFileRoute("/channel/$id")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.channel.name} — канал · МоДелизМ Club` },
+          { title: `${loaderData.channel.name} — канал · МоДелизМ Форум` },
           { name: "description", content: loaderData.channel.description },
         ]
       : [{ title: "Канал" }],

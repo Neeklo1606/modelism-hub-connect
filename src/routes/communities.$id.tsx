@@ -12,7 +12,7 @@ import { ShareSheet } from "@/components/communities/ShareSheet";
 import { SubmitPostSheet } from "@/components/communities/SubmitPostSheet";
 
 export const Route = createFileRoute("/communities/$id")({
-  head: ({ params }) => ({ meta: [{ title: `${communityById(params.id)?.name ?? "Сообщество"} — МоДелизМ Club` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${communityById(params.id)?.name ?? "Сообщество"} — МоДелизМ Форум` }] }),
   component: CommunityDetailPage,
 });
 
