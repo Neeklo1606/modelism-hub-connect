@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
-import { Phone, MoreHorizontal, Info, Search, Bell, BellOff, Archive, ArchiveRestore, Ban, ShieldOff, X } from "lucide-react";
+import { Phone, MoreHorizontal, Info, Search, Bell, BellOff, Archive, ArchiveRestore, Ban, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmCallDialog } from "@/components/calls/ConfirmCallDialog";
+import { calls, useCalls } from "@/lib/calls";
 import { actions, useStore, selectors } from "@/lib/store";
 
 interface Props {
