@@ -211,6 +211,7 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                   </div>
                 )
               )}
+              {tab === "invited" && isOwn && <InvitedFriendsSection />}
               {tab === "about" && (
                 <div className="max-w-[600px]">
                   {user.bio ? (
