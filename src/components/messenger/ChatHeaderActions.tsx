@@ -17,7 +17,9 @@ interface Props {
 export function ChatHeaderActions({ partnerId, partnerName, dialogId, onSearch }: Props) {
   const meta = useStore(dialogId ? selectors.dialogMeta(dialogId) : () => ({ archived: false, muted: false, blocked: false }));
   const [open, setOpen] = useState(false);
-  const [callOpen, setCallOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const activeCall = useCalls((s) => s.active);
+  const callBusy = !!activeCall && activeCall.status !== "ended";
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
