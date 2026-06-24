@@ -535,7 +535,7 @@ function MessengerPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="flex items-end gap-[8px] px-[12px] py-[10px]" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
+                <div className="relative flex items-end gap-[8px] px-[12px] py-[10px]" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
                   <div
                     className="flex flex-1 items-end gap-[4px] pl-[6px] pr-[4px]"
                     style={{
@@ -572,22 +572,23 @@ function MessengerPage() {
                       }}
                     />
                   </div>
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={send}
-                    disabled={!text.trim()}
-                    className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full transition-opacity"
-                    style={{
-                      background: "var(--accent)",
-                      color: "white",
-                      opacity: text.trim() ? 1 : 0.45,
-                      cursor: text.trim() ? "pointer" : "not-allowed",
-                      boxShadow: text.trim() ? "0 4px 12px -2px color-mix(in oklab, var(--accent) 50%, transparent)" : "none",
-                    }}
-                    aria-label="Отправить"
-                  >
-                    <Send size={18} />
-                  </motion.button>
+                  {text.trim() ? (
+                    <motion.button
+                      whileTap={{ scale: 0.92 }}
+                      onClick={send}
+                      className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full transition-opacity"
+                      style={{
+                        background: "var(--accent)",
+                        color: "white",
+                        boxShadow: "0 4px 12px -2px color-mix(in oklab, var(--accent) 50%, transparent)",
+                      }}
+                      aria-label="Отправить"
+                    >
+                      <Send size={18} />
+                    </motion.button>
+                  ) : (
+                    <VoiceRecorder onSend={sendVoice} />
+                  )}
                 </div>
 
               </div>
