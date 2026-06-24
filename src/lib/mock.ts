@@ -15,7 +15,10 @@ export interface User {
   friendIds?: ID[];
   online?: boolean;
   isAdmin?: boolean;
+  firstHundred?: boolean;
 }
+
+export const firstHundredStats = { taken: 47, total: 100 };
 
 export interface FriendRequest {
   id: ID;
