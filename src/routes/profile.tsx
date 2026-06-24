@@ -88,6 +88,22 @@ export function ProfileView({ user, isOwn }: { user: User; isOwn: boolean }) {
                   <BadgeCheck size={11} /> Pro
                 </span>
               )}
+              {user.firstHundred && (
+                <span
+                  className="inline-flex items-center gap-[4px] font-semibold"
+                  style={{
+                    background: "linear-gradient(135deg, #FBBF24, #B45309)",
+                    color: "#1F1300",
+                    fontSize: 11,
+                    padding: "2px 10px",
+                    borderRadius: 999,
+                    boxShadow: "0 4px 12px -4px rgba(245, 158, 11, 0.6)",
+                  }}
+                  title="Один из первых 100 участников клуба"
+                >
+                  ★ Первые 100
+                </span>
+              )}
             </div>
             <div className="mt-[2px] flex items-center gap-[6px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
               <MapPin size={12} /> {user.city}
