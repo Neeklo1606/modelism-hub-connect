@@ -258,7 +258,10 @@ function SubscriptionPage() {
             ))}
           </div>
         </section>
+
+        <InviteBlock />
       </div>
+
     </AppLayout>
   );
 }
