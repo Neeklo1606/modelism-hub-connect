@@ -687,6 +687,19 @@ function ModerationCard({ title, author, category, onApprove, onReject }: { titl
 function MonetizationSection() {
   const [editedTariffs, setEditedTariffs] = useState(tariffs);
   const [promos, setPromos] = useState(initialPromos);
+  const [bannerList, setBannerList] = useState<Banner[]>(initialBanners);
+
+  const updateBanner = (id: string, patch: Partial<Banner>) => {
+    setBannerList((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+  };
+  const removeBanner = (id: string) => {
+    setBannerList((prev) => prev.filter((b) => b.id !== id));
+    toast.success("Баннер удалён");
+  };
+  const sortedBanners = [...bannerList].sort((a, b) => {
+    if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
+    return (b.priority ?? 0) - (a.priority ?? 0);
+  });
 
 
   return (
@@ -730,35 +743,107 @@ function MonetizationSection() {
 
       {/* Banners */}
       <div style={{ ...card, padding: "20px" }}>
-        <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Рекламные баннеры</h4>
+        <div className="flex items-center justify-between flex-wrap gap-[8px]">
+          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)" }}>Рекламные баннеры</h4>
+          <span style={{ fontSize: "12px", color: "var(--foreground-50)" }}>Приоритет, закрепление и расписание показа</span>
+        </div>
         <div
           style={{
             border: "2px dashed var(--border)",
             borderRadius: "var(--r-card)",
-            height: "120px",
+            height: "100px",
             marginTop: "12px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
-            gap: "8px",
+            gap: "6px",
           }}
         >
-          <Upload size={32} style={{ color: "var(--foreground-30)" }} />
-          <span style={{ fontSize: "14px", color: "var(--foreground-50)" }}>Перетащите баннер или нажмите для загрузки</span>
+          <Upload size={26} style={{ color: "var(--foreground-30)" }} />
+          <span style={{ fontSize: "13px", color: "var(--foreground-50)" }}>Загрузить новый баннер</span>
         </div>
-        <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "6px" }}>
-          {banners.map((b) => (
-            <div key={b.id} className="flex items-center justify-between" style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "var(--r-card-sm)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--foreground)" }}>{b.title}</div>
-                <div style={{ fontSize: "11px", color: "var(--foreground-50)" }}>до {b.until}</div>
+
+        <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+          {sortedBanners.map((b) => (
+            <div
+              key={b.id}
+              style={{
+                padding: "14px",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-card-sm)",
+                background: b.pinned ? "var(--accent-soft)" : "transparent",
+              }}
+            >
+              <div className="flex items-start justify-between gap-[12px]">
+                <div className="min-w-0 flex-1">
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--foreground)" }}>{b.title}</div>
+                  <div style={{ fontSize: "12px", color: "var(--foreground-50)", marginTop: 2 }}>{b.text}</div>
+                </div>
+                <IconBtn danger onClick={() => removeBanner(b.id)}><Trash2 size={14} /></IconBtn>
               </div>
-              <IconBtn danger onClick={() => toast.success("Баннер удалён")}><Trash2 size={14} /></IconBtn>
+
+              <div
+                className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr_auto]"
+                style={{ gap: "10px", marginTop: "12px", alignItems: "end" }}
+              >
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Приоритет</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={b.priority ?? 0}
+                    onChange={(e) => updateBanner(b.id, { priority: Math.max(0, Math.min(100, +e.target.value || 0)) })}
+                    className="outline-none"
+                    style={{ ...inputStyle, height: 36 }}
+                  />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Показывать с</span>
+                  <input
+                    type="date"
+                    value={b.scheduleFrom ?? ""}
+                    onChange={(e) => updateBanner(b.id, { scheduleFrom: e.target.value })}
+                    className="outline-none"
+                    style={{ ...inputStyle, height: 36 }}
+                  />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--foreground-50)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Показывать по</span>
+                  <input
+                    type="date"
+                    value={b.scheduleTo ?? ""}
+                    onChange={(e) => updateBanner(b.id, { scheduleTo: e.target.value })}
+                    className="outline-none"
+                    style={{ ...inputStyle, height: 36 }}
+                  />
+                </label>
+                <label className="flex items-center gap-[8px] cursor-pointer" style={{ height: 36 }}>
+                  <input
+                    type="checkbox"
+                    checked={!!b.pinned}
+                    onChange={(e) => updateBanner(b.id, { pinned: e.target.checked })}
+                    style={{ width: 18, height: 18, accentColor: "var(--accent)" }}
+                  />
+                  <span style={{ fontSize: "13px", color: "var(--foreground-70)", fontWeight: 500 }}>Закрепить</span>
+                </label>
+              </div>
             </div>
           ))}
+          {sortedBanners.length === 0 && (
+            <div style={{ padding: "24px 12px", textAlign: "center", fontSize: "13px", color: "var(--foreground-50)" }}>
+              Нет активных баннеров
+            </div>
+          )}
         </div>
+        <button
+          onClick={() => toast.success("Настройки баннеров сохранены")}
+          style={{ ...primaryBtn, marginTop: "14px" }}
+        >
+          Сохранить баннеры
+        </button>
       </div>
     </div>
   );
