@@ -658,8 +658,7 @@ function ModerationCard({ title, author, category, onApprove, onReject }: { titl
 function MonetizationSection() {
   const [editedTariffs, setEditedTariffs] = useState(tariffs);
   const [promos, setPromos] = useState(initialPromos);
-  const [newCode, setNewCode] = useState("");
-  const [newDisc, setNewDisc] = useState(10);
+
 
   return (
     <div>
