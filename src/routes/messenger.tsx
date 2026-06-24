@@ -142,6 +142,7 @@ function MessageBubble({
               style={{ borderRadius: "12px", maxWidth: 280 }}
             />
           )}
+          {msg.voice && <VoiceBubble voice={msg.voice} isMe={isMe} />}
           {msg.text && (
             <div className="text-[14px] leading-[1.4]" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {msg.text}
