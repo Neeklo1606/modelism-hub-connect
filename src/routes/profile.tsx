@@ -266,9 +266,10 @@ function Counter({ label, value, divider }: { label: string; value: number; divi
   );
 }
 
-function Tabs({ tab, setTab }: { tab: TabKey; setTab: (k: TabKey) => void }) {
+function Tabs({ tab, setTab, isOwn }: { tab: TabKey; setTab: (k: TabKey) => void; isOwn: boolean }) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [indicator, setIndicator] = useState({ x: 0, w: 0 });
+  const tabs = TABS_BASE.filter((t) => isOwn || !t.ownOnly);
 
   useEffect(() => {
     const el = refs.current[tab];
@@ -281,7 +282,7 @@ function Tabs({ tab, setTab }: { tab: TabKey; setTab: (k: TabKey) => void }) {
       style={{ background: "var(--background)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--border)" }}
     >
       <div className="relative flex">
-        {TABS.map(({ key, label, Icon }) => {
+        {tabs.map(({ key, label, Icon }) => {
           const active = tab === key;
           return (
             <button
