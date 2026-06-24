@@ -2,16 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Car, Plane, Ship, Send, Code2, Wrench, Cpu, BatteryCharging, Users, Search,
+  Car, Plane, Ship, Send, Code2, Wrench, Cpu, BatteryCharging, Users, Search, ArrowRight,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useStore, actions, selectors } from "@/lib/store";
+import { useStore, selectors } from "@/lib/store";
 import type { Community } from "@/lib/mock";
 import { useDebounce } from "@/hooks/useDebounce";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/communities/")({
-  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Форум" }] }),
+  head: () => ({ meta: [{ title: "Сообщества — МоДелизМ Club" }] }),
   component: CommunitiesPage,
 });
 
@@ -19,12 +18,100 @@ const ICON_MAP: Record<string, typeof Car> = {
   Car, Plane, Ship, Send, Code2, Wrench, Cpu, BatteryCharging,
 };
 
-const pulse = {
-  animate: { opacity: [0.4, 0.7, 0.4] },
-  transition: { duration: 1.2, repeat: Infinity, ease: "easeInOut" as const },
-};
+function CommunityCard({ c }: { c: Community }) {
+  const Icon = ICON_MAP[c.avatarIcon ?? "Users"] ?? Users;
+  return (
+    <article
+      className="overflow-hidden flex flex-col"
+      style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 16 }}
+    >
+      {/* banner */}
+      <Link to="/communities/$id" params={{ id: c.id }} className="relative block">
+        {c.coverImage ? (
+          <img src={c.coverImage} alt="" className="h-[120px] w-full object-cover" />
+        ) : (
+          <div className="h-[120px] w-full" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-muted))" }} />
+        )}
+        {/* avatar */}
+        <div
+          className="absolute -bottom-[24px] left-[16px] grid h-[56px] w-[56px] place-items-center overflow-hidden"
+          style={{ background: "var(--background)", border: "3px solid var(--background)", borderRadius: 14 }}
+        >
+          {c.avatarImage ? (
+            <img src={c.avatarImage} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="grid h-full w-full place-items-center" style={{ background: "var(--accent-soft)" }}>
+              <Icon size={26} style={{ color: "var(--accent)" }} />
+            </div>
+          )}
+        </div>
+      </Link>
 
-type SectionKey = "my" | "recommended";
+      <div className="flex flex-1 flex-col gap-[10px] px-[16px] pt-[32px] pb-[16px]">
+        <Link to="/communities/$id" params={{ id: c.id }} className="min-w-0">
+          <h3 className="truncate font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>{c.name}</h3>
+          <p className="mt-[4px] text-[13px]" style={{
+            color: "var(--foreground-70)",
+            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+          }}>
+            {c.description}
+          </p>
+        </Link>
+        <div className="mt-auto flex items-center justify-between gap-[8px] pt-[4px]">
+          <span className="inline-flex items-center gap-[6px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
+            <Users size={14} /> {c.members.toLocaleString("ru")}
+          </span>
+          <Link
+            to="/communities/$id"
+            params={{ id: c.id }}
+            className="inline-flex items-center gap-[6px] font-semibold transition-colors"
+            style={{
+              height: 34, padding: "0 14px", borderRadius: 10,
+              background: "var(--accent)", color: "white", fontSize: 13,
+            }}
+          >
+            Перейти <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function EmptyMy({ onSwitch }: { onSwitch: () => void }) {
+  return (
+    <div className="grid place-items-center gap-[10px] py-[60px] text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
+      <div className="grid h-[56px] w-[56px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-50)" }}>
+        <Users size={24} />
+      </div>
+      <div className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>Вы пока не состоите ни в одном сообществе</div>
+      <p className="max-w-[320px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
+        Посмотрите рекомендованные клубы, школы и магазины моделизма
+      </p>
+      <button
+        onClick={onSwitch}
+        className="mt-[4px] inline-flex h-[36px] items-center px-[16px] text-[13px] font-semibold"
+        style={{ background: "var(--accent)", color: "white", borderRadius: 10 }}
+      >
+        Смотреть рекомендованные
+      </button>
+    </div>
+  );
+}
+
+function EmptySearch() {
+  return (
+    <div className="grid place-items-center gap-[8px] py-[60px] text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
+      <div className="grid h-[56px] w-[56px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-50)" }}>
+        <Search size={22} />
+      </div>
+      <div className="font-display text-[15px] font-semibold" style={{ color: "var(--foreground)" }}>Ничего не найдено</div>
+      <p className="max-w-[320px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
+        Попробуйте изменить запрос или поискать в другом разделе
+      </p>
+    </div>
+  );
+}
 
 function CommunitiesPage() {
   const currentUserId = useStore((s) => s.currentUserId);
@@ -33,57 +120,36 @@ function CommunitiesPage() {
 
   const [query, setQuery] = useState("");
   const debounced = useDebounce(query, 250);
-  const [sort, setSort] = useState<"popular" | "new">("popular");
-  const [section, setSection] = useState<SectionKey>("my");
-  const [loading, setLoading] = useState(true);
+  const [section, setSection] = useState<"my" | "recommended">("my");
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(t);
-  }, []);
-
-  // If user has no memberships, default to recommended
   useEffect(() => {
     if (myCommunities.length === 0) setSection("recommended");
   }, [myCommunities.length]);
 
   const apply = (list: Community[]) => {
     const q = debounced.trim().toLowerCase();
-    const arr = list.filter(
-      (c) => !q || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q)
-    );
-    if (sort === "popular") return [...arr].sort((a, b) => b.members - a.members);
-    return [...arr].reverse();
+    if (!q) return list;
+    return list.filter((c) => c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
   };
 
-  const myFiltered = useMemo(() => apply(myCommunities), [myCommunities, debounced, sort]);
-  const recFiltered = useMemo(() => apply(recommended), [recommended, debounced, sort]);
+  const myFiltered = useMemo(() => apply(myCommunities), [myCommunities, debounced]);
+  const recFiltered = useMemo(() => apply(recommended), [recommended, debounced]);
 
   const visible = section === "my" ? myFiltered : recFiltered;
-
-  const handleToggle = (c: Community) => {
-    const isMember = myCommunities.some((x) => x.id === c.id);
-    if (isMember) {
-      actions.leaveCommunity(currentUserId, c.id);
-      toast.success("Вы покинули сообщество", { description: `Вы больше не участник «${c.name}»` });
-    } else {
-      actions.joinCommunity(currentUserId, c.id);
-      toast.success(`Вы вступили в «${c.name}»`, { description: "Сообщество добавлено в ваш профиль" });
-    }
-  };
+  const hasQuery = debounced.trim().length > 0;
 
   return (
     <AppLayout rightColumn={false}>
       <div className="space-y-[20px]">
         <header>
-          <h1 className="font-display text-[28px] font-bold" style={{ color: "var(--foreground)" }}>Сообщества</h1>
-          <p className="mt-[4px] text-[14px]" style={{ color: "var(--foreground-50)" }}>Тематические группы моделистов</p>
+          <h1 className="font-display text-[24px] font-bold sm:text-[28px]" style={{ color: "var(--foreground)" }}>Сообщества</h1>
+          <p className="mt-[4px] text-[14px]" style={{ color: "var(--foreground-50)" }}>Клубы, кружки, школы и магазины моделизма</p>
         </header>
 
-        {/* Section tabs */}
-        <nav role="tablist" className="relative flex items-center gap-[4px]" style={{ borderBottom: "1px solid var(--border)" }}>
+        {/* Tabs */}
+        <nav role="tablist" className="relative flex items-center gap-[4px] overflow-x-auto" style={{ borderBottom: "1px solid var(--border)" }}>
           {([
-            { key: "my" as const, label: "Мои сообщества", count: myCommunities.length },
+            { key: "my" as const, label: "Мои", count: myCommunities.length },
             { key: "recommended" as const, label: "Рекомендованные", count: recommended.length },
           ]).map((t) => {
             const active = section === t.key;
@@ -93,7 +159,7 @@ function CommunitiesPage() {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setSection(t.key)}
-                className="relative inline-flex items-center gap-[8px] px-[16px] py-[12px] text-[14px] font-semibold transition-colors"
+                className="relative inline-flex shrink-0 items-center gap-[8px] px-[16px] py-[12px] text-[14px] font-semibold transition-colors"
                 style={{ color: active ? "var(--foreground)" : "var(--foreground-50)" }}
               >
                 {t.label}
@@ -120,134 +186,32 @@ function CommunitiesPage() {
           })}
         </nav>
 
-        <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Поиск по названию или категории"
-              className="w-full text-[14px] outline-none"
-              style={{
-                height: 40, paddingLeft: 36, paddingRight: 12,
-                background: "var(--background-surface)", borderRadius: 10,
-                border: "1.5px solid transparent", color: "var(--foreground)",
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
-            />
-          </div>
-
-          <div className="flex shrink-0" style={{ background: "var(--background-surface)", borderRadius: 10, padding: 3 }}>
-            {([["popular", "Популярные"], ["new", "Новые"]] as const).map(([key, label]) => {
-              const active = sort === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setSort(key)}
-                  className="text-[13px] transition-all duration-150"
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: 8,
-                    background: active ? "var(--background)" : "transparent",
-                    color: active ? "var(--foreground)" : "var(--foreground-50)",
-                    fontWeight: active ? 600 : 500,
-                    boxShadow: active ? "var(--shadow-card)" : "none",
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Search */}
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" size={16} style={{ color: "var(--foreground-50)" }} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск по названию, категории или описанию"
+            className="w-full text-[14px] outline-none"
+            style={{
+              height: 44, paddingLeft: 38, paddingRight: 14,
+              background: "var(--background-surface)", borderRadius: 12,
+              border: "1.5px solid transparent", color: "var(--foreground)",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
+          />
         </div>
 
-        {loading ? (
-          <div className="grid gap-[16px] sm:grid-cols-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="p-[20px]" style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 16 }}>
-                <div className="flex items-start gap-[12px]">
-                  <motion.div {...pulse} className="h-[56px] w-[56px]" style={{ background: "var(--background-surface)", borderRadius: 10 }} />
-                  <div className="flex-1 space-y-[8px]">
-                    <motion.div {...pulse} className="h-[14px] rounded-[6px]" style={{ background: "var(--background-surface)", width: "60%" }} />
-                    <motion.div {...pulse} className="h-[12px] rounded-[6px]" style={{ background: "var(--background-surface)", width: "90%" }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {section === "my" && myCommunities.length === 0 && !hasQuery ? (
+          <EmptyMy onSwitch={() => setSection("recommended")} />
         ) : visible.length === 0 ? (
-          <div className="grid place-items-center gap-[10px] py-[60px] text-center" style={{ border: "1px dashed var(--border-strong)", borderRadius: 14 }}>
-            <div className="grid h-[56px] w-[56px] place-items-center rounded-full" style={{ background: "var(--background-surface)", color: "var(--foreground-50)" }}>
-              <Users size={24} />
-            </div>
-            <div className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
-              {section === "my" ? "Вы ещё не вступили ни в одно сообщество" : "Ничего не найдено"}
-            </div>
-            {section === "my" && (
-              <button
-                onClick={() => setSection("recommended")}
-                className="mt-[4px] inline-flex h-[36px] items-center px-[16px] text-[13px] font-semibold"
-                style={{ background: "var(--accent)", color: "white", borderRadius: 10 }}
-              >
-                Посмотреть рекомендованные
-              </button>
-            )}
-          </div>
+          <EmptySearch />
         ) : (
           <AnimatePresence mode="popLayout">
-            <motion.div key={section} className="grid gap-[16px] sm:grid-cols-2">
-              {visible.map((g) => {
-                const Icon = ICON_MAP[g.avatarIcon ?? "Users"] ?? Users;
-                const isMember = myCommunities.some((x) => x.id === g.id);
-                return (
-                  <article
-                    key={g.id}
-                    className="flex flex-col gap-[14px] p-[20px]"
-                    style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 16 }}
-                  >
-                    <Link
-                      to="/communities/$id"
-                      params={{ id: g.id }}
-                      className="flex items-start gap-[14px] rounded-lg -m-2 p-2 transition-colors hover:bg-[var(--background-surface)]"
-                    >
-                      <div className="grid h-[56px] w-[56px] shrink-0 place-items-center" style={{ background: "var(--accent-soft)", borderRadius: 10 }}>
-                        <Icon size={28} style={{ color: "var(--accent)" }} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-display text-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
-                          {g.name}
-                        </div>
-                        <p className="mt-[6px] text-[14px]" style={{ color: "var(--foreground-70)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                          {g.description}
-                        </p>
-                        <div className="mt-[8px] flex items-center gap-[12px]">
-                          <span className="inline-flex items-center gap-[4px] text-[13px]" style={{ color: "var(--foreground-50)" }}>
-                            <Users size={14} /> {g.members.toLocaleString("ru")}
-                          </span>
-                          <span className="text-[11px]" style={{ background: "var(--background-surface)", padding: "3px 8px", borderRadius: 6, color: "var(--foreground-70)" }}>
-                            {g.category}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      onClick={() => handleToggle(g)}
-                      className="w-full font-semibold transition-colors duration-150"
-                      style={{
-                        height: 38, borderRadius: 10, fontSize: 13,
-                        background: isMember ? "transparent" : "var(--accent)",
-                        color: isMember ? "var(--foreground-70)" : "white",
-                        border: isMember ? "1px solid var(--border)" : "none",
-                      }}
-                    >
-                      {isMember ? "Покинуть" : "Вступить"}
-                    </motion.button>
-                  </article>
-                );
-              })}
+            <motion.div key={section} className="grid gap-[16px] grid-cols-1 sm:grid-cols-2">
+              {visible.map((c) => <CommunityCard key={c.id} c={c} />)}
             </motion.div>
           </AnimatePresence>
         )}
