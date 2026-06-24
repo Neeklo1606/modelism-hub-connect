@@ -170,6 +170,7 @@ function MessengerPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [listTab, setListTab] = useState<"chats" | "calls">("chats");
   const [createOpen, setCreateOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
