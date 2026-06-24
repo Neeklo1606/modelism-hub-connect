@@ -318,20 +318,30 @@ function MessengerPage() {
             </div>
             <div className="flex items-center gap-[6px]">
               {([
-                { key: false, label: "Активные" },
-                { key: true, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
-              ] as const).map((t) => {
-                const active = showArchived === t.key;
+                { key: "chats-active" as const, label: "Активные" },
+                { key: "chats-archive" as const, label: `Архив${archivedCount ? ` · ${archivedCount}` : ""}` },
+                { key: "calls" as const, label: "Звонки" },
+              ]).map((t) => {
+                const isActive =
+                  (t.key === "calls" && listTab === "calls") ||
+                  (t.key === "chats-active" && listTab === "chats" && !showArchived) ||
+                  (t.key === "chats-archive" && listTab === "chats" && showArchived);
                 return (
                   <button
-                    key={String(t.key)}
-                    onClick={() => setShowArchived(t.key)}
+                    key={t.key}
+                    onClick={() => {
+                      if (t.key === "calls") setListTab("calls");
+                      else {
+                        setListTab("chats");
+                        setShowArchived(t.key === "chats-archive");
+                      }
+                    }}
                     className="inline-flex items-center text-[12px] font-semibold transition-colors"
                     style={{
                       height: 28, padding: "0 12px", borderRadius: 999,
-                      background: active ? "var(--accent-soft)" : "transparent",
-                      color: active ? "var(--accent)" : "var(--foreground-50)",
-                      border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: isActive ? "var(--accent-soft)" : "transparent",
+                      color: isActive ? "var(--accent)" : "var(--foreground-50)",
+                      border: isActive ? "1px solid var(--accent)" : "1px solid var(--border)",
                     }}
                   >
                     {t.label}
@@ -340,6 +350,7 @@ function MessengerPage() {
               })}
             </div>
           </div>
+
 
 
           <div className="min-h-0 flex-1 overflow-y-auto">
