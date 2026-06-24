@@ -13,8 +13,9 @@ import { StatusBadge } from "@/components/StatusBadge";
 import {
   adminStats, adminActions, adminUsers, promoCodes as initialPromos,
   ads, posts, categories, tariffs, banners,
-  type AdminUser,
+  type AdminUser, type PromoCode,
 } from "@/lib/mock";
+import { Search, Filter, Calendar, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Форум" }] }),
