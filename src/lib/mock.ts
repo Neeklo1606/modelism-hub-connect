@@ -551,6 +551,9 @@ export interface PromoCode {
   code: string;
   discount: number;
   usedCount: number;
+  limit: number;
+  expiresAt: string; // ISO date
+  status?: "active" | "expired";
 }
 
 export const subscriptionPlans: SubscriptionPlan[] = [
