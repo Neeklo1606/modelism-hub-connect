@@ -12,6 +12,7 @@ import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/stor
 import { PostCard } from "@/components/PostCard";
 import { AdCard } from "@/components/AdCard";
 import { toast } from "sonner";
+import { InvitedFriendsSection } from "@/components/referral/InvitedFriendsSection";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Профиль — МоДелизМ Форум" }] }),
