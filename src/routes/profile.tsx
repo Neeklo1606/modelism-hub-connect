@@ -24,14 +24,16 @@ function ProfilePage() {
   return <ProfileView user={currentUser} isOwn />;
 }
 
-type TabKey = "posts" | "ads" | "communities" | "about";
+type TabKey = "posts" | "ads" | "communities" | "invited" | "about";
 
-const TABS: { key: TabKey; label: string; Icon: typeof FileText }[] = [
+const TABS_BASE: { key: TabKey; label: string; Icon: typeof FileText; ownOnly?: boolean }[] = [
   { key: "posts", label: "Публикации", Icon: FileText },
   { key: "ads", label: "Объявления", Icon: Tag },
   { key: "communities", label: "Сообщества", Icon: Users },
+  { key: "invited", label: "Приглашённые", Icon: UserPlus, ownOnly: true },
   { key: "about", label: "О себе", Icon: UserIcon },
 ];
+
 
 const ICON_MAP: Record<string, typeof Car> = {
   Car, Plane, Ship, Send: SendIcon, Code2, Wrench, Cpu, BatteryCharging,
