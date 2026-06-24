@@ -60,6 +60,7 @@ function LandingPage() {
     >
       <TopNav />
       <Hero />
+      <FirstHundredBanner />
       <TwoTracks />
       <CategoriesPreview />
       <CommunityProof />
