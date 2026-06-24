@@ -12,8 +12,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   adminStats, adminActions, adminUsers, promoCodes as initialPromos,
-  ads, posts, categories, tariffs, banners,
-  type AdminUser, type PromoCode,
+  ads, posts, categories, tariffs, banners as initialBanners,
+  type AdminUser, type PromoCode, type Banner,
 } from "@/lib/mock";
 import { Search, Filter, Calendar, Tag } from "lucide-react";
 
@@ -562,6 +562,10 @@ function AdsSection() {
 function ModerationSection() {
   const [postQueue, setPostQueue] = useState(posts.slice(0, 2).map((p) => ({ id: p.id, title: p.title, author: p.authorId, category: p.category })));
   const [adQueue, setAdQueue] = useState(ads.slice(0, 1).map((a) => ({ id: a.id, title: a.title, author: a.authorId, category: a.category })));
+  const [channelQueue, setChannelQueue] = useState([
+    { id: "chp-m1", title: "Обзор нового набора красок Mr.Hobby", author: "Моя мастерская", category: "Канал · Автор" },
+    { id: "chp-m2", title: "Скидка 20% на наборы Tamiya — выходные", author: "Tamiya News", category: "Канал · Бренд" },
+  ]);
 
   const removePost = (id: string, ok: boolean) => {
     setPostQueue((q) => q.filter((x) => x.id !== id));
@@ -570,6 +574,10 @@ function ModerationSection() {
   const removeAd = (id: string, ok: boolean) => {
     setAdQueue((q) => q.filter((x) => x.id !== id));
     ok ? toast.success("Объявление одобрено") : toast.error("Объявление отклонено");
+  };
+  const removeChannel = (id: string, ok: boolean) => {
+    setChannelQueue((q) => q.filter((x) => x.id !== id));
+    ok ? toast.success("Пост канала одобрен") : toast.error("Пост канала отклонён");
   };
 
   return (
@@ -614,6 +622,26 @@ function ModerationSection() {
               ))}
             </AnimatePresence>
             {adQueue.length === 0 && <EmptyQueue label="Нет объявлений на модерации" />}
+          </div>
+        </div>
+        <div className="lg:col-span-2">
+          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "16px", color: "var(--foreground)", marginBottom: "12px" }}>
+            Каналы на модерации ({channelQueue.length})
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <AnimatePresence>
+              {channelQueue.map((c) => (
+                <ModerationCard
+                  key={c.id}
+                  title={c.title}
+                  author={c.author}
+                  category={c.category}
+                  onApprove={() => removeChannel(c.id, true)}
+                  onReject={() => removeChannel(c.id, false)}
+                />
+              ))}
+            </AnimatePresence>
+            {channelQueue.length === 0 && <EmptyQueue label="Нет постов каналов на модерации" />}
           </div>
         </div>
       </div>
