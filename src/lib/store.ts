@@ -160,10 +160,17 @@ function reducer(s: AppState, a: Action): AppState {
     case "ADD_MESSAGE": {
       const d = s.dialogs[a.dialogId];
       if (!d) return s;
+      const preview = a.message.text
+        ? a.message.text
+        : a.message.voice
+          ? "🎤 Голосовое сообщение"
+          : a.message.image
+            ? "📷 Изображение"
+            : "";
       const nextDialog: Dialog = {
         ...d,
         messages: [...d.messages, a.message],
-        lastMessage: a.message.text || (a.message.image ? "📷 Изображение" : ""),
+        lastMessage: preview,
         time: a.message.time,
       };
       return { ...s, dialogs: { ...s.dialogs, [a.dialogId]: nextDialog } };

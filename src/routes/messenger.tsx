@@ -6,11 +6,13 @@ import {
   Paperclip, Search, Send, Users, X, Plus, Archive, Ban, BellOff,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { userById, me, formatRelativeTime } from "@/lib/mock";
+import { userById, me, formatRelativeTime, VOICE_TRANSCRIPTS, makeMockWaveform } from "@/lib/mock";
 import type { Message } from "@/lib/mock";
 import { useStore, actions, selectors, openOrCreateDialogWith } from "@/lib/store";
 import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
 import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
+import { VoiceBubble } from "@/components/messenger/VoiceBubble";
+import { VoiceRecorder } from "@/components/messenger/VoiceRecorder";
 import { CallsList } from "@/components/calls/CallsList";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -140,6 +142,7 @@ function MessageBubble({
               style={{ borderRadius: "12px", maxWidth: 280 }}
             />
           )}
+          {msg.voice && <VoiceBubble voice={msg.voice} isMe={isMe} />}
           {msg.text && (
             <div className="text-[14px] leading-[1.4]" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {msg.text}
@@ -263,6 +266,32 @@ function MessengerPage() {
     actions.addMessage(active.id, m);
     setText("");
     setReplyTo(null);
+  };
+
+  const sendVoice = (durationSec: number) => {
+    if (!active) return;
+    if (getMeta(active.id).blocked) {
+      toast.error("Пользователь заблокирован", { description: "Разблокируйте его, чтобы отправлять сообщения" });
+      return;
+    }
+    const seed = Date.now();
+    const transcript = VOICE_TRANSCRIPTS[seed % VOICE_TRANSCRIPTS.length];
+    const m: Message = {
+      id: `nm${seed}`,
+      authorId: me.id,
+      time: new Date().toISOString(),
+      text: "",
+      status: "sent",
+      replyTo: replyTo?.id,
+      voice: {
+        duration: durationSec,
+        waveform: makeMockWaveform(seed),
+        transcript,
+      },
+    };
+    actions.addMessage(active.id, m);
+    setReplyTo(null);
+    toast.success("Голосовое отправлено");
   };
 
 
@@ -506,7 +535,7 @@ function MessengerPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="flex items-end gap-[8px] px-[12px] py-[10px]" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
+                <div className="relative flex items-end gap-[8px] px-[12px] py-[10px]" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
                   <div
                     className="flex flex-1 items-end gap-[4px] pl-[6px] pr-[4px]"
                     style={{
@@ -543,22 +572,23 @@ function MessengerPage() {
                       }}
                     />
                   </div>
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={send}
-                    disabled={!text.trim()}
-                    className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full transition-opacity"
-                    style={{
-                      background: "var(--accent)",
-                      color: "white",
-                      opacity: text.trim() ? 1 : 0.45,
-                      cursor: text.trim() ? "pointer" : "not-allowed",
-                      boxShadow: text.trim() ? "0 4px 12px -2px color-mix(in oklab, var(--accent) 50%, transparent)" : "none",
-                    }}
-                    aria-label="Отправить"
-                  >
-                    <Send size={18} />
-                  </motion.button>
+                  {text.trim() ? (
+                    <motion.button
+                      whileTap={{ scale: 0.92 }}
+                      onClick={send}
+                      className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full transition-opacity"
+                      style={{
+                        background: "var(--accent)",
+                        color: "white",
+                        boxShadow: "0 4px 12px -2px color-mix(in oklab, var(--accent) 50%, transparent)",
+                      }}
+                      aria-label="Отправить"
+                    >
+                      <Send size={18} />
+                    </motion.button>
+                  ) : (
+                    <VoiceRecorder onSend={sendVoice} />
+                  )}
                 </div>
 
               </div>
