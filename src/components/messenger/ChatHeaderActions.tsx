@@ -95,12 +95,23 @@ export function ChatHeaderActions({ partnerId, partnerName, dialogId, onSearch }
     <>
       <button
         type="button"
-        onClick={() => setCallOpen(true)}
-        className="grid h-[36px] w-[36px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)]"
-        style={{ color: "var(--foreground-50)" }}
-        aria-label="Позвонить"
+        onClick={() => {
+          if (callBusy) {
+            toast("Звонок уже идёт");
+            return;
+          }
+          if (meta.blocked) {
+            toast.error("Пользователь заблокирован", { description: "Разблокируйте, чтобы позвонить" });
+            return;
+          }
+          setConfirmOpen(true);
+        }}
+        disabled={callBusy}
+        className="grid h-[40px] w-[40px] place-items-center rounded-full transition-colors hover:bg-[var(--background-surface)] disabled:opacity-50"
+        style={{ color: "var(--accent)" }}
+        aria-label={`Позвонить ${partnerName}`}
       >
-        <Phone size={18} />
+        <Phone size={19} />
       </button>
 
       <div className="relative" ref={ref}>
