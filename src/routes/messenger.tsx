@@ -268,6 +268,32 @@ function MessengerPage() {
     setReplyTo(null);
   };
 
+  const sendVoice = (durationSec: number) => {
+    if (!active) return;
+    if (getMeta(active.id).blocked) {
+      toast.error("Пользователь заблокирован", { description: "Разблокируйте его, чтобы отправлять сообщения" });
+      return;
+    }
+    const seed = Date.now();
+    const transcript = VOICE_TRANSCRIPTS[seed % VOICE_TRANSCRIPTS.length];
+    const m: Message = {
+      id: `nm${seed}`,
+      authorId: me.id,
+      time: new Date().toISOString(),
+      text: "",
+      status: "sent",
+      replyTo: replyTo?.id,
+      voice: {
+        duration: durationSec,
+        waveform: makeMockWaveform(seed),
+        transcript,
+      },
+    };
+    actions.addMessage(active.id, m);
+    setReplyTo(null);
+    toast.success("Голосовое отправлено");
+  };
+
 
 
   return (
