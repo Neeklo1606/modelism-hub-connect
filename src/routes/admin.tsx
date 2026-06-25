@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Users, Newspaper, Megaphone, ShieldCheck, DollarSign, FolderTree,
   Bell, BarChart3, Settings, Home, Eye, Ban, Check, X, Plus, Trash2, Pencil, Send,
-  Upload, UserPlus,
+  Upload, UserPlus, Palette, Sun, Moon, CheckCircle2, AlertCircle, Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
