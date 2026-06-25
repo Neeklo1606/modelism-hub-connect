@@ -37,6 +37,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
+  // Apply saved accent (admin Design System) on mount.
+  useEffect(() => { bootstrapTheme(); }, []);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     function onChange(e: MediaQueryListEvent) {
