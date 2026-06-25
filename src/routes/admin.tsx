@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin")({
 
 type Section =
   | "dashboard" | "users" | "content" | "ads" | "moderation"
-  | "monetization" | "categories" | "notifications" | "analytics" | "settings";
+  | "monetization" | "categories" | "notifications" | "analytics" | "design" | "settings";
 
 const navItems: { id: Section; label: string; icon: typeof Users }[] = [
   { id: "dashboard", label: "Дашборд", icon: LayoutDashboard },
@@ -36,6 +36,7 @@ const navItems: { id: Section; label: string; icon: typeof Users }[] = [
   { id: "categories", label: "Категории", icon: FolderTree },
   { id: "notifications", label: "Уведомления", icon: Bell },
   { id: "analytics", label: "Аналитика", icon: BarChart3 },
+  { id: "design", label: "Design System", icon: Palette },
   { id: "settings", label: "Настройки", icon: Settings },
 ];
 
