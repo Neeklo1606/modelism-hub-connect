@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { bootstrapTheme } from "@/lib/theme-manager";
 
 type Theme = "dark" | "light";
 
