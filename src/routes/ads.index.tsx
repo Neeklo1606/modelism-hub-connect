@@ -212,36 +212,72 @@ function MyAdsPage() {
           })}
         </nav>
 
-        {/* Filter toolbar */}
-        <div className="flex flex-wrap items-center gap-[8px]">
+        {/* Search + Filter (Avito-style) */}
+        <div className="flex items-center gap-[8px]">
+          <div className="relative flex-1">
+            <Search size={15} className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2" style={{ color: "var(--foreground-50)" }} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Поиск по объявлениям"
+              className="w-full text-[13.5px] outline-none transition-colors"
+              style={{
+                height: 40,
+                padding: "0 36px 0 36px",
+                background: "var(--background-surface)",
+                color: "var(--foreground)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-button)",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-[8px] top-1/2 grid h-[24px] w-[24px] -translate-y-1/2 place-items-center"
+                style={{ color: "var(--foreground-50)", borderRadius: 999 }}
+                aria-label="Очистить"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setShowFilters((v) => !v)}
-            className="inline-flex items-center gap-[8px] px-[14px] text-[13px] font-semibold"
+            aria-label="Фильтры"
+            className="relative grid shrink-0 place-items-center transition-colors"
             style={{
-              height: 36,
+              height: 40, width: 40,
               background: showFilters || filtersDirty ? "var(--accent-soft)" : "var(--background-surface)",
               color: showFilters || filtersDirty ? "var(--accent)" : "var(--foreground)",
               border: `1px solid ${showFilters || filtersDirty ? "var(--accent)" : "var(--border)"}`,
               borderRadius: "var(--r-button)",
             }}
           >
-            <Filter size={14} /> Фильтры{filtersDirty ? " · активны" : ""}
+            <Filter size={16} />
+            {filtersDirty && (
+              <span className="absolute right-[6px] top-[6px] h-[6px] w-[6px] rounded-full" style={{ background: "var(--accent)" }} />
+            )}
           </button>
           {filtersDirty && (
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex items-center gap-[6px] px-[12px] text-[13px] font-medium"
+              aria-label="Сбросить фильтры"
+              className="hidden shrink-0 items-center gap-[6px] px-[12px] text-[13px] font-medium sm:inline-flex"
               style={{
-                height: 36, color: "var(--foreground-70)",
+                height: 40, color: "var(--foreground-70)",
                 border: "1px solid var(--border)", borderRadius: "var(--r-button)", background: "transparent",
               }}
             >
-              <RotateCcw size={13} /> Сбросить фильтры
+              <RotateCcw size={13} /> Сбросить
             </button>
           )}
         </div>
+
 
         <AnimatePresence initial={false}>
           {showFilters && (
