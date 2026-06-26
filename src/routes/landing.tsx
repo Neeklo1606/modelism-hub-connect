@@ -332,52 +332,56 @@ function Hero() {
 }
 
 function HeroVisual() {
+  const heroPick = showcaseImages.slice(0, 4);
   return (
     <div
       className="relative w-full"
       style={{
-        maxWidth: 460,
+        maxWidth: 480,
         aspectRatio: "5 / 4",
         background: T.surface,
         border: `1px solid ${T.line}`,
         borderRadius: 24,
         boxShadow: T.shadowMd,
-        padding: 28,
+        padding: 16,
+        overflow: "hidden",
       }}
     >
       <div
-        className="absolute"
+        className="absolute z-10"
         style={{
-          top: 16,
-          left: 16,
+          top: 16, left: 16,
           padding: "4px 10px",
-          background: T.ink,
-          color: "#fff",
-          borderRadius: T.rPill,
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 1.5,
+          background: T.ink, color: "#fff",
+          borderRadius: T.rPill, fontSize: 10, fontWeight: 700, letterSpacing: 1.5,
         }}
       >
         SCALE 1:10
       </div>
-      <svg viewBox="0 0 400 320" className="h-full w-full" fill="none" stroke={T.line} strokeWidth="1.5">
-        <circle cx="200" cy="160" r="130" strokeDasharray="3 6" />
-        <circle cx="200" cy="160" r="90" />
-        <line x1="40" y1="160" x2="360" y2="160" />
-        <line x1="200" y1="20" x2="200" y2="300" />
-        <g stroke={T.orange} strokeWidth="2.2">
-          <path d="M90 200 L130 160 L200 145 L270 150 L320 165 L320 210 L300 220 L100 220 Z" fill="rgba(242,108,5,0.08)" />
-          <path d="M150 160 L165 145 L235 145 L255 160" />
-          <circle cx="135" cy="220" r="22" fill={T.surface} />
-          <circle cx="285" cy="220" r="22" fill={T.surface} />
-          <circle cx="135" cy="220" r="10" fill={T.ink} stroke={T.ink} />
-          <circle cx="285" cy="220" r="10" fill={T.ink} stroke={T.ink} />
-        </g>
-      </svg>
+      <div className="grid h-full w-full grid-cols-2 gap-2">
+        {heroPick.map((s) => (
+          <div
+            key={s.url}
+            className="relative overflow-hidden"
+            style={{
+              borderRadius: 16,
+              background: "linear-gradient(135deg, #2a2a2e 0%, #1a1a1e 100%)",
+              border: `1px solid ${T.line}`,
+            }}
+          >
+            <img
+              src={s.url}
+              alt={s.title}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-contain p-2"
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
+
 
 function FirstHundred() {
   const taken = Math.max(0, Math.min(firstHundredStats.total, firstHundredStats.taken));
