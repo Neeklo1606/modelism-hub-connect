@@ -13,6 +13,7 @@ import { ChatHeaderActions } from "@/components/messenger/ChatHeaderActions";
 import { LanguageSwitcher } from "@/components/messenger/LanguageSwitcher";
 import { CreateChatDialog } from "@/components/messenger/CreateChatDialog";
 import { VoiceBubble } from "@/components/messenger/VoiceBubble";
+import { TimeAgo } from "@/components/TimeAgo";
 import { VoiceRecorder } from "@/components/messenger/VoiceRecorder";
 import { CallsList } from "@/components/calls/CallsList";
 import { getAllChannels, useSubscriptions, formatCount } from "@/lib/channels";
