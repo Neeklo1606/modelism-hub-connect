@@ -273,6 +273,9 @@ function SubcategoryRoomPage() {
               </p>
             </div>
           </button>
+          <div className="ml-auto shrink-0">
+            <LanguageSwitcher />
+          </div>
         </header>
 
         {/* Tabs */}
