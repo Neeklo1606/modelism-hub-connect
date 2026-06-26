@@ -172,6 +172,7 @@ function LandingPage() {
       <Hero />
       <FirstHundred />
       <TwoTracks />
+      <ShowcaseSection />
       <CategoriesPreview />
       <CommunityProof />
       <Footer />
