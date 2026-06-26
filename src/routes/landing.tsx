@@ -10,7 +10,7 @@ import { firstHundredStats } from "@/lib/mock";
 export const Route = createFileRoute("/landing")({
   head: () => ({
     meta: [
-      { title: "МоДелизМ Форум — сообщество моделистов России" },
+      { title: "МоДелизМ Форум — сообщество моделистов" },
       { name: "description", content: "RC авто, самолёты, квадрокоптеры, корабли, электроника. Сообщество инженеров и энтузиастов в одном пространстве." },
       { property: "og:title", content: "МоДелизМ Форум — моделизм это жизнь" },
       { property: "og:description", content: "Платформа для моделистов: лента, чаты, объявления, сообщества." },
@@ -836,7 +836,7 @@ function Footer() {
         className="px-[20px] pb-[32px] pt-[16px] text-center"
         style={{ color: T.textMuted, fontSize: 12, fontWeight: 500 }}
       >
-        Сделано с душой для моделистов России
+        Сделано с душой для моделистов
       </div>
     </footer>
   );
