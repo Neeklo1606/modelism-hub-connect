@@ -51,6 +51,7 @@ function MyAdsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
+  const [query, setQuery] = useState("");
 
   const decorated = useMemo(
     () => allMyAds.map((ad) => ({ ad, status: (adStatusMap[ad.id] ?? "active") as AdStatusKey })),
