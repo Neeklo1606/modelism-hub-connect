@@ -133,13 +133,13 @@ function MyAdsPage() {
     <AppLayout rightColumn={false}>
       <div className="mx-auto flex w-full max-w-[960px] flex-col gap-[20px]">
         {/* Header */}
-        <header className="flex flex-wrap items-end justify-between gap-[16px]">
-          <div>
-            <h1 className="font-display text-[28px] font-bold leading-[1.1] sm:text-[32px]" style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
+        <header className="flex flex-wrap items-end justify-between gap-[12px]">
+          <div className="min-w-0">
+            <h1 className="font-display text-[20px] font-bold leading-[1.15] sm:text-[28px]" style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
               Мои объявления
             </h1>
-            <p className="mt-[6px] text-[14px]" style={{ color: "var(--foreground-70)" }}>
-              Управляйте своими публикациями, статистикой и архивом
+            <p className="mt-[4px] text-[12.5px] sm:text-[14px]" style={{ color: "var(--foreground-70)" }}>
+              Управляйте публикациями, статистикой и архивом
             </p>
           </div>
 
@@ -158,12 +158,12 @@ function MyAdsPage() {
           </button>
         </header>
 
-        {/* Stats */}
-        <section className="grid grid-cols-2 gap-[12px] md:grid-cols-4">
-          <StatCard icon={<TrendingUp size={18} />} label="Активных" value={stats.count.toString()} accent />
-          <StatCard icon={<Eye size={18} />} label="Просмотров" value={stats.views.toLocaleString("ru")} />
-          <StatCard icon={<Heart size={18} />} label="Лайков" value={stats.likes.toLocaleString("ru")} />
-          <StatCard icon={<MessageCircle size={18} />} label="Сумма" value={`${stats.earnings.toLocaleString("ru")} ₽`} />
+        {/* Stats — compact (Avito-style) */}
+        <section className="-mx-3 flex gap-[8px] overflow-x-auto px-3 pb-[2px] sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-[12px] sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <StatCard icon={<TrendingUp size={14} />} label="Активных"   value={stats.count.toString()} accent />
+          <StatCard icon={<Eye size={14} />}        label="Просмотров" value={stats.views.toLocaleString("ru")} />
+          <StatCard icon={<Heart size={14} />}      label="Лайков"     value={stats.likes.toLocaleString("ru")} />
+          <StatCard icon={<MessageCircle size={14} />} label="Сумма"   value={`${stats.earnings.toLocaleString("ru")} ₽`} />
         </section>
 
         {/* Tabs */}
