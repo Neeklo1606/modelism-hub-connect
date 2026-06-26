@@ -406,20 +406,21 @@ function FilterField({ label, children }: { label: string; children: React.React
 function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
     <div
-      className="flex flex-col gap-[6px] p-[14px]"
+      className="flex shrink-0 flex-col gap-[4px] px-[12px] py-[10px] sm:px-[14px] sm:py-[12px]"
       style={{
+        minWidth: 132,
         background: accent ? "var(--accent-soft)" : "var(--background-surface)",
         border: `1px solid ${accent ? "var(--accent)" : "var(--border)"}`,
         borderRadius: "var(--r-card-sm)",
       }}
     >
-      <div className="flex items-center gap-[6px] text-[12px] font-medium" style={{ color: accent ? "var(--accent)" : "var(--foreground-50)" }}>
+      <div className="flex items-center gap-[5px] text-[10.5px] font-semibold uppercase tracking-[0.04em]" style={{ color: accent ? "var(--accent)" : "var(--foreground-50)", fontFamily: "var(--font-mono)" }}>
         {icon}
-        <span style={{ fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</span>
+        <span>{label}</span>
       </div>
       <div
-        className="font-display text-[22px] font-bold leading-none"
-        style={{ color: accent ? "var(--accent)" : "var(--foreground)" }}
+        className="font-display text-[16px] font-bold leading-none sm:text-[18px]"
+        style={{ color: accent ? "var(--accent)" : "var(--foreground)", letterSpacing: "-0.01em" }}
       >
         {value}
       </div>
