@@ -106,7 +106,7 @@ function MyAdsPage() {
       }
     });
     return sorted.map((x) => ({ ad: x.ad, status: statusToMyAdStatus(x.status) }));
-  }, [decorated, tab, filters]);
+  }, [decorated, tab, filters, query]);
 
   // Aggregate stats from active ads
   const stats = useMemo(() => {
