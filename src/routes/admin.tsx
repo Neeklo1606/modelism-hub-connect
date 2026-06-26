@@ -18,7 +18,7 @@ import {
 import { Search, Filter, Calendar, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Админ-панель — МоДЕЛИЗМ Форум" }] }),
+  head: () => ({ meta: [{ title: "Админ-панель — МоДелизМ Форум" }] }),
   component: AdminPage,
 });
 
@@ -1158,7 +1158,7 @@ function CategoriesSection() {
 /* ============ NOTIFICATIONS ============ */
 function NotificationsSection() {
   const emailTpl = [
-    ["Приветствие", "Добро пожаловать в МоДЕЛИЗМ Форум!", "01.06.2026"],
+    ["Приветствие", "Добро пожаловать в МоДелизМ Форум!", "01.06.2026"],
     ["Подтверждение почты", "Подтвердите ваш email", "15.05.2026"],
     ["Сброс пароля", "Восстановление доступа", "10.05.2026"],
     ["Оповещение о модерации", "Ваш пост проверен", "05.06.2026"],
@@ -1316,7 +1316,7 @@ function SettingsSection() {
           Настройки платформы
         </h4>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {field("Название проекта", "МоДЕЛИЗМ Форум")}
+          {field("Название проекта", "МоДелизМ Форум")}
           {field("Домен", "modelizm-forum.ru")}
           {field("Email поддержки", "support@modelizm-forum.ru")}
           {field("Платёжный ключ ЮKassa (Shop ID)", "••••••••", "password")}
