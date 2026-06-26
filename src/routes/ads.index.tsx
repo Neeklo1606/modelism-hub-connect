@@ -84,6 +84,7 @@ function MyAdsPage() {
       "30d": 30 * 24 * 3600 * 1000,
       "90d": 90 * 24 * 3600 * 1000,
     };
+    const q = query.trim().toLowerCase();
     const filtered = decorated.filter(({ ad, status }) => {
       if (statusToTab(status) !== tab) return false;
       if (filters.category !== "all" && ad.category !== filters.category) return false;
@@ -92,6 +93,7 @@ function MyAdsPage() {
         const createdAt = ad.createdAt ? Date.parse(ad.createdAt) : NaN;
         if (!isFinite(createdAt) || now - createdAt > rangeMs[filters.dateRange]) return false;
       }
+      if (q && !ad.title.toLowerCase().includes(q)) return false;
       return true;
     });
 
