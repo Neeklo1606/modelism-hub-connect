@@ -41,7 +41,7 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.22, ease: [0.19, 1, 0.22, 1] }}
-      className="relative grid grid-cols-[88px_minmax(0,1fr)_auto] items-stretch gap-[12px] p-[10px] sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:p-[12px]"
+      className="relative grid grid-cols-[80px_minmax(0,1fr)_auto] items-stretch gap-[10px] p-[10px] sm:grid-cols-[96px_minmax(0,1fr)_auto] sm:gap-[12px] sm:p-[12px]"
       style={{
         background: "var(--background)",
         border: `1px solid ${selected ? "var(--accent)" : "var(--border)"}`,
