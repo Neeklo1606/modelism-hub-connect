@@ -384,6 +384,52 @@ function HeroVisual() {
   );
 }
 
+function ShowcaseSection() {
+  return (
+    <section style={{ padding: "64px 20px", background: T.surfaceAlt }}>
+      <div className="mx-auto" style={{ maxWidth: 1200 }}>
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Каталог моделей</SectionLabel>
+          <SectionTitle>Реальные модели сообщества</SectionTitle>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+          {showcaseImages.map((s) => (
+            <div
+              key={s.url}
+              className="group relative overflow-hidden"
+              style={{
+                aspectRatio: "1 / 1",
+                background: "linear-gradient(135deg, #2a2a2e 0%, #1a1a1e 100%)",
+                border: `1px solid ${T.line}`,
+                borderRadius: 18,
+                transition: "transform 250ms var(--ease-out-expo), box-shadow 250ms var(--ease-out-expo)",
+              }}
+            >
+              <img
+                src={s.url}
+                alt={s.title}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
+              />
+              <div
+                className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5"
+                style={{
+                  background: "color-mix(in oklab, #0d0d0d 70%, transparent)",
+                  backdropFilter: "blur(8px)",
+                  color: "#fff",
+                }}
+              >
+                <span style={{ fontSize: 11, fontWeight: 600 }}>{s.title}</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: T.orange, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.tag}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function FirstHundred() {
   const taken = Math.max(0, Math.min(firstHundredStats.total, firstHundredStats.taken));
