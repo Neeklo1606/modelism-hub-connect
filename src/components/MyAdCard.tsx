@@ -91,25 +91,25 @@ export function MyAdCard({ ad, status, selected, onSelect, onArchive, onPublish,
       </Link>
 
       {/* Body */}
-      <div className="flex min-w-0 flex-col justify-between gap-[6px] py-[2px]">
+      <div className="flex min-w-0 flex-col justify-between gap-[4px] py-[2px]">
         <div className="min-w-0">
           <Link
             to="/ads/$id"
             params={{ id: ad.id }}
-            className="block min-w-0 truncate font-display text-[14px] font-semibold leading-[1.3] sm:text-[15px]"
+            className="block min-w-0 line-clamp-2 font-display text-[13.5px] font-semibold leading-[1.3] sm:text-[14.5px]"
             style={{ color: "var(--foreground)" }}
           >
             {ad.title}
           </Link>
           <div
-            className="mt-[4px] font-display text-[18px] font-bold leading-none sm:text-[20px]"
-            style={{ color: "var(--accent)", letterSpacing: "-0.01em" }}
+            className="mt-[4px] font-display text-[15.5px] font-bold leading-none sm:text-[17px]"
+            style={{ color: "var(--foreground)", letterSpacing: "-0.01em" }}
           >
             {ad.price.toLocaleString("ru")} ₽
           </div>
         </div>
 
-        <div className="flex items-center gap-[10px] text-[12px]" style={{ color: "var(--foreground-50)" }}>
+        <div className="flex items-center gap-[10px] text-[11.5px]" style={{ color: "var(--foreground-50)" }}>
           <span className="inline-flex min-w-0 items-center gap-[4px]">
             <MapPin size={12} className="shrink-0" />
             <span className="truncate">{ad.city}</span>
