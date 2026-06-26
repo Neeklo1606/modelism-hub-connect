@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { firstHundredStats } from "@/lib/mock";
+import { showcaseImages } from "@/lib/showcase-images";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
